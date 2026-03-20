@@ -32,6 +32,10 @@ jobs:
           mkdir -p asset
           if [ -f asset/guild.sql ]; then
             echo "Restoring database from SQL dump..."
+            
+            # FORCE DELETE the old binary file so we always start with a clean slate!
+            rm -f asset/guild.db
+            
             # Safely rebuild the DB from text
             sqlite3 asset/guild.db < asset/guild.sql
           fi
