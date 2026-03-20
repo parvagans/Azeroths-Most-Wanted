@@ -75,20 +75,39 @@ async def fetch_guild_metadata(session, token, realm, slug):
     """Fetches guild-level metadata to resolve rank names."""
     url = f"https://eu.api.blizzard.com/data/wow/guild/{realm}/{slug}?namespace=profile-classicann-eu&locale=en_US"
     headers = {"Authorization": f"Bearer {token}"}
-    try:
-        async with session.get(url, headers=headers) as response:
-            if response.status == 200:
-                data = await response.json()
-                return {r['id']: r['name'] for r in data.get('ranks', [])}
-    except Exception:
-        return {}
+    
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            async with session.get(url, headers=headers) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    return {r['id']: r['name'] for r in data.get('ranks', [])}
+                else:
+                    response.raise_for_status() # Force an error if Blizzard returns a 500/404
+        except Exception as e:
+            print(f"⚠️ Guild Metadata fetch failed (Attempt {attempt + 1}/{max_retries}): {e}")
+            if attempt < max_retries - 1:
+                await asyncio.sleep(5)
+            else:
+                return {}
     return {}
 
 async def fetch_with_semaphore(sem, session, token, char, history_data):
     """Bouncer function throttling dynamic API requests to respect rate limits."""
-    async with sem:
-        await asyncio.sleep(0.3)
-        return await fetch_character_data(session, token, char, history_data)
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            async with sem:
+                await asyncio.sleep(0.3)
+                return await fetch_character_data(session, token, char, history_data)
+        except Exception as e:
+            print(f"⚠️ Failed to fetch {char} (Attempt {attempt + 1}/{max_retries}): {e}")
+            if attempt < max_retries - 1:
+                await asyncio.sleep(5)
+            else:
+                print(f"❌ Skipping {char} after {max_retries} failed attempts.")
+                return None
 
 async def main_async():
     """Core asynchronous orchestrator."""
@@ -145,39 +164,52 @@ async def main_async():
         raw_guild_roster = [] # Captures EVERYONE, even level 1s, for the total roster view
         char_ranks = {} # Temporary mapping to inject ranks into the deep character profiles
         
-        async with session.get(url, headers=headers) as resp:
-            if resp.status == 200:
-                raw_data = await resp.json()
-                all_m = raw_data.get('members', [])
-                
-                for m in all_m:
-                    c = m.get('character', {})
-                    c_name = c.get('name', 'Unknown')
-                    c_level = c.get('level', 0)
-                    
-                    # Convert raw IDs to Strings for the fallback view
-                    c_class_id = c.get('playable_class', {}).get('id')
-                    c_class = CLASS_MAP.get(c_class_id, "Unknown")
-                    
-                    c_race_id = c.get('playable_race', {}).get('id')
-                    c_race = RACE_MAP.get(c_race_id, "Unknown")
-                    
-                    # Map the explicit Guild Rank
-                    rank_id = m.get('rank')
-                    rank_name = rank_map.get(rank_id, "Member")
-                    char_ranks[c_name.lower()] = rank_name
-                    
-                    raw_guild_roster.append({
-                        "name": c_name.title(),
-                        "level": c_level,
-                        "class": c_class,
-                        "race": c_race,
-                        "rank": rank_name
-                    })
-                    
-                    # Only process full API deep-scans for chars > level 10
-                    if c_level > 10:
-                        roster_names.append(c_name.lower())
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                async with session.get(url, headers=headers) as resp:
+                    if resp.status == 200:
+                        raw_data = await resp.json()
+                        all_m = raw_data.get('members', [])
+                        
+                        for m in all_m:
+                            c = m.get('character', {})
+                            c_name = c.get('name', 'Unknown')
+                            c_level = c.get('level', 0)
+                            
+                            # Convert raw IDs to Strings for the fallback view
+                            c_class_id = c.get('playable_class', {}).get('id')
+                            c_class = CLASS_MAP.get(c_class_id, "Unknown")
+                            
+                            c_race_id = c.get('playable_race', {}).get('id')
+                            c_race = RACE_MAP.get(c_race_id, "Unknown")
+                            
+                            # Map the explicit Guild Rank
+                            rank_id = m.get('rank')
+                            rank_name = rank_map.get(rank_id, "Member")
+                            char_ranks[c_name.lower()] = rank_name
+                            
+                            raw_guild_roster.append({
+                                "name": c_name.title(),
+                                "level": c_level,
+                                "class": c_class,
+                                "race": c_race,
+                                "rank": rank_name
+                            })
+                            
+                            # Only process full API deep-scans for chars > level 10
+                            if c_level > 10:
+                                roster_names.append(c_name.lower())
+                        break # Successfully fetched and parsed, break out of the retry loop
+                    else:
+                        resp.raise_for_status()
+            except Exception as e:
+                print(f"⚠️ Roster fetch failed (Attempt {attempt + 1}/{max_retries}): {e}")
+                if attempt < max_retries - 1:
+                    await asyncio.sleep(5)
+                else:
+                    print("❌ Fatal Error: Could not fetch guild roster.")
+                    # Let the rest of the script continue with an empty roster to prevent a hard crash
 
         print(f"👥 Guild: {len(raw_guild_roster)} Total Members. Processing {len(roster_names)} valid characters (> Lvl 10).")
 
