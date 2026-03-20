@@ -68,6 +68,18 @@ def setup_database():
             item_quality TEXT, item_icon TEXT, level INTEGER
         )
     """)
+
+    # NEW: Store midnight snapshots to calculate daily stat trends for the dashboard arrows
+    c.execute("""
+        CREATE TABLE IF NOT EXISTS daily_snapshot (
+            id TEXT PRIMARY KEY,
+            snapshot_date TEXT,
+            val1 INTEGER,
+            val2 INTEGER,
+            val3 INTEGER
+        )
+    """)
+
     conn.commit()
     conn.close()
 
@@ -217,6 +229,12 @@ async def main_async():
         tasks = [fetch_with_semaphore(sem, session, token, char, history_data) for char in roster_names]
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
+        # --- NEW TREND LOGIC: Load Daily Snapshots from DB ---
+        today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        snapshots = {}
+        for row in db_c.execute("SELECT * FROM daily_snapshot").fetchall():
+            snapshots[row['id']] = dict(row)
+
         for result in results:
             if isinstance(result, dict) and result:
                 char_name_lower = result['char'].lower()
@@ -224,9 +242,71 @@ async def main_async():
                 # DATA SANITIZATION: Only assign the guild rank if the API successfully returned a profile payload
                 if isinstance(result.get('profile'), dict):
                     result['profile']['guild_rank'] = char_ranks.get(char_name_lower, "Member")
+                    
+                    # --- TREND CALCULATIONS: PVE & PVP ---
+                    cur_ilvl = result['profile'].get('equipped_item_level', 0)
+                    cur_hks = result['profile'].get('honorable_kills', 0)
+                    
+                    snap = snapshots.get(char_name_lower)
+                    baseline_ilvl, baseline_hks = cur_ilvl, cur_hks
+                    
+                    if snap:
+                        if snap['snapshot_date'] == today_str:
+                            # We already snapshotted today. Use it for comparison!
+                            baseline_ilvl, baseline_hks = snap['val1'], snap['val2']
+                        else:
+                            # It's a new day! Overwrite yesterday's snapshot with current stats
+                            db_c.execute("INSERT OR REPLACE INTO daily_snapshot (id, snapshot_date, val1, val2, val3) VALUES (?, ?, ?, ?, ?)", 
+                                         (char_name_lower, today_str, cur_ilvl, cur_hks, 0))
+                    else:
+                        # First time ever seeing this character
+                        db_c.execute("INSERT INTO daily_snapshot (id, snapshot_date, val1, val2, val3) VALUES (?, ?, ?, ?, ?)", 
+                                     (char_name_lower, today_str, cur_ilvl, cur_hks, 0))
+                        
+                    # Inject the math directly into the profile so JS can read it!
+                    result['profile']['trend_pve'] = cur_ilvl - baseline_ilvl
+                    result['profile']['trend_pvp'] = cur_hks - baseline_hks
                 
                 history_data, timeline_data_new = update_character_state(result, history_data, timeline_data_new)
                 roster_data.append(result)
+
+        # --- TREND CALCULATIONS: Global Guild Stats ---
+        total_members = len(raw_guild_roster)
+        active_14_days = 0 
+        raid_ready_count = 0
+        current_time_ms = int(datetime.now(timezone.utc).timestamp() * 1000)
+        fourteen_days_ms = 14 * 24 * 60 * 60 * 1000 
+        
+        for char in roster_data:
+            # THE FIX: 'or {}' forces it to be a dictionary even if Blizzard returns None!
+            p = char.get("profile") or {} 
+            
+            lvl = p.get('level', 0)
+            ilvl = p.get('equipped_item_level', 0)
+            
+            if lvl == 70 and ilvl >= 110: raid_ready_count += 1
+            if current_time_ms - p.get('last_login_timestamp', 0) <= fourteen_days_ms: active_14_days += 1
+                
+        global_snap = snapshots.get('__GLOBAL__')
+        base_total, base_active, base_ready = total_members, active_14_days, raid_ready_count
+        
+        if global_snap:
+            if global_snap['snapshot_date'] == today_str:
+                base_total, base_active, base_ready = global_snap['val1'], global_snap['val2'], global_snap['val3']
+            else:
+                db_c.execute("INSERT OR REPLACE INTO daily_snapshot (id, snapshot_date, val1, val2, val3) VALUES (?, ?, ?, ?, ?)", 
+                             ('__GLOBAL__', today_str, total_members, active_14_days, raid_ready_count))
+        else:
+            db_c.execute("INSERT INTO daily_snapshot (id, snapshot_date, val1, val2, val3) VALUES (?, ?, ?, ?, ?)", 
+                         ('__GLOBAL__', today_str, total_members, active_14_days, raid_ready_count))
+                         
+        # Inject the global math directly into realm_data so html_dashboard.py can use it
+        if realm_data is None: realm_data = {}
+        realm_data['global_trends'] = {
+            'trend_total': total_members - base_total,
+            'trend_active': active_14_days - base_active,
+            'trend_ready': raid_ready_count - base_ready
+        }
 
     print("\n===========================================")
     print("💾 Commit today's updates to SQLite database...")

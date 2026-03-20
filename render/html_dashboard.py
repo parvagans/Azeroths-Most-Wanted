@@ -70,6 +70,24 @@ def generate_html_dashboard(roster_data, realm_data=None, timeline_data=None, ra
     avg_level = (total_level // total_processed) if total_processed > 0 else 0
     display_total_members = len(raw_guild_roster)
 
+    avg_level = (total_level // total_processed) if total_processed > 0 else 0
+    display_total_members = len(raw_guild_roster)
+
+    # --- NEW: Process Daily Trends for Global Stats ---
+    global_trends = realm_data.get('global_trends', {}) if isinstance(realm_data, dict) else {}
+    
+    def get_trend_html(trend_val):
+        if trend_val > 0:
+            return f'<span style="color: #2ecc71; font-size: 16px; text-shadow: none; margin-left: 6px;">▲ {trend_val}</span>'
+        elif trend_val < 0:
+            return f'<span style="color: #e74c3c; font-size: 16px; text-shadow: none; margin-left: 6px;">▼ {abs(trend_val)}</span>'
+        else:
+            return f'<span style="color: #555; font-size: 16px; text-shadow: none; margin-left: 6px;">-</span>'
+
+    trend_total_html = get_trend_html(global_trends.get('trend_total', 0))
+    trend_active_html = get_trend_html(global_trends.get('trend_active', 0))
+    trend_ready_html = get_trend_html(global_trends.get('trend_ready', 0))
+
     # --- Process Timeline for Heatmap (Last 7 Days) ---
     heatmap_counts = {}
     for event in timeline_data:
@@ -228,15 +246,24 @@ def generate_html_dashboard(roster_data, realm_data=None, timeline_data=None, ra
                 
                 <div class="stat-box-container">
                     <div id="stat-total" class="stat-box clickable" title="Click to view all {display_total_members} members">
-                        <span class="stat-value">{display_total_members}</span>
+                        <span class="stat-value" style="display: flex; align-items: center; justify-content: center;">
+                            {display_total_members} 
+                            {trend_total_html}
+                        </span>
                         <span class="stat-label">Total Roster</span>
                     </div>
                     <div id="stat-active" class="stat-box clickable" title="Click to view characters active within 14 days">
-                        <span class="stat-value" style="color: #2ecc71;">{active_14_days}</span>
+                        <span class="stat-value" style="color: #2ecc71; display: flex; align-items: center; justify-content: center;">
+                            {active_14_days}
+                            {trend_active_html}
+                        </span>
                         <span class="stat-label">Active (14 Days)</span>
                     </div>
                     <div id="stat-raidready" class="stat-box clickable" title="Click to view characters Level 70 with 110+ iLvl">
-                        <span class="stat-value" style="color: #ff8000;">{raid_ready_count}</span>
+                        <span class="stat-value" style="color: #ff8000; display: flex; align-items: center; justify-content: center;">
+                            {raid_ready_count}
+                            {trend_ready_html}
+                        </span>
                         <span class="stat-label">Raid Ready</span>
                     </div>
                     <div class="stat-box" title="Average level of scanned characters">

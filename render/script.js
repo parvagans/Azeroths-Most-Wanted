@@ -284,6 +284,12 @@ window.addEventListener('DOMContentLoaded', () => {
             const ilvl = p.equipped_item_level || 0;
             const portraitURL = char.render_url || getClassIcon(cClass);
 
+            // --- NEW: Trend Arrow Logic for PvE ---
+            const trend = p.trend_pve || 0; 
+            let trendHTML = '<span style="color: #555; font-size: 12px; margin-left: 12px; width: 30px; text-align: right;">-</span>';
+            if (trend > 0) trendHTML = `<span style="color: #2ecc71; font-size: 12px; margin-left: 12px; width: 30px; text-align: right;">▲ ${trend}</span>`;
+            else if (trend < 0) trendHTML = `<span style="color: #e74c3c; font-size: 12px; margin-left: 12px; width: 30px; text-align: right;">▼ ${Math.abs(trend)}</span>`;
+
             pveHTML += `
             <div class="pvp-row tt-char" data-char="${(p.name || '').toLowerCase()}" onclick="selectCharacter('${(p.name || '').toLowerCase()}')" style="border-left: 4px solid ${cHex}; padding: 8px 12px;">
                 <div style="color: ${rankColor}; font-family: 'Cinzel'; font-weight: bold; font-size: ${rankSize}; width: 30px; text-shadow: 1px 1px 2px #000;">#${index + 1}</div>
@@ -292,7 +298,10 @@ window.addEventListener('DOMContentLoaded', () => {
                     <span style="color: ${cHex}; font-family: 'Cinzel'; font-weight: bold; font-size: 14px; text-shadow: 1px 1px 2px #000;">${p.name}</span>
                     <span style="color: #aaa; font-size: 10px; font-style: italic;">${specIconHtml}${displaySpecClass}</span>
                 </div>
-                <div style="color: #ff8000; font-weight: bold; font-size: 15px; text-shadow: 1px 1px 2px #000;">${ilvl} <span style="font-size:10px; color:#888;">iLvl</span></div>
+                <div style="display: flex; align-items: center; color: #ff8000; font-weight: bold; font-size: 15px; text-shadow: 1px 1px 2px #000;">
+                    ${ilvl} <span style="font-size:10px; color:#888; margin-left: 3px;">iLvl</span>
+                    ${trendHTML}
+                </div>
             </div>`;
         });
         pveContainer.innerHTML = pveHTML;
@@ -323,6 +332,12 @@ window.addEventListener('DOMContentLoaded', () => {
             const hkCount = (p.honorable_kills || 0).toLocaleString();
             const portraitURL = char.render_url || getClassIcon(cClass);
 
+            // --- NEW: Trend Arrow Logic for PvP ---
+            const trend = p.trend_pvp || 0; 
+            let trendHTML = '<span style="color: #555; font-size: 12px; margin-left: 12px; width: 30px; text-align: right;">-</span>';
+            if (trend > 0) trendHTML = `<span style="color: #2ecc71; font-size: 12px; margin-left: 12px; width: 30px; text-align: right;">▲ ${trend}</span>`;
+            else if (trend < 0) trendHTML = `<span style="color: #e74c3c; font-size: 12px; margin-left: 12px; width: 30px; text-align: right;">▼ ${Math.abs(trend)}</span>`;
+
             pvpHTML += `
             <div class="pvp-row tt-char" data-char="${(p.name || '').toLowerCase()}" onclick="selectCharacter('${(p.name || '').toLowerCase()}')" style="border-left: 4px solid ${cHex}; padding: 8px 12px;">
                 <div style="color: ${rankColor}; font-family: 'Cinzel'; font-weight: bold; font-size: ${rankSize}; width: 30px; text-shadow: 1px 1px 2px #000;">#${index + 1}</div>
@@ -331,7 +346,10 @@ window.addEventListener('DOMContentLoaded', () => {
                     <span style="color: ${cHex}; font-family: 'Cinzel'; font-weight: bold; font-size: 14px; text-shadow: 1px 1px 2px #000;">${p.name}</span>
                     <span style="color: #aaa; font-size: 10px; font-style: italic;">${specIconHtml}${displaySpecClass}</span>
                 </div>
-                <div style="color: #ff4400; font-weight: bold; font-size: 15px; text-shadow: 1px 1px 2px #000;">${hkCount} <span style="font-size:10px; color:#888;">HKs</span></div>
+                <div style="display: flex; align-items: center; color: #ff4400; font-weight: bold; font-size: 15px; text-shadow: 1px 1px 2px #000;">
+                    ${hkCount} <span style="font-size:10px; color:#888; margin-left: 3px;">HKs</span>
+                    ${trendHTML}
+                </div>
             </div>`;
         });
         pvpContainer.innerHTML = pvpHTML;
