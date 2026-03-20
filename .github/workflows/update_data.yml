@@ -2,7 +2,7 @@ name: Update WoW Guild Data
 
 on:
   schedule:
-    - cron: '*/30 * * * *'
+    - cron: '5/10 * * * *'
   workflow_dispatch:
 
 jobs:
