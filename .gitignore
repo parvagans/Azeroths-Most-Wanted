@@ -36,5 +36,4 @@ desktop.ini
 *.db
 *.sqlite
 *.sqlite3
-index.html
 dump.py
