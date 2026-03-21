@@ -101,6 +101,15 @@ window.addEventListener('DOMContentLoaded', () => {
 
     const searchInput = document.getElementById('charSearch');
     const searchAutoComplete = document.getElementById('search-autocomplete');
+    
+    // NEW: Force mobile keyboards to open when tapping the collapsed search icon
+    const searchBox = document.querySelector('.search-box');
+    if (searchBox && searchInput) {
+        searchBox.addEventListener('click', () => {
+            searchInput.focus();
+        });
+    }
+
     const customSelect = document.getElementById('customCharSelect');
     const customOptions = document.getElementById('customCharOptions');
     const selectValueText = customSelect ? customSelect.querySelector('.selected-value') : null;
@@ -568,7 +577,7 @@ window.addEventListener('DOMContentLoaded', () => {
                 ${advancedStatsHtml}
             </div>
         </div>
-        <div style="flex:1; display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+        <div class="gear-grid-container">
             ${gearHtml}
         </div>
     </div>

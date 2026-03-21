@@ -120,6 +120,7 @@ a, .item-slot, .nav-btn, .clickable-class, .tt-char, .concise-item, .tl-btn { cu
 .item-slot img { width: 36px; height: 36px; border-radius: 4px; margin-right: 12px; border: 1px solid #111; box-shadow: 0 2px 5px rgba(0,0,0,0.9); flex-shrink: 0; }
 .item-slot a { text-decoration: none; font-weight: bold; font-size: 14px; text-shadow: 1px 1px 2px #000; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .item-slot a:hover { text-decoration: underline; }
+.gear-grid-container { flex: 1; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
 /* Premium Sidebar Timeline UI */
 .timeline-container { width: 380px; flex-shrink: 0; background: #161616; padding: 25px 20px; border-radius: 12px; border: 1px solid #333; box-shadow: 0 10px 30px rgba(0,0,0,0.8); position: sticky; top: 100px; max-height: calc(100vh - 120px); overflow-y: auto; }
@@ -166,6 +167,7 @@ a, .item-slot, .nav-btn, .clickable-class, .tt-char, .concise-item, .tl-btn { cu
     .c-main-info { width: 100%; }
     .c-stats-info { width: 100%; justify-content: flex-end; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; }
     .stat-badge { min-width: 80px; padding: 6px 10px; } 
+    .gear-grid-container { grid-template-columns: 1fr; }
 }
 
 /* Expanding Mobile Search Bar & Navbar layout */
