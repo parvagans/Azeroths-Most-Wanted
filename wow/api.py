@@ -6,17 +6,6 @@ async def fetch_wow_endpoint(session, token, realm, character_name, endpoint="",
     """
     Fetches character-specific data from the Blizzard WoW API.
     Includes an automatic retry mechanism with backoff for 429 Rate Limits.
-    
-    Args:
-        session (aiohttp.ClientSession): The active asynchronous HTTP session.
-        token (str): The OAuth access token for API authentication.
-        realm (str): The character's realm.
-        character_name (str): The character's name.
-        endpoint (str, optional): The specific profile endpoint to query. Defaults to the base profile.
-        retries (int, optional): Number of times to retry upon failure.
-        
-    Returns:
-        dict | None: The parsed JSON response, or None if the request fails after all retries.
     """
     url_suffix = f"/{endpoint}" if endpoint else ""
     
@@ -51,14 +40,6 @@ async def fetch_wow_endpoint(session, token, realm, character_name, endpoint="",
 async def fetch_realm_data(session, token, realm):
     """
     Retrieves current server status, population, and rule type for a specific realm.
-    
-    Args:
-        session (aiohttp.ClientSession): The active asynchronous HTTP session.
-        token (str): The OAuth access token for API authentication.
-        realm (str): The target realm name.
-        
-    Returns:
-        dict: A dictionary containing 'status', 'population', and 'type' values.
     """
     print(f"\n🌍 Fetching Realm Status for {realm.title()}...")
     
@@ -101,3 +82,25 @@ async def fetch_realm_data(session, token, realm):
             
     print("   ┣ ⚠️ Could not determine complete realm status.")
     return realm_info
+
+async def fetch_guild_metadata(session, token, realm, slug):
+    """Fetches guild-level metadata to resolve rank names."""
+    url = f"https://eu.api.blizzard.com/data/wow/guild/{realm}/{slug}?namespace=profile-classicann-eu&locale=en_US"
+    headers = {"Authorization": f"Bearer {token}"}
+    
+    max_retries = 3
+    for attempt in range(max_retries):
+        try:
+            async with session.get(url, headers=headers) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    return {r['id']: r['name'] for r in data.get('ranks', [])}
+                else:
+                    response.raise_for_status() # Force an error if Blizzard returns a 500/404
+        except Exception as e:
+            print(f"⚠️ Guild Metadata fetch failed (Attempt {attempt + 1}/{max_retries}): {e}")
+            if attempt < max_retries - 1:
+                await asyncio.sleep(5)
+            else:
+                return {}
+    return {}

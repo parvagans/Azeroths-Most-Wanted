@@ -12,13 +12,12 @@ import json
 from datetime import datetime, timezone
 
 from wow.auth import get_access_token
-from wow.api import fetch_realm_data
+from wow.api import fetch_realm_data, fetch_guild_metadata
 from wow.character import fetch_character_data, update_character_state
 from render.html_dashboard import generate_html_dashboard
+from render.database import setup_database, get_db_connection
+from wow.trends import process_character_trends, process_global_trends
 from config import REALM, GUILD_NAME
-
-# Permanent database file
-DB_FILE = "asset/guild.db"
 
 # Map Blizzard's raw integer IDs to strings for the base roster view
 CLASS_MAP = {
@@ -31,7 +30,7 @@ RACE_MAP = {
     6: "Tauren", 7: "Gnome", 8: "Troll", 10: "Blood Elf", 11: "Draenei"
 }
 
-# NEW: Map the exact in-game rank names to their numerical IDs (0 is always Guild Master)
+# Map the exact in-game rank names to their numerical IDs (0 is always Guild Master)
 RANK_MAP = {
     0: "Guild Master",
     1: "MOST WANTED",
@@ -40,91 +39,6 @@ RANK_MAP = {
     4: "Alt",
     5: "Wanted"
 }
-
-def get_db_connection():
-    """Establishes a connection to the persistent SQLite database."""
-    os.makedirs(os.path.dirname(DB_FILE), exist_ok=True)
-    return sqlite3.connect(DB_FILE)
-
-def setup_database():
-    """Ensures database schema exists. Migration handles initial data population."""
-    conn = get_db_connection()
-    c = conn.cursor()
-    
-    # Store character summary data, stats, and metadata like faction/class
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS characters (
-            name TEXT PRIMARY KEY, class TEXT, race TEXT, faction TEXT, guild TEXT,
-            level INTEGER, equipped_item_level INTEGER, xp INTEGER, xp_max INTEGER,
-            health INTEGER, power INTEGER, last_login_ms INTEGER, portrait_url TEXT
-        )
-    """)
-
-    # Store loot/gear historical state.
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS gear (
-            character_name TEXT, slot TEXT, item_id INTEGER, name TEXT, quality TEXT,
-            icon_data TEXT, tooltip_params TEXT,
-            last_detected TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (character_name, slot, item_id)
-        )
-    """)
-
-    # Store timeline events (loot drops and level ups). No longer capped.
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS timeline (
-            timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, character_name TEXT,
-            class TEXT, type TEXT, item_id INTEGER, item_name TEXT,
-            item_quality TEXT, item_icon TEXT, level INTEGER
-        )
-    """)
-
-    # NEW: Store midnight snapshots to calculate daily stat trends for the dashboard arrows
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS daily_snapshot (
-            id TEXT PRIMARY KEY,
-            snapshot_date TEXT,
-            val1 INTEGER,
-            val2 INTEGER,
-            val3 INTEGER
-        )
-    """)
-
-    # NEWER: Persistent trend tracker for characters (replaces daily reset for leaderboards)
-    c.execute("""
-        CREATE TABLE IF NOT EXISTS character_trends (
-            char_name TEXT PRIMARY KEY,
-            last_ilvl INTEGER,
-            trend_ilvl INTEGER,
-            last_hks INTEGER,
-            trend_hks INTEGER
-        )
-    """)
-
-    conn.commit()
-    conn.close()
-
-async def fetch_guild_metadata(session, token, realm, slug):
-    """Fetches guild-level metadata to resolve rank names."""
-    url = f"https://eu.api.blizzard.com/data/wow/guild/{realm}/{slug}?namespace=profile-classicann-eu&locale=en_US"
-    headers = {"Authorization": f"Bearer {token}"}
-    
-    max_retries = 3
-    for attempt in range(max_retries):
-        try:
-            async with session.get(url, headers=headers) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    return {r['id']: r['name'] for r in data.get('ranks', [])}
-                else:
-                    response.raise_for_status() # Force an error if Blizzard returns a 500/404
-        except Exception as e:
-            print(f"⚠️ Guild Metadata fetch failed (Attempt {attempt + 1}/{max_retries}): {e}")
-            if attempt < max_retries - 1:
-                await asyncio.sleep(5)
-            else:
-                return {}
-    return {}
 
 async def fetch_with_semaphore(sem, session, token, char, history_data):
     """Bouncer function throttling dynamic API requests to respect rate limits."""
@@ -141,7 +55,7 @@ async def fetch_with_semaphore(sem, session, token, char, history_data):
             else:
                 print(f"❌ Skipping {char} after {max_retries} failed attempts.")
                 return None
-
+            
 async def main_async():
     """Core asynchronous orchestrator."""
     print("\n🔑 Authenticating with Blizzard API...")
@@ -250,7 +164,7 @@ async def main_async():
         tasks = [fetch_with_semaphore(sem, session, token, char, history_data) for char in roster_names]
         results = await asyncio.gather(*tasks, return_exceptions=True)
         
-        # --- NEW TREND LOGIC: Load Persistent Trends & Daily Snapshots ---
+        # --- TREND LOGIC: Load Persistent Trends & Daily Snapshots ---
         today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         
         # Load Global Snapshots
@@ -265,94 +179,16 @@ async def main_async():
 
         for result in results:
             if isinstance(result, dict) and result:
-                char_name_lower = result['char'].lower()
+                # 1. Process math and save trends to SQLite
+                result = process_character_trends(db_c, result, char_ranks, char_trends)
                 
-                # DATA SANITIZATION: Only assign the guild rank if the API successfully returned a profile payload
-                if isinstance(result.get('profile'), dict):
-                    result['profile']['guild_rank'] = char_ranks.get(char_name_lower, "Member")
-                    
-                    # --- PERSISTENT TREND CALCULATIONS: PVE & PVP ---
-                    cur_ilvl = result['profile'].get('equipped_item_level', 0)
-                    cur_hks = result['profile'].get('honorable_kills', 0)
-                    
-                    ct = char_trends.get(char_name_lower)
-                    
-                    if ct:
-                        last_ilvl = ct['last_ilvl']
-                        trend_ilvl = ct['trend_ilvl']
-                        last_hks = ct['last_hks']
-                        trend_hks = ct['trend_hks']
-                        
-                        # Check for iLvl changes
-                        if cur_ilvl != last_ilvl:
-                            trend_ilvl = cur_ilvl - last_ilvl
-                            last_ilvl = cur_ilvl
-                            
-                        # Check for HK changes
-                        if cur_hks != last_hks:
-                            trend_hks = cur_hks - last_hks
-                            last_hks = cur_hks
-                            
-                        # Save the updated persistent trend back to the DB
-                        db_c.execute("""
-                            INSERT OR REPLACE INTO character_trends 
-                            (char_name, last_ilvl, trend_ilvl, last_hks, trend_hks) 
-                            VALUES (?, ?, ?, ?, ?)
-                        """, (char_name_lower, last_ilvl, trend_ilvl, last_hks, trend_hks))
-                        
-                    else:
-                        # First time seeing this character: set baseline, trend is 0
-                        trend_ilvl, trend_hks = 0, 0
-                        db_c.execute("""
-                            INSERT INTO character_trends 
-                            (char_name, last_ilvl, trend_ilvl, last_hks, trend_hks) 
-                            VALUES (?, ?, 0, ?, 0)
-                        """, (char_name_lower, cur_ilvl, cur_hks))
-                        
-                    # Inject the persistent math directly into the profile so JS can read it!
-                    result['profile']['trend_pve'] = trend_ilvl
-                    result['profile']['trend_pvp'] = trend_hks
-                
+                # 2. Check gear state and append any new drops to timeline_data_new
                 history_data, timeline_data_new = update_character_state(result, history_data, timeline_data_new)
+                
                 roster_data.append(result)
 
-        # --- TREND CALCULATIONS: Global Guild Stats ---
-        total_members = len(raw_guild_roster)
-        active_14_days = 0 
-        raid_ready_count = 0
-        current_time_ms = int(datetime.now(timezone.utc).timestamp() * 1000)
-        fourteen_days_ms = 14 * 24 * 60 * 60 * 1000 
-        
-        for char in roster_data:
-            # THE FIX: 'or {}' forces it to be a dictionary even if Blizzard returns None!
-            p = char.get("profile") or {} 
-            
-            lvl = p.get('level', 0)
-            ilvl = p.get('equipped_item_level', 0)
-            
-            if lvl == 70 and ilvl >= 110: raid_ready_count += 1
-            if current_time_ms - p.get('last_login_timestamp', 0) <= fourteen_days_ms: active_14_days += 1
-                
-        global_snap = snapshots.get('__GLOBAL__')
-        base_total, base_active, base_ready = total_members, active_14_days, raid_ready_count
-        
-        if global_snap:
-            if global_snap['snapshot_date'] == today_str:
-                base_total, base_active, base_ready = global_snap['val1'], global_snap['val2'], global_snap['val3']
-            else:
-                db_c.execute("INSERT OR REPLACE INTO daily_snapshot (id, snapshot_date, val1, val2, val3) VALUES (?, ?, ?, ?, ?)", 
-                             ('__GLOBAL__', today_str, total_members, active_14_days, raid_ready_count))
-        else:
-            db_c.execute("INSERT INTO daily_snapshot (id, snapshot_date, val1, val2, val3) VALUES (?, ?, ?, ?, ?)", 
-                         ('__GLOBAL__', today_str, total_members, active_14_days, raid_ready_count))
-                         
-        # Inject the global math directly into realm_data so html_dashboard.py can use it
-        if realm_data is None: realm_data = {}
-        realm_data['global_trends'] = {
-            'trend_total': total_members - base_total,
-            'trend_active': active_14_days - base_active,
-            'trend_ready': raid_ready_count - base_ready
-        }
+        # --- PERSISTENT TREND CALCULATIONS: Global Guild Stats ---
+        realm_data = process_global_trends(db_c, roster_data, raw_guild_roster, realm_data)
 
     print("\n===========================================")
     print("💾 Commit today's updates to SQLite database...")

@@ -89,7 +89,7 @@ async def fetch_character_data(session, token, char, history_data):
     upg_str = f"{upgrade_count} Upgrades" if upgrade_count > 0 else "0 Upgrades"
     lvl_str = f"Lvl {current_level} (Level Up!)" if level_up else f"Lvl {current_level}"
     
-    print(f"[{char.title()}] {lvl_str} {spec_log_name} | HKs: {hk_count} | {upg_str}")
+    print(f"[{char.title()}] {lvl_str} {spec_log_name}")
 
     # Return the normalized data payload for downstream HTML generation and state tracking
     return {
