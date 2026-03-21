@@ -5,14 +5,15 @@ on:
     - cron: '5/20 * * * *'
   workflow_dispatch:
 
+# NEW: We must give the action global permission to write to both the repo and GitHub Pages
+permissions:
+  contents: write
+  pages: write      
+  id-token: write   
+
 jobs:
   auto-update-wow-data:
     runs-on: ubuntu-latest
-    
-    # We need to give the Action permission to push code back to the repo
-    permissions:
-      contents: write
-
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
@@ -66,3 +67,28 @@ jobs:
           
           git commit -m "Auto-update WoW guild data & SQL timeline" || echo "No changes to commit"
           git push
+
+  # --- NEW: Deploy to GitHub Pages ONLY after the data job above finishes ---
+  deploy:
+    needs: auto-update-wow-data
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout Latest Code
+        uses: actions/checkout@v4
+        with:
+          ref: main
+      
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+        
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: '.'
+          
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
