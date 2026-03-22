@@ -38,3 +38,4 @@ desktop.ini
 *.sqlite3
 create_sql.py
 restore_db.py
+_backup

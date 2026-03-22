@@ -234,6 +234,43 @@ def generate_html_dashboard(roster_data, realm_data=None, timeline_data=None, ra
     </style>
 </head>
 <body>
+    <div id="intro-container">
+        <video id="intro-video" autoplay muted playsinline>
+            <source src="asset/Amw.mp4" type="video/mp4">
+            Your browser does not support the video tag.
+        </video>
+    </div>
+    <script>
+        // Self-contained script to guarantee the video dies and the site loads
+        function killIntro() {{
+            var intro = document.getElementById('intro-container');
+            var dash = document.querySelector('.dashboard-layout');
+            
+            if (intro && !intro.classList.contains('fade-out')) {{
+                intro.classList.add('fade-out'); // Fade it to black
+                
+                if (dash) {{
+                    dash.style.opacity = '1';
+                    dash.style.transition = 'opacity 1.5s ease-in-out';
+                }}
+                
+                // Destroy the video element to free up memory
+                setTimeout(function() {{ 
+                    if (intro) intro.remove(); 
+                }}, 1000);
+            }}
+        }}
+
+        var vid = document.getElementById('intro-video');
+        if (vid) {{
+            vid.playbackRate = 1.5; 
+            vid.addEventListener('ended', killIntro); 
+            vid.addEventListener('error', killIntro); 
+        }}
+        
+        // The absolute guarantee: kill it at 7 seconds now since the video is faster
+        setTimeout(killIntro, 6500);
+    </script>
     <div class="embers-container">
 """
 
@@ -247,7 +284,7 @@ def generate_html_dashboard(roster_data, realm_data=None, timeline_data=None, ra
     
     <div id="custom-tooltip" class="custom-tooltip"></div>
     
-    <div class="dashboard-layout">
+    <div id="main-dashboard" class="dashboard-layout" style="opacity: 0; transition: opacity 1.5s ease-in-out;">
         <div class="main-content">
             <div id="empty-state">
                 

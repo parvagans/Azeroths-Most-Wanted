@@ -1216,27 +1216,28 @@ window.addEventListener('DOMContentLoaded', async () => {
     });
     
     // ==========================================
-    // 🔥 REALISTIC EMBERS & DROOPING COBWEBS
+    // 🌌 TBC ATMOSPHERE: NETHERSTORM (SPARKS ONLY)
     // ==========================================
     function initAtmosphere() {
         // 1. STATIC CORNER WEB
         const web = document.createElement('div');
         web.className = 'corner-web'; 
         web.style.position = 'fixed';
-        web.style.width = '450px';
-        web.style.height = '450px';
+        web.style.width = '300px'; 
+        web.style.height = '300px';
         web.style.backgroundImage = 'url("asset/web.png")'; 
         web.style.backgroundSize = 'contain';
         web.style.backgroundRepeat = 'no-repeat';
         web.style.opacity = '0.4'; 
+        web.style.filter = 'drop-shadow(0 0 15px rgba(163, 53, 238, 0.6))';
         web.style.zIndex = '-3'; 
         web.style.pointerEvents = 'none'; 
         web.style.top = '60px';
-        web.style.left = '-20px';
+        web.style.left = '-30px';
         web.style.transform = 'rotate(0deg)';
         document.body.appendChild(web);
 
-        // 2. CANVAS FOR EMBERS & DYNAMIC SILK
+        // 2. CANVAS FOR PHYSICS & PARTICLES
         const canvas = document.createElement('canvas');
         canvas.id = 'ember-canvas';
         canvas.style.position = 'fixed';
@@ -1250,8 +1251,9 @@ window.addEventListener('DOMContentLoaded', async () => {
 
         const ctx = canvas.getContext('2d');
         let width, height;
-        let embers = [];
-        let silkNodes = [];
+        let sparks = [];
+        let windTime = 0;
+        let windForce = 0;
 
         function resize() {
             width = canvas.width = window.innerWidth;
@@ -1260,30 +1262,34 @@ window.addEventListener('DOMContentLoaded', async () => {
         window.addEventListener('resize', resize);
         resize();
 
-        let mouse = { x: null, y: null, radius: 120 };
-        document.addEventListener('mousemove', (e) => {
-            mouse.x = e.clientX;
-            mouse.y = e.clientY;
-        });
-        document.addEventListener('mouseleave', () => {
-            mouse.x = null; mouse.y = null;
-        });
+        let mouse = { x: null, y: null, radius: 150 };
+        document.addEventListener('mousemove', (e) => { mouse.x = e.clientX; mouse.y = e.clientY; });
+        document.addEventListener('mouseleave', () => { mouse.x = null; mouse.y = null; });
 
-        // --- CLASS 1: THE FIRE EMBERS ---
-        class Ember {
+        // --- CLASS 1: FEL & NETHER SPARKS ---
+        class Spark {
             constructor() {
+                this.z = Math.random() * 0.8 + 0.2; 
                 this.x = Math.random() * width;
                 this.y = Math.random() * height + height; 
-                this.size = Math.random() * 2.5 + 0.5;
-                this.speed = Math.random() * 1.5 + 0.5; 
+                this.size = (Math.random() * 2.5 + 1) * this.z; 
+                this.speed = (Math.random() * 1.5 + 0.5) * this.z * 1.5; 
                 this.angle = Math.random() * 360; 
                 this.spin = (Math.random() - 0.5) * 0.05;
-                this.opacity = Math.random() * 0.8 + 0.2;
+                this.opacity = (Math.random() * 0.8 + 0.2) * this.z;
+
+                if (Math.random() > 0.4) {
+                    this.coreColor = `rgba(180, 255, 180, ${this.opacity})`; 
+                    this.glowColor = '#1eff00'; // Fel Green
+                } else {
+                    this.coreColor = `rgba(230, 180, 255, ${this.opacity})`; 
+                    this.glowColor = '#a335ee'; // Nether Purple
+                }
             }
             update() {
                 this.y -= this.speed; 
                 this.angle += this.spin;
-                this.x += Math.sin(this.angle) * 0.5; 
+                this.x += (Math.sin(this.angle) * 0.5 + windForce * 2.5) * this.z; 
                 
                 if (mouse.x != null) {
                     let dx = mouse.x - this.x;
@@ -1291,93 +1297,40 @@ window.addEventListener('DOMContentLoaded', async () => {
                     let distance = Math.sqrt(dx * dx + dy * dy);
                     if (distance < mouse.radius) {
                         const force = (mouse.radius - distance) / mouse.radius;
-                        this.x -= (dx / distance) * force * 3;
-                        this.y -= (dy / distance) * force * 3;
+                        this.x -= (dx / distance) * force * 3 * this.z;
+                        this.y -= (dy / distance) * force * 3 * this.z;
                     }
                 }
                 if (this.y < -20) {
                     this.y = height + 20;
                     this.x = Math.random() * width;
-                    this.opacity = Math.random() * 0.8 + 0.2;
+                    this.opacity = (Math.random() * 0.8 + 0.2) * this.z;
                 }
             }
             draw() {
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
-                ctx.shadowBlur = 12;
-                ctx.shadowColor = '#ff4400'; 
-                ctx.fillStyle = `rgba(255, 209, 0, ${this.opacity})`;
+                ctx.shadowBlur = 12 * this.z; 
+                ctx.shadowColor = this.glowColor; 
+                ctx.fillStyle = this.coreColor;
                 ctx.fill();
                 ctx.shadowBlur = 0; 
             }
         }
 
-        // --- CLASS 2: THE DROOPING COBWEBS ---
-        class SilkNode {
-            constructor() {
-                this.x = Math.random() * width;
-                this.y = Math.random() * (height * 0.7); // Mostly upper screen
-                this.vx = (Math.random() - 0.5) * 0.15; // Drift extremely slowly
-                this.vy = (Math.random() - 0.5) * 0.15;
-            }
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                
-                // Mouse pushes the webs gently out of the way
-                if (mouse.x != null) {
-                    let dx = mouse.x - this.x;
-                    let dy = mouse.y - this.y;
-                    let dist = Math.sqrt(dx * dx + dy * dy);
-                    if (dist < 150) {
-                        this.x -= (dx / dist) * 0.5;
-                        this.y -= (dy / dist) * 0.5;
-                    }
-                }
-
-                // Gently bounce off invisible borders
-                if (this.x < -50 || this.x > width + 50) this.vx *= -1;
-                if (this.y < -50 || this.y > height) this.vy *= -1;
-            }
-        }
-
-        // Spawn the particles
-        for (let i = 0; i < 80; i++) embers.push(new Ember());
-        for (let i = 0; i < 28; i++) silkNodes.push(new SilkNode());
+        // Spawn Sparks
+        for (let i = 0; i < 90; i++) sparks.push(new Spark()); 
 
         function animate() {
             ctx.clearRect(0, 0, width, height);
 
-            // 1. Draw the Drooping Silk first (so it sits behind the fire)
-            ctx.lineWidth = 0.6;
-            for (let i = 0; i < silkNodes.length; i++) {
-                silkNodes[i].update();
-                for (let j = i + 1; j < silkNodes.length; j++) {
-                    let dx = silkNodes[i].x - silkNodes[j].x;
-                    let dy = silkNodes[i].y - silkNodes[j].y;
-                    let dist = Math.sqrt(dx * dx + dy * dy);
+            windTime += 0.02;
+            windForce = (Math.sin(windTime) * 0.5 + Math.sin(windTime * 0.3) * 0.8) * 0.6;
 
-                    if (dist < 300) {
-                        // This creates the "Gravity" sag effect on the strings
-                        let sag = dist * 0.25; 
-                        let midX = (silkNodes[i].x + silkNodes[j].x) / 2;
-                        let midY = (silkNodes[i].y + silkNodes[j].y) / 2 + sag;
-
-                        ctx.beginPath();
-                        // Faint, dusty white color that fades as nodes get further apart
-                        ctx.strokeStyle = `rgba(255, 255, 255, ${(1 - dist / 300) * 0.12})`; 
-                        ctx.moveTo(silkNodes[i].x, silkNodes[i].y);
-                        // Draw a curved line instead of a straight one
-                        ctx.quadraticCurveTo(midX, midY, silkNodes[j].x, silkNodes[j].y);
-                        ctx.stroke();
-                    }
-                }
-            }
-
-            // 2. Draw the Embers over top
-            for (let i = 0; i < embers.length; i++) {
-                embers[i].update();
-                embers[i].draw();
+            // Draw Sparks
+            for (let i = 0; i < sparks.length; i++) {
+                sparks[i].update();
+                sparks[i].draw();
             }
 
             requestAnimationFrame(animate);
@@ -1385,8 +1338,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         animate();
     }
 
-    // Fire it up!
-    initAtmosphere();    
+    initAtmosphere();
 
     // Initialize routing
     route();
