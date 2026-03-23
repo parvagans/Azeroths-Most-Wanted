@@ -345,7 +345,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     const topPve = rosterData
         .filter(c => c.profile && (c.profile.equipped_item_level || 0) > 0)
         .sort((a, b) => (b.profile.equipped_item_level || 0) - (a.profile.equipped_item_level || 0))
-        .slice(0, 10);
+        .slice(0, 50);
 
     if (topPve.length > 0 && pveContainer) {
         pveWrapper.style.display = 'block';
@@ -393,7 +393,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     const topPvp = rosterData
         .filter(c => c.profile && (c.profile.honorable_kills || 0) > 0)
         .sort((a, b) => (b.profile.honorable_kills || 0) - (a.profile.honorable_kills || 0))
-        .slice(0, 10);
+        .slice(0, 50);
 
     if (topPvp.length > 0 && pvpContainer) {
         pvpWrapper.style.display = 'block';
@@ -785,7 +785,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Variable to track current sort method
-    let currentSortMethod = 'ilvl'; 
+    let currentSortMethod = 'level';
 
     function renderConciseList(title, characters, isRawMode = false) {
         conciseViewTitle.textContent = title;
@@ -834,73 +834,76 @@ window.addEventListener('DOMContentLoaded', async () => {
 
         // Generate the HTML for the list
         let listHTML = sortedCharacters.map(char => {
-            // ... (Keep ALL of your exact existing mapping logic inside here) ...
+            let statLabel = currentSortMethod === 'hks' ? 'HKs' : 'iLvl';
             
-            if (isRawMode) {
-                const deepChar = rosterData.find(c => c.profile && c.profile.name && c.profile.name.toLowerCase() === char.name.toLowerCase());
-                if (deepChar) {
-                    const p = deepChar.profile || {};
-                    const cClass = getCharClass(deepChar);
-                    const raceName = p.race && p.race.name ? (typeof p.race.name === 'string' ? p.race.name : (p.race.name.en_US || 'Unknown')) : 'Unknown';
-                    const cHex = CLASS_COLORS[cClass] || "#fff";
-                    const portraitURL = deepChar.render_url || getClassIcon(cClass);
-                    const activeSpec = p.active_spec ? p.active_spec : '';
-                    const activeSpecAttr = activeSpec ? activeSpec : 'unspecced';
-                    const specIconUrl = getSpecIcon(cClass, activeSpec);
-                    const specIconHtml = specIconUrl ? `<img src="${specIconUrl}" style="width: 14px; height: 14px; border-radius: 50%; vertical-align: middle; margin-right: 3px; border: 1px solid #222;">` : '';
-                    const displaySpecClass = activeSpec ? `${activeSpec} ${cClass}` : cClass;
-                    return `
-                    <a href="javascript:void(0)" onclick="selectCharacter('${(p.name || '').toLowerCase()}')" class="concise-char-bar tt-char" data-char="${(p.name || '').toLowerCase()}" data-class="${cClass}" data-spec="${activeSpecAttr}" style="border-left-color:${cHex};">
-                        <div class="c-main-info">
-                            <img src="${portraitURL}" class="c-portrait" style="border-color:${cHex};" onerror="this.src='https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg'">
-                            <span class="c-name" style="color:${cHex};">${p.name || 'Unknown'}</span>
-                            <span class="c-meta">${raceName} &bull; ${specIconHtml}${displaySpecClass}</span>
-                        </div>
-                        <div class="c-stats-info">
-                            <span>Level <span class="c-val-lvl">${p.level || 0}</span></span>
-                            <span>iLvl <span class="c-val-ilvl">${p.equipped_item_level || 0}</span></span>
-                        </div>
-                    </a>`;
-                } else {
-                    const charClass = char.class || 'Unknown';
-                    const cHex = CLASS_COLORS[charClass] || "#fff";
-                    const portraitURL = getClassIcon(charClass);
-                    return `
-                    <div class="concise-char-bar" data-class="${charClass}" data-spec="unspecced" style="border-left-color:${cHex}; cursor: default;">
-                        <div class="c-main-info">
-                            <img src="${portraitURL}" class="c-portrait" style="border-color:${cHex};" onerror="this.src='https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg'">
-                            <span class="c-name" style="color:${cHex};">${char.name || 'Unknown'}</span>
-                            <span class="c-meta">${char.race || 'Unknown'} ${charClass}</span>
-                        </div>
-                        <div class="c-stats-info">
-                            <span>Level <span class="c-val-lvl">${char.level || 0}</span></span>
-                            <span>iLvl <span class="c-val-ilvl" style="color:#666;">???</span></span>
-                        </div>
-                    </div>`;
-                }
+            // 1. Identify if we have a deep profile (scanned data) or just raw roster data
+            let deepChar = isRawMode ? rosterData.find(c => c.profile && c.profile.name && c.profile.name.toLowerCase() === char.name.toLowerCase()) : char;
+            
+            // 2. Setup Variables
+            let isClickable = false;
+            let displayName, cClass, raceName, cHex, portraitURL, level;
+            let activeSpecAttr = 'unspecced';
+            let specIconHtml = '';
+            let displaySpecClass = '';
+            let statValue = '???';
+            let statColor = 'color:#666;';
+
+            // 3. Populate Variables based on data availability
+            if (deepChar && deepChar.profile) {
+                const p = deepChar.profile;
+                isClickable = true;
+                displayName = p.name || 'Unknown';
+                cClass = getCharClass(deepChar);
+                raceName = p.race && p.race.name ? (typeof p.race.name === 'string' ? p.race.name : (p.race.name.en_US || 'Unknown')) : 'Unknown';
+                cHex = CLASS_COLORS[cClass] || "#fff";
+                portraitURL = deepChar.render_url || getClassIcon(cClass);
+                level = p.level || 0;
+                
+                const activeSpec = p.active_spec ? p.active_spec : '';
+                activeSpecAttr = activeSpec ? activeSpec : 'unspecced';
+                const specIconUrl = getSpecIcon(cClass, activeSpec);
+                specIconHtml = specIconUrl ? `<img src="${specIconUrl}" style="width: 14px; height: 14px; border-radius: 50%; vertical-align: middle; margin-right: 3px; border: 1px solid #222;">` : '';
+                displaySpecClass = activeSpec ? `${activeSpec} ${cClass}` : cClass;
+                
+                statValue = currentSortMethod === 'hks' ? (p.honorable_kills || 0).toLocaleString() : (p.equipped_item_level || 0);
+                statColor = currentSortMethod === 'hks' ? 'color: #ff4400;' : '';
+            } else {
+                // Fallback for characters lacking a deep scan (e.g., levels 1-9)
+                displayName = char.name || 'Unknown';
+                cClass = char.class || 'Unknown';
+                raceName = char.race || 'Unknown';
+                cHex = CLASS_COLORS[cClass] || "#fff";
+                portraitURL = getClassIcon(cClass);
+                level = char.level || 0;
+                displaySpecClass = cClass;
             }
-            
-            const p = char.profile || {};
-            const cClass = getCharClass(char);
-            const raceName = p.race && p.race.name ? (typeof p.race.name === 'string' ? p.race.name : (p.race.name.en_US || 'Unknown')) : 'Unknown';
-            const cHex = CLASS_COLORS[cClass] || "#fff";
-            const portraitURL = char.render_url || getClassIcon(cClass);
-            const activeSpec = p.active_spec ? p.active_spec : '';
-            const activeSpecAttr = activeSpec ? activeSpec : 'unspecced';
-            const specIconUrl = getSpecIcon(cClass, activeSpec);
-            const specIconHtml = specIconUrl ? `<img src="${specIconUrl}" style="width: 14px; height: 14px; border-radius: 50%; vertical-align: middle; margin-right: 3px; border: 1px solid #222;">` : '';
-            const displaySpecClass = activeSpec ? `${activeSpec} ${cClass}` : cClass;
-            
+
+            // 4. Render the unified HTML
+            if (!isClickable) {
+                return `
+                <div class="concise-char-bar" data-class="${cClass}" data-spec="unspecced" style="border-left-color:${cHex}; cursor: default;">
+                    <div class="c-main-info">
+                        <img src="${portraitURL}" class="c-portrait" style="border-color:${cHex};" onerror="this.src='https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg'">
+                        <span class="c-name" style="color:${cHex};">${displayName}</span>
+                        <span class="c-meta">${raceName} ${displaySpecClass}</span>
+                    </div>
+                    <div class="c-stats-info">
+                        <span>Level <span class="c-val-lvl">${level}</span></span>
+                        <span>${statLabel} <span class="c-val-ilvl" style="${statColor}">${statValue}</span></span>
+                    </div>
+                </div>`;
+            }
+
             return `
-            <a href="javascript:void(0)" onclick="selectCharacter('${(p.name || '').toLowerCase()}')" class="concise-char-bar tt-char" data-char="${(p.name || '').toLowerCase()}" data-class="${cClass}" data-spec="${activeSpecAttr}" style="border-left-color:${cHex};">
+            <a href="javascript:void(0)" onclick="selectCharacter('${displayName.toLowerCase()}')" class="concise-char-bar tt-char" data-char="${displayName.toLowerCase()}" data-class="${cClass}" data-spec="${activeSpecAttr}" style="border-left-color:${cHex};">
                 <div class="c-main-info">
                     <img src="${portraitURL}" class="c-portrait" style="border-color:${cHex};" onerror="this.src='https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg'">
-                    <span class="c-name" style="color:${cHex};">${p.name || 'Unknown'}</span>
+                    <span class="c-name" style="color:${cHex};">${displayName}</span>
                     <span class="c-meta">${raceName} &bull; ${specIconHtml}${displaySpecClass}</span>
                 </div>
                 <div class="c-stats-info">
-                    <span>Level <span class="c-val-lvl">${p.level || 0}</span></span>
-                    <span>iLvl <span class="c-val-ilvl">${p.equipped_item_level || 0}</span></span>
+                    <span>Level <span class="c-val-lvl">${level}</span></span>
+                    <span>${statLabel} <span class="c-val-ilvl" style="${statColor}">${statValue}</span></span>
                 </div>
             </a>`;
         }).join('');
@@ -1263,6 +1266,10 @@ window.addEventListener('DOMContentLoaded', async () => {
         hideAllViews();
         conciseView.style.display = 'flex';
         if (navbar) navbar.style.background = '#111';
+        
+        // Force the filter to always reset to Character Level
+        currentSortMethod = 'level';
+        
         renderConciseList(title, characters, isRawRoster);
         
         window.currentFilteredChars = characters.map(c => {
