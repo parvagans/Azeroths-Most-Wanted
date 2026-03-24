@@ -34,12 +34,24 @@ window.addEventListener('DOMContentLoaded', async () => {
     const config = JSON.parse(document.getElementById('dashboard-config').textContent);
     const heatmapData = JSON.parse(document.getElementById('heatmap-data').textContent);
     
-    // NEW: Download the heavy roster files silently in the background
-    const rosterRes = await fetch('asset/roster.json');
-    const rosterData = await rosterRes.json();
-    
-    const rawRes = await fetch('asset/raw_roster.json');
-    const rawGuildRoster = await rawRes.json();
+    // NEW: Download the heavy roster files silently in the background with error handling
+    let rosterData = [];
+    let rawGuildRoster = [];
+    try {
+        const rosterRes = await fetch('asset/roster.json');
+        rosterData = await rosterRes.json();
+        
+        const rawRes = await fetch('asset/raw_roster.json');
+        rawGuildRoster = await rawRes.json();
+    } catch (error) {
+        console.error("Failed to load armory data:", error);
+        const loaderText = document.querySelector('.loader-content div');
+        if (loaderText) {
+            loaderText.style.color = '#e74c3c';
+            loaderText.innerHTML = 'Failed to load data. Please refresh.';
+        }
+        return; // Stop executing to prevent cascading errors
+    }
 
     // Hide the loading overlay once data is ready
     const loader = document.getElementById('loading-overlay');
@@ -53,7 +65,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     const updateTimeEl = document.getElementById("update-time");
     if (updateTimeEl) updateTimeEl.textContent = rawDate.toLocaleString(undefined, dateOptions);
     
-    let tlTypeFilter = 'all';
+    let tlTypeFilter = 'rare_plus';
     let tlDateFilter = '7'; // Start with 7 days to match the heatmap
     let tlSpecificDate = null; 
     window.currentFilteredChars = null;
@@ -175,7 +187,11 @@ window.addEventListener('DOMContentLoaded', async () => {
                 searchAutoComplete.classList.add('show');
                 if (customOptions) customOptions.classList.remove('show');
             } else {
-                searchAutoComplete.innerHTML = `<div style="padding: 10px; color: #888; text-align: center; font-style: italic; font-size: 12px;">No heroes found.</div>`;
+                searchAutoComplete.innerHTML = `
+                    <div style="padding: 20px 10px; text-align: center; display: flex; flex-direction: column; align-items: center;">
+                        <img src="https://wow.zamimg.com/images/wow/icons/large/inv_misc_head_murloc_01.jpg" loading="lazy" style="width: 32px; height: 32px; border-radius: 4px; filter: grayscale(100%); margin-bottom: 8px;">
+                        <span style="color: #aaa; font-style: italic; font-size: 13px;">No heroes found... Mrgrlrl!</span>
+                    </div>`;
                 searchAutoComplete.classList.add('show');
             }
         });
@@ -197,18 +213,33 @@ window.addEventListener('DOMContentLoaded', async () => {
         if (searchAutoComplete) searchAutoComplete.classList.remove('show');
     });
     
-    function updateDropdownLabel(val) {
+    function updateDropdownLabel(ignoreVal) {
         if (!selectValueText) return;
-        if (val === 'all' || val === 'total' || val === 'active' || val === 'raidready' || val.startsWith('class-') || val.startsWith('spec-')) {
-            selectValueText.innerHTML = "View Entire Guild";
+        
+        // Smarter logic: Read the actual active URL hash to determine the label
+        const hash = window.location.hash.substring(1); 
+        
+        if (hash === '') {
+            selectValueText.innerHTML = "Select View...";
+        } else if (hash === 'all' || hash === 'total') {
+            selectValueText.innerHTML = "🌍 Entire Guild";
+        } else if (hash === 'active') {
+            selectValueText.innerHTML = "🔥 Active Roster";
+        } else if (hash === 'raidready') {
+            selectValueText.innerHTML = "⚔️ Raid Ready";
+        } else if (hash === 'analytics') {
+            selectValueText.innerHTML = "📊 Analytics";
+        } else if (hash.startsWith('class-') || hash.startsWith('spec-') || hash.startsWith('filter-')) {
+            selectValueText.innerHTML = "⚡ Filter Active";
         } else {
-            const char = rosterData.find(c => c.profile && c.profile.name && c.profile.name.toLowerCase() === val);
+            // It's a specific character
+            const char = rosterData.find(c => c.profile && c.profile.name && c.profile.name.toLowerCase() === hash);
             if (char) {
                 const cClass = getCharClass(char);
                 const cHex = CLASS_COLORS[cClass] || '#fff';
                 selectValueText.innerHTML = `<span style="color: ${cHex}; text-shadow: 1px 1px 2px #000;">${char.profile.name}</span>`;
             } else {
-                selectValueText.innerHTML = "View Entire Guild";
+                selectValueText.innerHTML = "Select View...";
             }
         }
     }
@@ -666,6 +697,14 @@ window.addEventListener('DOMContentLoaded', async () => {
                     b.style.transform = 'scale(1)';
                 });
                 
+                // Trigger smooth fade-in animation
+                const charList = document.getElementById('concise-char-list');
+                if (charList) {
+                    charList.classList.remove('animate-list-update');
+                    void charList.offsetWidth; // Force a browser reflow
+                    charList.classList.add('animate-list-update');
+                }
+
                 if (isActive) {
                     document.querySelectorAll('.concise-char-bar').forEach(el => el.style.display = 'flex');
                     document.querySelectorAll('.dynamic-badge').forEach(b => b.style.opacity = '1');
@@ -753,6 +792,14 @@ window.addEventListener('DOMContentLoaded', async () => {
                         specBtn.addEventListener('click', function() {
                             const targetSpec = this.getAttribute('data-spec');
                             const subVisibleChars = []; 
+                            
+                            // Trigger smooth fade-in animation for spec clicks
+                            const charList = document.getElementById('concise-char-list');
+                            if (charList) {
+                                charList.classList.remove('animate-list-update');
+                                void charList.offsetWidth; // Force a browser reflow
+                                charList.classList.add('animate-list-update');
+                            }
                             
                             document.querySelectorAll('.concise-char-bar').forEach(el => {
                                 const charName = el.getAttribute('data-char');
@@ -883,7 +930,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                 return `
                 <div class="concise-char-bar" data-class="${cClass}" data-spec="unspecced" style="border-left-color:${cHex}; cursor: default;">
                     <div class="c-main-info">
-                        <img src="${portraitURL}" class="c-portrait" style="border-color:${cHex};" onerror="this.src='https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg'">
+                        <img src="${portraitURL}" class="c-portrait" loading="lazy" style="border-color:${cHex};" onerror="this.src='https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg'">
                         <span class="c-name" style="color:${cHex};">${displayName}</span>
                         <span class="c-meta">${raceName} ${displaySpecClass}</span>
                     </div>
@@ -897,7 +944,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             return `
             <a href="javascript:void(0)" onclick="selectCharacter('${displayName.toLowerCase()}')" class="concise-char-bar tt-char" data-char="${displayName.toLowerCase()}" data-class="${cClass}" data-spec="${activeSpecAttr}" style="border-left-color:${cHex};">
                 <div class="c-main-info">
-                    <img src="${portraitURL}" class="c-portrait" style="border-color:${cHex};" onerror="this.src='https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg'">
+                    <img src="${portraitURL}" class="c-portrait" loading="lazy" style="border-color:${cHex};" onerror="this.src='https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg'">
                     <span class="c-name" style="color:${cHex};">${displayName}</span>
                     <span class="c-meta">${raceName} &bull; ${specIconHtml}${displaySpecClass}</span>
                 </div>
@@ -997,8 +1044,12 @@ window.addEventListener('DOMContentLoaded', async () => {
             
             if (window.currentFilteredChars && !window.currentFilteredChars.includes(charName)) show = false;
             
-            // --- NEW: Epic & Legendary Filtering Logic ---
-            if (tlTypeFilter === 'epic') {
+            // --- NEW: Rarity Filtering Logic ---
+            if (tlTypeFilter === 'rare_plus') {
+                // Default: Blue, Purple, Orange
+                if (eventType !== 'item' && eventType !== 'level_up') show = false;
+                if (eventType === 'item' && (itemQuality === 'POOR' || itemQuality === 'COMMON' || itemQuality === 'UNCOMMON')) show = false;
+            } else if (tlTypeFilter === 'epic') {
                 // If they click Epics+, show ONLY Epic OR Legendary items
                 if (eventType !== 'item' || (itemQuality !== 'EPIC' && itemQuality !== 'LEGENDARY')) show = false;
             } else if (tlTypeFilter === 'legendary') {
