@@ -1,3 +1,4 @@
+import asyncio
 from wow.images import (
     fetch_blizzard_media_href,
     fetch_item_icon_url,
@@ -7,80 +8,106 @@ from wow.images import (
 from wow.quality import fetch_item_quality
 from config import FALLBACK_ICON
 
-async def process_equipment(session, token, equipment, char_name):
-    """
-    Parses the character equipment payload and resolves metadata for each equipped item.
+async def process_single_item(session, token, item, past_gear, fallback_url):
+    """Helper function to process a single item asynchronously."""
+    slot_type = item.get('slot', {}).get('type', '')
+    item_id = item.get('item', {}).get('id')
+    item_level = item.get('level', {}).get('value', 0)
     
-    This function iterates through the equipped items, safely extracting item names, 
-    identifiers, quality tiers, and icon assets. It utilizes a waterfall approach 
-    to fetch item icons and applies a fallback image if resolution fails.
+    name_data = item.get('name', 'Empty')
+    item_name = name_data if isinstance(name_data, str) else name_data.get('en_US', 'Empty')
     
-    Args:
-        session (aiohttp.ClientSession): The active asynchronous HTTP session.
-        token (str): The OAuth access token for Blizzard API authentication.
-        equipment (dict): The raw equipment data payload from the Blizzard API.
-        char_name (str): The name of the character being processed.
+    # LOCAL CACHE CHECK
+    past_item = past_gear.get(slot_type, {})
+    cached_icon = past_item.get('icon_data')
+    cached_tooltip = past_item.get('tooltip_params')
+    
+    # Reject the cache if it wiped to None, or if it saved the fallback logo
+    is_invalid_cache = (
+        not cached_icon or 
+        not cached_tooltip or 
+        (cached_icon == fallback_url) or 
+        ("amw" in str(cached_icon).lower()) or
+        ("undefined" in str(cached_tooltip).lower())
+    )
+    
+    if past_item and past_item.get('item_id') == item_id and not is_invalid_cache:
+        return slot_type, {
+            "name": item_name,
+            "icon_data": cached_icon,
+            "quality": past_item.get('quality', 'COMMON'),
+            "is_fallback": False,
+            "item_id": item_id,
+            "item_level": item_level,
+            "tooltip_params": cached_tooltip
+        }
         
-    Returns:
-        dict: A mapping of equipment slot types to their respective parsed item data 
-              (name, base64 icon, quality, fallback status, item ID, and item level).
-    """
+    # NETWORK FETCH SETUP
+    item_href = item.get('item', {}).get('key', {}).get('href')
+    media_href = item.get('media', {}).get('key', {}).get('href')
+    payload_quality = item.get('quality', {}).get('type')
+
+    async def resolve_icon():
+        icon_url = None
+        if media_href:
+            icon_url = await fetch_blizzard_media_href(session, token, media_href)
+        if not icon_url and item_id:
+            icon_url = await fetch_item_icon_url(session, token, item_id) 
+        if not icon_url and item_id:
+            icon_url = await fetch_wowhead_icon_url(session, item_id)
+        return icon_url
+
+    async def resolve_quality():
+        if payload_quality:
+            return payload_quality
+        return await fetch_item_quality(session, token, item_href, item_id)
+
+    quality_type, icon_url = await asyncio.gather(
+        resolve_quality(),
+        resolve_icon()
+    )
+    
+    quality_type = quality_type.upper() if quality_type else "COMMON"
+    final_url = get_standardized_image_url(icon_url) if icon_url else None
+    
+    is_fallback = False 
+    if not final_url:
+        final_url = fallback_url
+        is_fallback = True
+
+    enchants = item.get('enchantments', [])
+    ench_str = "&ench=" + ":".join([str(e.get('enchantment_id')) for e in enchants]) if enchants else ""
+    
+    sockets = item.get('sockets', [])
+    gems_str = "&gems=" + ":".join([str(s.get('item', {}).get('id')) for s in sockets if s.get('item')]) if sockets else ""
+    
+    tooltip_params = f"item={item_id}{ench_str}{gems_str}"
+
+    return slot_type, {
+        "name": item_name,
+        "icon_data": final_url, 
+        "quality": quality_type,
+        "is_fallback": is_fallback,
+        "item_id": item_id,
+        "item_level": item_level,
+        "tooltip_params": tooltip_params
+    }
+
+async def process_equipment(session, token, equipment, past_gear=None):
+    """Parses the character equipment payload sequentially to prevent media rate limits."""
+    if past_gear is None: past_gear = {}
     equipped_dict = {}
     fallback_url = get_standardized_image_url(FALLBACK_ICON)
 
     if equipment and 'equipped_items' in equipment:
         items = equipment['equipped_items']
         
+        # Sequentially iterate to safely heal the database without overloading Blizzard
         for item in items:
-            slot_type = item.get('slot', {}).get('type', '')
-            
-            # Safely extract the item name, accounting for varying API localization formats
-            name_data = item.get('name', 'Empty')
-            item_name = name_data if isinstance(name_data, str) else name_data.get('en_US', 'Empty')
-            
-            item_id = item.get('item', {}).get('id')
-            item_level = item.get('level', {}).get('value', 0)
-            
-            item_href = item.get('item', {}).get('key', {}).get('href')
-            quality_type = item.get('quality', {}).get('type')
-            if not quality_type:
-                quality_type = await fetch_item_quality(session, token, item_href, item_id)
-            quality_type = quality_type.upper() if quality_type else "COMMON"
-            
-            media_href = item.get('media', {}).get('key', {}).get('href')
-            icon_url = None
-            
-            if media_href:
-                icon_url = await fetch_blizzard_media_href(session, token, media_href)
-            if not icon_url and item_id:
-                icon_url = await fetch_item_icon_url(session, token, item_id) 
-            if not icon_url and item_id:
-                icon_url = await fetch_wowhead_icon_url(session, item_id)
-            
-            # --- CHANGED: Just get the standardized URL directly ---
-            final_url = get_standardized_image_url(icon_url) if icon_url else None
-            
-            is_fallback = False 
-            if not final_url:
-                final_url = fallback_url
-                is_fallback = True
-
-            enchants = item.get('enchantments', [])
-            ench_str = "&ench=" + ":".join([str(e.get('enchantment_id')) for e in enchants]) if enchants else ""
-            
-            sockets = item.get('sockets', [])
-            gems_str = "&gems=" + ":".join([str(s.get('item', {}).get('id')) for s in sockets if s.get('item')]) if sockets else ""
-            
-            tooltip_params = f"item={item_id}{ench_str}{gems_str}"
-
-            equipped_dict[slot_type] = {
-                "name": item_name,
-                "icon_data": final_url, # We keep the key as 'icon_data' so the rest of your app/DB doesn't break
-                "quality": quality_type,
-                "is_fallback": is_fallback,
-                "item_id": item_id,
-                "item_level": item_level,
-                "tooltip_params": tooltip_params
-            }
+            try:
+                slot_type, item_data = await process_single_item(session, token, item, past_gear, fallback_url)
+                equipped_dict[slot_type] = item_data
+            except Exception as e:
+                print(f"⚠️ Minor item fetch warning: {e}")
 
     return equipped_dict

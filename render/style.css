@@ -428,3 +428,62 @@ a, .item-slot, .nav-btn, .clickable-class, .tt-char, .concise-item, .tl-btn { cu
 .animate-list-update {
     animation: smoothFadeIn 0.3s ease-out forwards;
 }
+
+/* Architecture View Styles */
+.arch-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1 1 320px; /* Allows cards to wrap and fill space cleanly on mobile */
+    max-width: 500px;
+    background: rgba(0,0,0,0.6);
+    border-top: 3px solid #ffd100;
+    padding: 25px 20px;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.arch-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(255, 209, 0, 0.15);
+}
+
+/* Modern Frosted Glass Pill Container */
+.arch-logo-pill {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    background: rgba(235, 235, 235, 0.85); /* Lightened for clarity, but slightly transparent */
+    backdrop-filter: blur(8px); /* Gives it a premium frosted glass look */
+    -webkit-backdrop-filter: blur(8px); /* Safari support */
+    padding: 12px 24px;
+    border-radius: 50px; 
+    margin-bottom: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.3); /* Soft highlighted rim */
+    box-shadow: 0 8px 20px rgba(0,0,0,0.6), inset 0 0 10px rgba(255,255,255,0.5); /* Outer depth + inner glow */
+    min-height: 65px;
+}
+
+.arch-logo-pill img {
+    height: 38px; 
+    width: auto;
+    object-fit: contain;
+    margin: 0; 
+    /* A tiny, sharp dark shadow to pop the logo off the light glass */
+    filter: drop-shadow(0 2px 3px rgba(0,0,0,0.3)); 
+}
+
+.arch-card h3 {
+    color: #fff;
+    font-family: 'Cinzel', serif;
+    margin-top: 0;
+    margin-bottom: 12px;
+    text-shadow: 1px 1px 2px #000;
+    text-align: center;
+}
+.arch-card p {
+    color: #bbb;
+    font-size: 14px;
+    line-height: 1.6;
+    margin: 0;
+    text-align: center;
+}

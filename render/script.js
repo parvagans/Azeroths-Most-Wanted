@@ -78,7 +78,8 @@ window.addEventListener('DOMContentLoaded', async () => {
     let analyticsActivityChartInst = null;
     let analyticsClassChartInst = null;
     const analyticsView = document.getElementById('analytics-view');   
-    
+    const architectureView = document.getElementById('architecture-view');
+
     const navbar = document.querySelector('.navbar');
     const emptyState = document.getElementById('empty-state');
     const conciseView = document.getElementById('concise-view');
@@ -229,6 +230,8 @@ window.addEventListener('DOMContentLoaded', async () => {
             selectValueText.innerHTML = "⚔️ Raid Ready";
         } else if (hash === 'analytics') {
             selectValueText.innerHTML = "📊 Analytics";
+        } else if (hash === 'architecture') {
+            selectValueText.innerHTML = "⚙️ Architecture";
         } else if (hash.startsWith('class-') || hash.startsWith('spec-') || hash.startsWith('filter-')) {
             selectValueText.innerHTML = "⚡ Filter Active";
         } else {
@@ -282,9 +285,12 @@ window.addEventListener('DOMContentLoaded', async () => {
                         {
                             label: 'Total Roster',
                             data: heatmapData.map(d => d.total_roster || 0),
-                            borderColor: '#3498db', // Blue
+                            borderColor: 'rgba(52, 152, 219, 0.3)',
                             backgroundColor: 'transparent',
                             borderWidth: 2,
+                            borderDash: [4, 4],
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
                             pointBackgroundColor: '#3498db',
                             pointBorderColor: '#fff',
                             tension: 0.3,
@@ -294,13 +300,16 @@ window.addEventListener('DOMContentLoaded', async () => {
                         {
                             label: 'Active Roster',
                             data: heatmapData.map(d => d.active_roster || 0),
-                            borderColor: '#2ecc71', // Green
-                            backgroundColor: 'transparent',
+                            borderColor: 'rgba(46, 204, 113, 0.6)',
+                            backgroundColor: 'rgba(46, 204, 113, 0.05)',
                             borderWidth: 2,
+                            borderDash: [4, 4],
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
                             pointBackgroundColor: '#2ecc71',
                             pointBorderColor: '#fff',
                             tension: 0.3,
-                            fill: false,
+                            fill: true,
                             yAxisID: 'y-roster'
                         }
                     ]
@@ -1170,6 +1179,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         conciseView.style.display = 'none';
         fullCardContainer.style.display = 'none';
         if (analyticsView) analyticsView.style.display = 'none';
+        if (architectureView) architectureView.style.display = 'none';
         if (searchInput) searchInput.value = '';
         if (searchAutoComplete) searchAutoComplete.classList.remove('show');
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1327,24 +1337,58 @@ window.addEventListener('DOMContentLoaded', async () => {
                     labels: heatmapData.map(d => d.day_name),
                     datasets: [
                         {
-                            label: 'Loot Drops', data: heatmapData.map(d => d.loot || 0),
-                            borderColor: '#a335ee', backgroundColor: 'rgba(163, 53, 238, 0.1)',
-                            borderWidth: 2, pointBackgroundColor: '#a335ee', pointBorderColor: '#fff', tension: 0.3, fill: true, yAxisID: 'y'
+                            label: 'Loot Drops',
+                            data: heatmapData.map(d => d.loot || 0),
+                            borderColor: '#a335ee', // Epic Purple
+                            backgroundColor: 'rgba(163, 53, 238, 0.1)',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#a335ee',
+                            pointBorderColor: '#fff',
+                            tension: 0.3,
+                            fill: true,
+                            yAxisID: 'y'
                         },
                         {
-                            label: 'Level Ups', data: heatmapData.map(d => d.levels || 0),
-                            borderColor: '#ffd100', backgroundColor: 'rgba(255, 209, 0, 0.1)',
-                            borderWidth: 2, pointBackgroundColor: '#ffd100', pointBorderColor: '#fff', tension: 0.3, fill: true, yAxisID: 'y'
+                            label: 'Level Ups',
+                            data: heatmapData.map(d => d.levels || 0),
+                            borderColor: '#ffd100', // Gold
+                            backgroundColor: 'rgba(255, 209, 0, 0.1)',
+                            borderWidth: 2,
+                            pointBackgroundColor: '#ffd100',
+                            pointBorderColor: '#fff',
+                            tension: 0.3,
+                            fill: true,
+                            yAxisID: 'y'
                         },
                         {
-                            label: 'Total Roster', data: heatmapData.map(d => d.total_roster || 0),
-                            borderColor: '#3498db', backgroundColor: 'transparent',
-                            borderWidth: 2, pointBackgroundColor: '#3498db', pointBorderColor: '#fff', tension: 0.3, fill: false, yAxisID: 'y-roster'
+                            label: 'Total Roster',
+                            data: heatmapData.map(d => d.total_roster || 0),
+                            borderColor: 'rgba(52, 152, 219, 0.3)',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [4, 4],
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            pointBackgroundColor: '#3498db',
+                            pointBorderColor: '#fff',
+                            tension: 0.3,
+                            fill: false,
+                            yAxisID: 'y-roster'
                         },
                         {
-                            label: 'Active Roster', data: heatmapData.map(d => d.active_roster || 0),
-                            borderColor: '#2ecc71', backgroundColor: 'transparent',
-                            borderWidth: 2, pointBackgroundColor: '#2ecc71', pointBorderColor: '#fff', tension: 0.3, fill: false, yAxisID: 'y-roster'
+                            label: 'Active Roster',
+                            data: heatmapData.map(d => d.active_roster || 0),
+                            borderColor: 'rgba(46, 204, 113, 0.6)',
+                            backgroundColor: 'rgba(46, 204, 113, 0.05)',
+                            borderWidth: 2,
+                            borderDash: [4, 4],
+                            pointRadius: 0,
+                            pointHoverRadius: 4,
+                            pointBackgroundColor: '#2ecc71',
+                            pointBorderColor: '#fff',
+                            tension: 0.3,
+                            fill: true,
+                            yAxisID: 'y-roster'
                         }
                     ]
                 },
@@ -1364,6 +1408,13 @@ window.addEventListener('DOMContentLoaded', async () => {
         // 5. Duplicate Class Donut Chart from Main Page
         if(analyticsClassChartInst) analyticsClassChartInst.destroy();
         analyticsClassChartInst = createDonutChart('analyticsClassDonutChart', rawGuildRoster, true);
+    }
+
+    function showArchitectureView() {
+        hideAllViews();
+        if (architectureView) architectureView.style.display = 'block';
+        if (navbar) navbar.style.background = '#111';
+        if (timeline) timeline.style.display = 'none'; 
     }
 
     window.returnToHome = function() {
@@ -1460,6 +1511,9 @@ window.addEventListener('DOMContentLoaded', async () => {
             showHomeView();
         } else if (hash === 'analytics') {
             showAnalyticsView();
+            updateDropdownLabel('all');
+        } else if (hash === 'architecture') {
+            showArchitectureView();
             updateDropdownLabel('all');
         } else if (hash === 'total') {
             showConciseView(`Total Guild Roster (${rawGuildRoster.length})`, rawGuildRoster.sort((a,b) => b.level - a.level), true, true);
