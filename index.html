@@ -78,10 +78,22 @@ a, .item-slot, .nav-btn, .clickable-class, .tt-char, .concise-item, .tl-btn { cu
 
 /* Navbar & Navigation Buttons */
 .navbar { position: sticky; top: 0; width: 100%; z-index: 100; background: rgba(15, 15, 15, 0.85); backdrop-filter: blur(12px); border-bottom: 1px solid #333; display: flex; justify-content: center; align-items: center; padding: 10px 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.6); }
-.controls-wrapper { display: flex; gap: 15px; align-items: center; flex-wrap: wrap; justify-content: center; position: relative; width: 100%; max-width: 1400px; }
+.controls-wrapper { display: flex; gap: 15px; align-items: center; flex-wrap: nowrap; justify-content: space-between; position: relative; width: 100%; max-width: 1400px; }
 .nav-btn { text-decoration: none; padding: 8px 16px; border-radius: 20px; font-weight: bold; display: flex; align-items: center; gap: 6px; font-size: 14px; transition: 0.3s; color: white; cursor: pointer; white-space: nowrap; }
-.nav-btn-home { background: repeating-linear-gradient(45deg, rgba(0,0,0,0.3), rgba(0,0,0,0.3) 2px, transparent 2px, transparent 4px), linear-gradient(135deg, #1f1f1f, #0a0a0a); border: 1px solid #444; color: #ffd100; font-family: 'Cinzel'; }
+.nav-btn-home { background: repeating-linear-gradient(45deg, rgba(0,0,0,0.3), rgba(0,0,0,0.3) 2px, transparent 2px, transparent 4px), linear-gradient(135deg, #1f1f1f, #0a0a0a); border: 1px solid #444; color: #ffd100; font-family: 'Cinzel'; margin-left: 0 !important; width: 90%; justify-content: flex-start; }
 .nav-btn-home:hover { border-color: #ffd100; box-shadow: 0 0 10px rgba(255,209,0,0.3); transform: translateY(-1px); }
+.home-text { display: inline; }
+
+/* Universal Hamburger Menu Activation */
+.mobile-menu-toggle { display: flex; flex-direction: column; justify-content: space-around; width: 28px; height: 22px; background: transparent; border: none; cursor: pointer; padding: 0; z-index: 120; position: relative; }
+.mobile-menu-toggle span { width: 28px; height: 3px; background: #ffd100; border-radius: 10px; transition: all 0.3s linear; position: relative; transform-origin: 1px; }
+.mobile-menu-toggle.open span:nth-child(1) { transform: rotate(45deg); }
+.mobile-menu-toggle.open span:nth-child(2) { opacity: 0; }
+.mobile-menu-toggle.open span:nth-child(3) { transform: rotate(-45deg); }
+
+/* Universal Slide-out Sidebar */
+.nav-links-container { position: fixed; top: 0; left: -100%; height: 100vh; width: 250px; flex-direction: column; background: rgba(15, 15, 15, 0.98); backdrop-filter: blur(10px); border-right: 1px solid #333; padding-top: 80px; padding-left: 20px; align-items: flex-start; transition: left 0.3s ease-in-out; z-index: 110; box-shadow: 5px 0 15px rgba(0,0,0,0.8); display: flex; gap: 10px; }
+.nav-links-container.open { left: 0; }
 
 /* Custom Dropdown Menu */
 .custom-select-wrapper { position: relative; user-select: none; font-family: 'Cinzel'; z-index: 105; cursor: url('https://wow.zamimg.com/images/wow/cursor/select.png'), pointer !important; }
@@ -210,7 +222,10 @@ a, .item-slot, .nav-btn, .clickable-class, .tt-char, .concise-item, .tl-btn { cu
 .event-box img { width: 18px; height: 18px; border-radius: 4px; border: 1px solid #111; }
 .event-box span { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
-.dashboard-footer { text-align: center; padding: 40px; color: #666; font-size: 14px; width: 100%; border-top: 1px solid #222; margin-top: 40px; clear: both; }
+.dashboard-footer { text-align: center; padding: 40px 20px; color: #666; font-size: 13px; width: 100%; border-top: 1px solid #222; margin-top: 40px; clear: both; background: rgba(10, 10, 10, 0.8); }
+.footer-tech-stack { font-family: 'Cinzel', serif; color: #aaa; font-size: 14px; margin-bottom: 12px; letter-spacing: 1px; }
+.footer-update-info { margin-bottom: 25px; font-size: 13px; color: #888; }
+.footer-disclaimer { max-width: 800px; margin: 0 auto; font-size: 11px; line-height: 1.6; color: #444; font-style: italic; }
 
 /* 📱 Responsive Layout Shifts 📱 */
 @media (max-width: 1050px) { 
@@ -230,36 +245,54 @@ a, .item-slot, .nav-btn, .clickable-class, .tt-char, .concise-item, .tl-btn { cu
     .c-stats-info { width: 100%; justify-content: flex-end; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 8px; }
     .stat-badge { min-width: 80px; padding: 6px 10px; } 
     .gear-grid-container { grid-template-columns: 1fr; }
+    
+    /* 🔥 NEW FIXES: Override inline HTML widths to prevent horizontal overflow */
+    .heatmap-wrapper, 
+    #pve-leaderboard-container, 
+    #pvp-leaderboard-container,
+    #concise-badges-wrapper,
+    #concise-donut-container {
+        min-width: 100% !important; 
+        max-width: 100% !important; 
+        width: 100% !important; 
+        flex: 1 1 100% !important; 
+        box-sizing: border-box;
+    }
+    
+    /* 🔥 NEW FIXES: Force KPI stat boxes to wrap into a 2x2 grid instead of squishing */
+    .stat-box { 
+        min-width: 45% !important; 
+        flex: 1 1 45% !important; 
+    }
 }
 
-/* Expanding Mobile Search Bar & Navbar layout */
-@media (max-width: 700px) {
+/* 🔥 NEW FIX: Kill phantom hover tooltips on touch devices (phones/tablets) */
+@media (hover: none) and (pointer: coarse), (max-width: 800px) {
+    .custom-tooltip {
+        display: none !important;
+    }
+}
+
+/* Expanding Mobile Search Bar layout */
+@media (max-width: 850px) {
     .navbar { padding: 10px; }
-    .controls-wrapper { justify-content: space-between; flex-wrap: nowrap; gap: 8px; }
-    .home-text { display: none; }
-    .nav-btn-home { padding: 8px 12px; }
+    .controls-wrapper { gap: 8px; }
     
-    .custom-select { min-width: 0; width: 160px; padding: 8px 12px; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    /* Shrink the dropdown to fit next to the hamburger */
+    .custom-select { min-width: 0; width: 140px; padding: 8px 12px; font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     
+    /* Search Bar Collapse Logic & Z-Index Fix */
     .search-box { padding: 0; width: 38px; border-radius: 20px; overflow: hidden; justify-content: center; }
     .search-box input { width: 0; padding: 0; opacity: 0; cursor: pointer; }
     .search-icon { padding: 8px; cursor: pointer; }
     
-    .search-container { position: static; }
+    /* 🔥 THE FIX: Elevate the parent container's flex z-index so it escapes the trap */
+    .search-container { position: static; z-index: 130; }
+    .search-container:focus-within { z-index: 9999; }
     
-    .search-box:focus-within { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 100%; height: 42px; z-index: 110; background: rgba(10,10,10,0.95); box-shadow: 0 5px 15px rgba(0,0,0,0.9); border-color: #ffd100; justify-content: flex-start; padding: 0 15px; }
+    .search-box:focus-within { position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: 100%; height: 42px; z-index: 9999; background: rgba(10,10,10,0.98); box-shadow: 0 5px 15px rgba(0,0,0,0.9); border-color: #ffd100; justify-content: flex-start; padding: 0 15px; }
     .search-box:focus-within input { width: 100%; padding: 0 10px; opacity: 1; cursor: text; }
-    .search-autocomplete { width: 100%; top: calc(100% + 5px); }
-}
-
-/* 🕸️ Breathing animation for the corner spiderwebs */
-.corner-web {
-    animation: breatheWeb 6s ease-in-out infinite alternate;
-}
-
-@keyframes breatheWeb {
-    0% { opacity: 0.3; transform: scale(0.98); filter: drop-shadow(0 0 5px rgba(163, 53, 238, 0.2)); }
-    100% { opacity: 0.7; transform: scale(1.02); filter: drop-shadow(0 0 15px rgba(163, 53, 238, 0.6)); }
+    .search-autocomplete { width: 100%; top: calc(100% + 5px); z-index: 10000; }
 }
 
 /* =========================================
@@ -333,17 +366,20 @@ a, .item-slot, .nav-btn, .clickable-class, .tt-char, .concise-item, .tl-btn { cu
 /* 4. Swipeable Class Badges on Mobile */
 @media (max-width: 600px) {
     .class-stat-container {
-        flex-wrap: nowrap;
-        overflow-x: auto;
-        justify-content: flex-start;
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important;
+        justify-content: flex-start !important; /* Prevents center-locking the scroll */
         padding-bottom: 15px;
-        /* Hide scrollbar for a clean UI */
+        padding-left: 20px;
+        padding-right: 20px;
         -ms-overflow-style: none;
         scrollbar-width: none;
         scroll-snap-type: x mandatory;
     }
-    .class-stat-container::-webkit-scrollbar {
-        display: none;
+    .class-stat-container::-webkit-scrollbar { display: none; }
+    .stat-badge {
+        flex: 0 0 auto !important;
+        scroll-snap-align: center;
     }
     .stat-badge {
         flex: 0 0 auto; /* Prevent badges from shrinking */
@@ -644,15 +680,22 @@ a, .item-slot, .nav-btn, .clickable-class, .tt-char, .concise-item, .tl-btn { cu
     <div class="navbar">
         
         <div class="controls-wrapper">
-            <a href="javascript:void(0)" onclick="returnToHome()" class="nav-btn nav-btn-home" title="Return to guild stats page">
-              🛡️<span class="home-text"> Armory Home</span>
-            </a>
-            <a href="#analytics" class="nav-btn nav-btn-home" title="View Guild Analytics" style="margin-left: 10px;">
-              📊<span class="home-text"> Analytics</span>
-            </a>
-            <a href="#architecture" class="nav-btn nav-btn-home" title="How the Website Works" style="margin-left: 10px;">
-              ⚙️<span class="home-text"> Architecture</span>
-            </a>
+            <button class="mobile-menu-toggle" aria-label="Toggle Menu">
+                <span></span><span></span><span></span>
+            </button>
+            
+            <div class="nav-links-container">
+                <a href="javascript:void(0)" onclick="returnToHome()" class="nav-btn nav-btn-home" title="Return to guild stats page">
+                  🛡️<span class="home-text"> Armory Home</span>
+                </a>
+                <a href="#analytics" class="nav-btn nav-btn-home" title="View Guild Analytics">
+                  📊<span class="home-text"> Analytics</span>
+                </a>
+                <a href="#architecture" class="nav-btn nav-btn-home" title="How the Website Works">
+                  ⚙️<span class="home-text"> Architecture</span>
+                </a>
+            </div>
+
             <div class="custom-select-wrapper" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-controls="customCharOptions">
                 <div class="custom-select" id="customCharSelect" tabindex="0">
                     <span class="selected-value">Select View...</span>
@@ -670,6 +713,7 @@ a, .item-slot, .nav-btn, .clickable-class, .tt-char, .concise-item, .tl-btn { cu
                     </div>
                 </div>
             </div>
+            
             <div class="search-container">
                 <div class="search-box">
                     <span class="search-icon">🔍</span>
@@ -842,6 +886,13 @@ a, .item-slot, .nav-btn, .clickable-class, .tt-char, .concise-item, .tl-btn { cu
                             <canvas id="raceDistChart"></canvas>
                         </div>
                     </div>
+
+                    <div class="heatmap-wrapper" style="flex: 1; min-width: 400px; max-width: 500px; display: flex; flex-direction: column;">
+                        <h3 class="heatmap-title" style="justify-content: center;">📊 Class Distribution <span style="color:#aaa; font-size: 11px; margin-left: 6px;">Scanned Roster</span></h3>
+                        <div style="position: relative; flex: 1; width: 100%; min-height: 250px;">
+                            <canvas id="analyticsClassChart"></canvas>
+                        </div>
+                    </div>
                 </div>
             </div>
 
@@ -940,12 +991,8 @@ a, .item-slot, .nav-btn, .clickable-class, .tt-char, .concise-item, .tl-btn { cu
                 
                 <div id="concise-top-stats" style="display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 20px; width: 100%; max-width: 1100px; margin: 0 auto 30px auto;">
                     
-                    <div id="concise-donut-container" class="heatmap-wrapper" style="flex: 1.2; min-width: 300px; max-width: 480px; margin: 0; display: none; flex-direction: column;">
-                        <h3 class="heatmap-title" style="justify-content: center;">📊 Class Distribution</h3>
-                        <div style="position: relative; height: 250px; width: 100%; display: flex; justify-content: center; align-items: center;">
-                            <canvas id="conciseDonutChart"></canvas>
+                    <div id="concise-donut-container" class="heatmap-wrapper" style="flex: 1.2; min-width: 300px; max-width: 100%; margin: 0; display: none; flex-direction: column;">
                         </div>
-                    </div>
 
                     <div id="concise-badges-wrapper" style="flex: 2; min-width: 320px; max-width: 650px; display: flex; flex-direction: column; justify-content: center;">
                         <div id="concise-class-badges" class="class-stat-container" style="display:none; margin-bottom: 20px; width: 100%; justify-content: center;"></div>
@@ -990,18 +1037,24 @@ a, .item-slot, .nav-btn, .clickable-class, .tt-char, .concise-item, .tl-btn { cu
 
     </div> 
     
-    <div class="dashboard-footer">
-        Automatically generated via GitHub Actions &bull; Database powered by SQLite &bull; Unlimited history stored &bull; Last updated: <span id="update-time" style="color: #ffd100;"></span>
-        <div style="margin-top: 20px; opacity: 0.5; transition: opacity 0.3s ease; display: flex; justify-content: center;" onmouseover="this.style.opacity='1'" onmouseout="this.style.opacity='0.5'">
-            <img src="https://api.visitorbadge.io/api/visitors?path=AzerothsMostWantedArmory_2&label=VIEWS&labelColor=111111&countColor=ffd100&style=flat-square" alt="Visitor Count" style="border-radius: 4px; box-shadow: 0 2px 5px rgba(0,0,0,0.5);">
+    <div class="dashboard-footer" style="text-align: center; padding: 40px 20px; color: #666; font-size: 13px; width: 100%; border-top: 1px solid #222; margin-top: 40px; clear: both; background: rgba(10, 10, 10, 0.8);">
+        <div class="footer-tech-stack" style="font-family: 'Cinzel', serif; color: #aaa; font-size: 14px; margin-bottom: 12px; letter-spacing: 1px;">
+            <span style="color: #ffd100;">⚡ Edge Architecture:</span> GitHub Actions CI/CD &bull; Turso SQLite &bull; Python AsyncIO
+        </div>
+        <div class="footer-update-info" style="margin-bottom: 25px; font-size: 13px; color: #888;">
+            Database Last Synced: <span id="update-time" style="color: #ffd100; font-weight: bold; margin-left: 5px;"></span>
+        </div>
+        <div class="footer-disclaimer" style="max-width: 800px; margin: 0 auto; font-size: 11px; line-height: 1.6; color: #444; font-style: italic;">
+            World of Warcraft, Warcraft and Blizzard Entertainment are trademarks or registered trademarks of Blizzard Entertainment, Inc. in the U.S. and/or other countries.<br>
+            Azeroth's Most Wanted Armory is a community project and is not affiliated with, endorsed, or sponsored by Blizzard Entertainment.
         </div>
     </div>
 
     <script id="dashboard-config" type="application/json">
-        {"last_updated": "2026-03-26T11:02:01.593054Z", "active_14_days": 386, "raid_ready_count": 19}
+        {"last_updated": "2026-03-26T11:08:03.290812Z", "active_14_days": 386, "raid_ready_count": 19}
     </script>
     <script id="heatmap-data" type="application/json">
-        [{"date": "2026-03-20", "day_name": "Fri", "count": 121, "loot": 92, "levels": 29, "total_roster": null, "active_roster": null}, {"date": "2026-03-21", "day_name": "Sat", "count": 560, "loot": 453, "levels": 107, "total_roster": null, "active_roster": null}, {"date": "2026-03-22", "day_name": "Sun", "count": 664, "loot": 520, "levels": 144, "total_roster": null, "active_roster": null}, {"date": "2026-03-23", "day_name": "Mon", "count": 566, "loot": 425, "levels": 141, "total_roster": 535, "active_roster": 309}, {"date": "2026-03-24", "day_name": "Tue", "count": 563, "loot": 435, "levels": 128, "total_roster": 608, "active_roster": 370}, {"date": "2026-03-25", "day_name": "Wed", "count": 731, "loot": 565, "levels": 166, "total_roster": 624, "active_roster": 388}, {"date": "2026-03-26", "day_name": "Thu", "count": 134, "loot": 99, "levels": 35, "total_roster": 622, "active_roster": 386}]
+        [{"date": "2026-03-20", "day_name": "Fri", "count": 121, "loot": 92, "levels": 29, "total_roster": null, "active_roster": null}, {"date": "2026-03-21", "day_name": "Sat", "count": 560, "loot": 453, "levels": 107, "total_roster": null, "active_roster": null}, {"date": "2026-03-22", "day_name": "Sun", "count": 664, "loot": 520, "levels": 144, "total_roster": null, "active_roster": null}, {"date": "2026-03-23", "day_name": "Mon", "count": 566, "loot": 425, "levels": 141, "total_roster": 535, "active_roster": 309}, {"date": "2026-03-24", "day_name": "Tue", "count": 563, "loot": 435, "levels": 128, "total_roster": 608, "active_roster": 370}, {"date": "2026-03-25", "day_name": "Wed", "count": 731, "loot": 565, "levels": 166, "total_roster": 624, "active_roster": 388}, {"date": "2026-03-26", "day_name": "Thu", "count": 141, "loot": 105, "levels": 36, "total_roster": 622, "active_roster": 386}]
     </script>
 
     <script>
@@ -1068,9 +1121,9 @@ window.addEventListener('DOMContentLoaded', async () => {
     const raidReadyCount = config.raid_ready_count;
 
     const rawDate = new Date(config.last_updated);
-    const dateOptions = { month: 'short', day: 'numeric', year: 'numeric', hour: '2-digit', minute: '2-digit' };
+    const dateOptions = { timeZone: 'Europe/Berlin', day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
     const updateTimeEl = document.getElementById("update-time");
-    if (updateTimeEl) updateTimeEl.textContent = rawDate.toLocaleString(undefined, dateOptions);
+    if (updateTimeEl) updateTimeEl.textContent = rawDate.toLocaleString('de-DE', dateOptions) + ' Uhr (CET/CEST)';
     
     let tlTypeFilter = 'rare_plus';
     let tlDateFilter = 'all'; // Start with 7 days to match the heatmap
@@ -2223,16 +2276,166 @@ window.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
+    // --- AESTHETIC CHART DRAWING PLUGINS ---
+    function createPieOverlayPlugin() {
+        return {
+            id: 'pieOverlays',
+            afterDatasetDraw(chart) {
+                const ctx = chart.ctx;
+                const meta = chart.getDatasetMeta(0);
+                chart.data.labels.forEach((label, i) => {
+                    const arc = meta.data[i];
+                    const dataVal = chart.data.datasets[0].data[i];
+                    if (dataVal === 0 || arc.hidden) return;
+
+                    // Calculate center of slice, pushed slightly outward
+                    const centerAngle = arc.startAngle + (arc.endAngle - arc.startAngle) / 2;
+                    const radius = arc.innerRadius + (arc.outerRadius - arc.innerRadius) * 0.65; 
+                    const x = arc.x + Math.cos(centerAngle) * radius;
+                    const y = arc.y + Math.sin(centerAngle) * radius;
+
+                    ctx.save();
+                    
+                    // Draw sleek pill-shaped badge
+                    ctx.beginPath();
+                    ctx.roundRect(x - 18, y - 12, 36, 24, 6);
+                    ctx.fillStyle = 'rgba(15, 15, 15, 0.9)';
+                    ctx.fill();
+                    ctx.lineWidth = 1.5;
+                    ctx.strokeStyle = arc.options.backgroundColor || '#ffd100';
+                    ctx.stroke();
+
+                    // Draw text
+                    ctx.fillStyle = '#fff';
+                    ctx.font = 'bold 13px Inter, sans-serif';
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(dataVal, x, y + 1); // +1 tweak for optical alignment
+                    
+                    ctx.restore();
+                });
+            }
+        };
+    }
+
+    const barLabelPlugin = {
+        id: 'barLabels',
+        afterDatasetsDraw(chart) {
+            const ctx = chart.ctx;
+            chart.data.datasets.forEach((dataset, i) => {
+                const meta = chart.getDatasetMeta(i);
+                meta.data.forEach((bar, index) => {
+                    const data = dataset.data[index];
+                    if (data > 0) {
+                        ctx.fillStyle = '#fff';
+                        ctx.font = 'bold 14px Cinzel';
+                        ctx.textAlign = 'center';
+                        ctx.textBaseline = 'bottom';
+                        ctx.shadowColor = 'rgba(0,0,0,0.9)';
+                        ctx.shadowBlur = 4;
+                        ctx.shadowOffsetX = 1;
+                        ctx.shadowOffsetY = 1;
+                        ctx.fillText(data, bar.x, bar.y - 6);
+                        ctx.shadowBlur = 0; 
+                    }
+                });
+            });
+        }
+    };
+
+    // --- REUSABLE ROLE CHART GENERATOR ---
+    function drawRoleChart(ctxId, characters, isRawMode) {
+        const roleCounts = { "Tank": 0, "Healer": 0, "Melee DPS": 0, "Ranged DPS": 0 };
+        characters.forEach(c => {
+            const p = isRawMode ? rosterData.find(deep => deep.profile && deep.profile.name && deep.profile.name.toLowerCase() === (c.name || '').toLowerCase())?.profile : c.profile;
+            if (!p || !p.active_spec) return;
+            const spec = p.active_spec;
+            const cClass = isRawMode ? (c.class || 'Unknown') : getCharClass(c);
+            
+            if (["Protection", "Blood"].includes(spec) || (cClass === "Druid" && spec === "Feral Combat")) roleCounts["Tank"]++;
+            else if (["Holy", "Discipline", "Restoration"].includes(spec)) roleCounts["Healer"]++;
+            else if (["Mage", "Warlock", "Hunter"].includes(cClass) || ["Balance", "Elemental", "Shadow"].includes(spec)) roleCounts["Ranged DPS"]++;
+            else roleCounts["Melee DPS"]++;
+        });
+
+        const ctx = document.getElementById(ctxId);
+        if (!ctx) return null;
+
+        return new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(roleCounts),
+                datasets: [{ 
+                    data: Object.values(roleCounts), 
+                    backgroundColor: ['#e74c3c', '#2ecc71', '#e67e22', '#3498db'], 
+                    borderColor: '#111', borderWidth: 2 
+                }]
+            },
+            options: { 
+                responsive: true, maintainAspectRatio: false, cutout: '60%', layout: { padding: { top: 20, bottom: 20 } },
+                plugins: { legend: { position: 'bottom', labels: { color: '#bbb', font: { family: 'Cinzel' } } } },
+                onClick: (event, elements, chart) => {
+                    if (elements.length > 0) {
+                        const clickedLabel = chart.data.labels[elements[0].index];
+                        window.location.hash = 'filter-role-' + clickedLabel.toLowerCase().replace(/\s+/g, '-');
+                    }
+                },
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+                }
+            },
+            plugins: [createPieOverlayPlugin()]
+        });
+    }
+
+    function createDonutChart(ctxId, rosterToCount, isRawMode) {
+        const counts = {};
+        rosterToCount.forEach(char => {
+            let cClass = isRawMode ? (char.class || 'Unknown') : getCharClass(char);
+            if (cClass !== 'Unknown') counts[cClass] = (counts[cClass] || 0) + 1;
+        });
+
+        const sortedClasses = Object.keys(counts).sort((a, b) => counts[b] - counts[a]);
+        const donutLabels = sortedClasses;
+        const donutData = sortedClasses.map(cls => counts[cls]);
+        const donutColors = sortedClasses.map(cls => CLASS_COLORS[cls] || '#888');
+
+        const ctx = document.getElementById(ctxId);
+        if (!ctx) return null;
+
+        return new Chart(ctx, {
+            type: 'doughnut',
+            data: { labels: donutLabels, datasets: [{ data: donutData, backgroundColor: donutColors, borderColor: '#111', borderWidth: 2, hoverOffset: 6 }] },
+            options: {
+                responsive: true, maintainAspectRatio: false, cutout: '65%', layout: { padding: { top: 20, bottom: 20, right: 20, left: 20 } },
+                onClick: (event, elements, chart) => {
+                    if (elements.length > 0) {
+                        const clickedClass = chart.data.labels[elements[0].index];
+                        const dynamicBadge = document.querySelector(`.dynamic-badge[data-class="${clickedClass}"]`);
+                        if (dynamicBadge && document.getElementById('concise-view').style.display !== 'none') {
+                            dynamicBadge.click(); 
+                        } else {
+                            window.location.hash = 'class-' + clickedClass.toLowerCase();
+                        }
+                    }
+                },
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+                },
+                plugins: { legend: { display: false } }
+            },
+            plugins: [createPieOverlayPlugin()]
+        });
+    }
+
     function showAnalyticsView() {
         hideAllViews();
         if (analyticsView) analyticsView.style.display = 'block';
         if (navbar) navbar.style.background = '#111';
         if (timeline) timeline.style.display = 'none'; 
 
-        // --- NEW: CALCULATE KPIs ---
-        let totalIlvl = 0, lvl70Count = 0;
-        let totalHks = 0;
-        
+        // --- CALCULATE KPIs ---
+        let totalIlvl = 0, lvl70Count = 0, totalHks = 0;
         rosterData.forEach(c => {
             const p = c.profile;
             if (p) {
@@ -2246,64 +2449,23 @@ window.addEventListener('DOMContentLoaded', async () => {
         
         let epicLootCount = 0;
         timelineData.forEach(e => {
-            if (e.type === 'item' && (e.item_quality === 'EPIC' || e.item_quality === 'LEGENDARY')) {
-                epicLootCount++;
-            }
+            if (e.type === 'item' && (e.item_quality === 'EPIC' || e.item_quality === 'LEGENDARY')) epicLootCount++;
         });
 
         const kpiIlvl = document.getElementById('kpi-avg-ilvl');
         if (kpiIlvl) kpiIlvl.innerText = lvl70Count > 0 ? Math.round(totalIlvl / lvl70Count) : 0;
-        
         const kpiEpic = document.getElementById('kpi-epic-loot');
         if (kpiEpic) kpiEpic.innerText = epicLootCount;
-        
         const kpiHks = document.getElementById('kpi-total-hks');
         if (kpiHks) kpiHks.innerText = totalHks >= 1000000 ? (totalHks/1000000).toFixed(1) + 'M' : totalHks.toLocaleString();
 
-        // --- NEW: ROLE DISTRIBUTION CHART ---
-        const roleCounts = { "Tank": 0, "Healer": 0, "Melee DPS": 0, "Ranged DPS": 0 };
-        rosterData.forEach(c => {
-            if (!c.profile || !c.profile.active_spec) return;
-            const spec = c.profile.active_spec;
-            const cClass = getCharClass(c);
-            
-            if (["Protection", "Blood"].includes(spec) || (cClass === "Druid" && spec === "Feral Combat")) roleCounts["Tank"]++;
-            else if (["Holy", "Discipline", "Restoration"].includes(spec)) roleCounts["Healer"]++;
-            else if (["Mage", "Warlock", "Hunter"].includes(cClass) || ["Balance", "Elemental", "Shadow"].includes(spec)) roleCounts["Ranged DPS"]++;
-            else roleCounts["Melee DPS"]++;
-        });
+        if(window.roleChartInstance) window.roleChartInstance.destroy();
+        window.roleChartInstance = drawRoleChart('roleDonutChart', rosterData, false);
 
-        const roleCtx = document.getElementById('roleDonutChart');
-        if (roleCtx) {
-            if(window.roleChartInstance) window.roleChartInstance.destroy();
-            window.roleChartInstance = new Chart(roleCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(roleCounts),
-                    datasets: [{ 
-                        data: Object.values(roleCounts), 
-                        backgroundColor: ['#e74c3c', '#2ecc71', '#e67e22', '#3498db'], 
-                        borderColor: '#111', borderWidth: 2 
-                    }]
-                },
-                options: { 
-                    responsive: true, maintainAspectRatio: false, cutout: '60%',
-                    plugins: { legend: { position: 'bottom', labels: { color: '#bbb', font: { family: 'Cinzel' } } } },
-                    onClick: (event, elements, chart) => {
-                        if (elements.length > 0) {
-                            const clickedLabel = chart.data.labels[elements[0].index];
-                            // Converts "Melee DPS" to "melee-dps" for the URL hash
-                            window.location.hash = 'filter-role-' + clickedLabel.toLowerCase().replace(/\s+/g, '-');
-                        }
-                    },
-                    onHover: (event, elements) => {
-                        event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
-                    }
-                }
-            });
-        }
+        if (mainDonutChartInstance) mainDonutChartInstance.destroy();
+        mainDonutChartInstance = createDonutChart('classDonutChart', rawGuildRoster, true);
 
-        // --- UPGRADED: LEVEL DISTRIBUTION (WITH GRADIENTS) ---
+        // --- LEVEL DISTRIBUTION ---
         const levelLabels = ["1-9", "10-19", "20-29", "30-39", "40-49", "50-59", "60-69", "70"];
         const levelData = [0, 0, 0, 0, 0, 0, 0, 0];
         rawGuildRoster.forEach(c => {
@@ -2322,8 +2484,8 @@ window.addEventListener('DOMContentLoaded', async () => {
         if (lvlCanvas) {
             const lvlCtx = lvlCanvas.getContext('2d');
             const lvlGradient = lvlCtx.createLinearGradient(0, 0, 0, 400);
-            lvlGradient.addColorStop(0, 'rgba(255, 209, 0, 0.8)'); // Gold Top
-            lvlGradient.addColorStop(1, 'rgba(255, 209, 0, 0.1)'); // Faded Bottom
+            lvlGradient.addColorStop(0, 'rgba(255, 209, 0, 0.8)');
+            lvlGradient.addColorStop(1, 'rgba(255, 209, 0, 0.1)');
 
             if(levelChartInstance) levelChartInstance.destroy();
             levelChartInstance = new Chart(lvlCtx, {
@@ -2333,25 +2495,23 @@ window.addEventListener('DOMContentLoaded', async () => {
                     datasets: [{ label: 'Characters', data: levelData, backgroundColor: lvlGradient, borderColor: '#ffd100', borderWidth: 1, borderRadius: 4 }]
                 },
                 options: { 
-                    responsive: true, maintainAspectRatio: false, plugins: { legend: {display: false}}, 
+                    responsive: true, maintainAspectRatio: false, layout: { padding: { top: 30 } }, plugins: { legend: {display: false}}, 
                     scales: { 
                         y: {beginAtZero: true, grid: {color: 'rgba(255,255,255,0.05)'}, ticks: {color: '#888'}}, 
                         x: {grid: {display: false}, ticks: {color: '#888', font: {family: 'Cinzel'}}}
                     },
                     onClick: (event, elements, chart) => {
                         if (elements.length > 0) {
-                            const clickedLabel = chart.data.labels[elements[0].index];
-                            window.location.hash = 'filter-level-' + clickedLabel;
+                            window.location.hash = 'filter-level-' + chart.data.labels[elements[0].index];
                         }
                     },
-                    onHover: (event, elements) => {
-                        event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
-                    }
-                }
+                    onHover: (event, elements) => { event.native.target.style.cursor = elements.length ? 'pointer' : 'default'; }
+                },
+                plugins: [barLabelPlugin]
             });
         }
 
-        // --- UPGRADED: MAX LEVEL ILVL SPREAD (WITH GRADIENTS) ---
+        // --- ILVL DISTRIBUTION ---
         const ilvlLabels = ["<100", "100-109", "110-119", "120-129", "130+"];
         const ilvlData = [0, 0, 0, 0, 0];
         rosterData.forEach(c => {
@@ -2370,7 +2530,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         if (ilvlCanvas) {
             const ilvlCtx = ilvlCanvas.getContext('2d');
             const ilvlGradient = ilvlCtx.createLinearGradient(0, 0, 0, 400);
-            ilvlGradient.addColorStop(0, 'rgba(255, 128, 0, 0.8)'); // Legendary Orange Top
+            ilvlGradient.addColorStop(0, 'rgba(255, 128, 0, 0.8)'); 
             ilvlGradient.addColorStop(1, 'rgba(255, 128, 0, 0.1)'); 
 
             if(ilvlChartInstance) ilvlChartInstance.destroy();
@@ -2381,25 +2541,21 @@ window.addEventListener('DOMContentLoaded', async () => {
                     datasets: [{ label: 'Level 70 Characters', data: ilvlData, backgroundColor: ilvlGradient, borderColor: '#ff8000', borderWidth: 1, borderRadius: 4 }]
                 },
                 options: { 
-                    responsive: true, maintainAspectRatio: false, plugins: { legend: {display: false}}, 
+                    responsive: true, maintainAspectRatio: false, layout: { padding: { top: 30 } }, plugins: { legend: {display: false}}, 
                     scales: { 
                         y: {beginAtZero: true, grid: {color: 'rgba(255,255,255,0.05)'}, ticks: {color: '#888'}}, 
                         x: {grid: {display: false}, ticks: {color: '#888', font: {family: 'Cinzel'}}}
                     },
                     onClick: (event, elements, chart) => {
-                        if (elements.length > 0) {
-                            const clickedLabel = chart.data.labels[elements[0].index];
-                            window.location.hash = 'filter-ilvl-' + clickedLabel;
-                        }
+                        if (elements.length > 0) window.location.hash = 'filter-ilvl-' + chart.data.labels[elements[0].index];
                     },
-                    onHover: (event, elements) => {
-                        event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
-                    }
-                }
+                    onHover: (event, elements) => { event.native.target.style.cursor = elements.length ? 'pointer' : 'default'; }
+                },
+                plugins: [barLabelPlugin]
             });
         }
 
-        // --- EXISTING: RACE DISTRIBUTION (UNCHANGED) ---
+        // --- RACE DISTRIBUTION ---
         const raceCounts = {};
         rosterData.forEach(c => {
             const p = c.profile;
@@ -2423,20 +2579,21 @@ window.addEventListener('DOMContentLoaded', async () => {
                 datasets: [{ data: Object.values(raceCounts), backgroundColor: Object.keys(raceCounts).map(r => RACE_COLORS[r] || '#555'), borderColor: '#111', borderWidth: 2 }]
             },
             options: { 
-                responsive: true, maintainAspectRatio: false, plugins: { legend: {position: 'right', labels:{color:'#bbb', font:{family:'Cinzel'}}} },
+                responsive: true, maintainAspectRatio: false, cutout: '55%', layout: { padding: { top: 20, bottom: 20, right: 20, left: 20 } },
+                plugins: { legend: {position: 'right', labels:{color:'#bbb', font:{family:'Cinzel'}}} },
                 onClick: (event, elements, chart) => {
-                    if (elements.length > 0) {
-                        const clickedLabel = chart.data.labels[elements[0].index];
-                        window.location.hash = 'filter-race-' + clickedLabel.toLowerCase();
-                    }
+                    if (elements.length > 0) window.location.hash = 'filter-race-' + chart.data.labels[elements[0].index].toLowerCase();
                 },
-                onHover: (event, elements) => {
-                    event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
-                }
-            }
+                onHover: (event, elements) => { event.native.target.style.cursor = elements.length ? 'pointer' : 'default'; }
+            },
+            plugins: [createPieOverlayPlugin()]
         });
 
-        // --- EXISTING: DUPLICATE ACTIVITY CHART (UNCHANGED) ---
+        // --- NEW: CLASS DISTRIBUTION FOR ANALYTICS ---
+        if(analyticsClassChartInst) analyticsClassChartInst.destroy();
+        analyticsClassChartInst = createDonutChart('analyticsClassChart', rosterData, false);
+
+        // --- ACTIVITY CHART ---
         const actCtx = document.getElementById('analyticsActivityChart');
         if (actCtx && heatmapData && heatmapData.length > 0) {
             if(analyticsActivityChartInst) analyticsActivityChartInst.destroy();
@@ -2445,60 +2602,10 @@ window.addEventListener('DOMContentLoaded', async () => {
                 data: {
                     labels: heatmapData.map(d => d.day_name),
                     datasets: [
-                        {
-                            label: 'Loot Drops',
-                            data: heatmapData.map(d => d.loot || 0),
-                            borderColor: '#a335ee', // Epic Purple
-                            backgroundColor: 'rgba(163, 53, 238, 0.1)',
-                            borderWidth: 2,
-                            pointBackgroundColor: '#a335ee',
-                            pointBorderColor: '#fff',
-                            tension: 0.3,
-                            fill: true,
-                            yAxisID: 'y'
-                        },
-                        {
-                            label: 'Level Ups',
-                            data: heatmapData.map(d => d.levels || 0),
-                            borderColor: '#ffd100', // Gold
-                            backgroundColor: 'rgba(255, 209, 0, 0.1)',
-                            borderWidth: 2,
-                            pointBackgroundColor: '#ffd100',
-                            pointBorderColor: '#fff',
-                            tension: 0.3,
-                            fill: true,
-                            yAxisID: 'y'
-                        },
-                        {
-                            label: 'Total Roster',
-                            data: heatmapData.map(d => d.total_roster || 0),
-                            borderColor: 'rgba(52, 152, 219, 0.3)',
-                            backgroundColor: 'transparent',
-                            borderWidth: 2,
-                            borderDash: [4, 4],
-                            pointRadius: 0,
-                            pointHoverRadius: 4,
-                            pointBackgroundColor: '#3498db',
-                            pointBorderColor: '#fff',
-                            tension: 0.3,
-                            fill: false,
-                            yAxisID: 'y-roster'
-                        },
-                        {
-                            label: 'Active Roster',
-                            data: heatmapData.map(d => d.active_roster || 0),
-                            borderColor: 'rgba(46, 204, 113, 0.6)',
-                            backgroundColor: 'rgba(46, 204, 113, 0.05)',
-                            borderWidth: 2,
-                            borderDash: [4, 4],
-                            pointRadius: 0,
-                            pointHoverRadius: 4,
-                            pointBackgroundColor: '#2ecc71',
-                            pointBorderColor: '#fff',
-                            tension: 0.3,
-                            fill: true,
-                            yAxisID: 'y-roster'
-                        }
+                        { label: 'Loot Drops', data: heatmapData.map(d => d.loot || 0), borderColor: '#a335ee', backgroundColor: 'rgba(163, 53, 238, 0.1)', borderWidth: 2, pointBackgroundColor: '#a335ee', pointBorderColor: '#fff', tension: 0.3, fill: true, yAxisID: 'y' },
+                        { label: 'Level Ups', data: heatmapData.map(d => d.levels || 0), borderColor: '#ffd100', backgroundColor: 'rgba(255, 209, 0, 0.1)', borderWidth: 2, pointBackgroundColor: '#ffd100', pointBorderColor: '#fff', tension: 0.3, fill: true, yAxisID: 'y' },
+                        { label: 'Total Roster', data: heatmapData.map(d => d.total_roster || 0), borderColor: 'rgba(52, 152, 219, 0.3)', backgroundColor: 'transparent', borderWidth: 2, borderDash: [4, 4], pointRadius: 0, pointHoverRadius: 4, pointBackgroundColor: '#3498db', pointBorderColor: '#fff', tension: 0.3, fill: false, yAxisID: 'y-roster' },
+                        { label: 'Active Roster', data: heatmapData.map(d => d.active_roster || 0), borderColor: 'rgba(46, 204, 113, 0.6)', backgroundColor: 'rgba(46, 204, 113, 0.05)', borderWidth: 2, borderDash: [4, 4], pointRadius: 0, pointHoverRadius: 4, pointBackgroundColor: '#2ecc71', pointBorderColor: '#fff', tension: 0.3, fill: true, yAxisID: 'y-roster' }
                     ]
                 },
                 options: {
@@ -2557,9 +2664,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         conciseView.style.display = 'flex';
         if (navbar) navbar.style.background = '#111';
         
-        // Force the filter to always reset to Character Level
         currentSortMethod = 'level';
-        
         renderConciseList(title, characters, isRawRoster);
         
         window.currentFilteredChars = characters.map(c => {
@@ -2567,22 +2672,68 @@ window.addEventListener('DOMContentLoaded', async () => {
             return c.profile && c.profile.name ? c.profile.name.toLowerCase() : '';
         });
         
-        if (showBadges) {
-            renderDynamicBadges(characters, isRawRoster);
-        } else {
+        if (showBadges) renderDynamicBadges(characters, isRawRoster);
+        else {
             document.getElementById('concise-class-badges').style.display = 'none';
             const specContainer = document.getElementById('concise-spec-container');
             if (specContainer) specContainer.style.display = 'none';
         }
 
-        // Draw the secondary Pie Chart
+       // Draw the dynamic charts & KPIs
         const hash = window.location.hash.substring(1);
         const donutContainer = document.getElementById('concise-donut-container');
+        
         if (hash === 'total' || hash === 'active' || hash === 'raidready') {
             if (donutContainer) {
                 donutContainer.style.display = 'flex';
-                if (conciseDonutChartInstance) conciseDonutChartInstance.destroy();
-                conciseDonutChartInstance = createDonutChart('conciseDonutChart', characters, isRawRoster);
+                donutContainer.style.flexDirection = 'column';
+                donutContainer.style.alignItems = 'center';
+                donutContainer.style.gap = '20px';
+                
+                let kpiHtml = '';
+                if (hash === 'raidready') {
+                    const avgIlvl = Math.round(characters.reduce((sum, c) => sum + ((c.profile && c.profile.equipped_item_level) || 0), 0) / characters.length) || 0;
+                    kpiHtml = `<div class="stat-box" style="margin-bottom: 5px; min-width: 200px; border-color: #ff8000;"><span class="stat-value" style="color:#ff8000;">${avgIlvl}</span><span class="stat-label">Average iLvl</span></div>`;
+                } else if (hash === 'active' || hash === 'total') {
+                    // Match raw roster names to deep profile roster to get accurate levels and iLvls
+                    const avgLvl = Math.round(characters.reduce((sum, c) => {
+                        const p = isRawRoster ? rosterData.find(deep => deep.profile?.name?.toLowerCase() === (c.name || '').toLowerCase())?.profile : c.profile;
+                        return sum + ((p && p.level) || c.level || 0);
+                    }, 0) / characters.length) || 0;
+                    
+                    const lvl70s = characters.filter(c => {
+                        const p = isRawRoster ? rosterData.find(deep => deep.profile?.name?.toLowerCase() === (c.name || '').toLowerCase())?.profile : c.profile;
+                        return p && p.level === 70;
+                    });
+                    
+                    const avgIlvl = lvl70s.length > 0 ? Math.round(lvl70s.reduce((sum, c) => {
+                        const p = isRawRoster ? rosterData.find(deep => deep.profile?.name?.toLowerCase() === (c.name || '').toLowerCase())?.profile : c.profile;
+                        return sum + ((p && p.equipped_item_level) || 0);
+                    }, 0) / lvl70s.length) : 0;
+                    
+                    kpiHtml = `
+                        <div style="display:flex; gap:15px; margin-bottom: 5px; flex-wrap: wrap; justify-content:center;">
+                            <div class="stat-box" style="border-color: #ffd100;"><span class="stat-value" style="color:#ffd100;">${avgLvl}</span><span class="stat-label">Avg Level</span></div>
+                            <div class="stat-box" style="border-color: #ff8000;"><span class="stat-value" style="color:#ff8000;">${avgIlvl}</span><span class="stat-label">Avg Lvl 70 iLvl</span></div>
+                        </div>`;
+                }
+
+                let chartsHtml = kpiHtml + `<div style="display:flex; gap: 30px; flex-wrap: wrap; justify-content: center; width: 100%;">`;
+                if (hash === 'raidready') {
+                    chartsHtml += `<div style="flex: 1; min-width: 280px; max-width: 350px; height: 280px; position: relative;"><h4 style="text-align:center; color:#ffd100; font-family:'Cinzel'; margin-top:0;">Raid Roles</h4><canvas id="conciseRoleChart"></canvas></div>`;
+                } else {
+                    chartsHtml += `<div style="flex: 1; min-width: 280px; max-width: 350px; height: 280px; position: relative;"><h4 style="text-align:center; color:#ffd100; font-family:'Cinzel'; margin-top:0;">Raid Roles</h4><canvas id="conciseRoleChart"></canvas></div>`;
+                    chartsHtml += `<div style="flex: 1; min-width: 280px; max-width: 350px; height: 280px; position: relative;"><h4 style="text-align:center; color:#ffd100; font-family:'Cinzel'; margin-top:0;">Class Distribution</h4><canvas id="conciseClassChart"></canvas></div>`;
+                }
+                chartsHtml += `</div>`;
+                
+                donutContainer.innerHTML = chartsHtml;
+
+                if (window.conciseRoleChartInstance) window.conciseRoleChartInstance.destroy();
+                if (window.conciseClassChartInstance) window.conciseClassChartInstance.destroy();
+
+                window.conciseRoleChartInstance = drawRoleChart('conciseRoleChart', characters, isRawRoster);
+                if (hash !== 'raidready') window.conciseClassChartInstance = createDonutChart('conciseClassChart', characters, isRawRoster);
             }
         } else {
             if (donutContainer) donutContainer.style.display = 'none';
@@ -2946,6 +3097,51 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     initAtmosphere();
 
+    // --- REUSABLE ROLE CHART GENERATOR ---
+    function drawRoleChart(ctxId, characters, isRawMode) {
+        const roleCounts = { "Tank": 0, "Healer": 0, "Melee DPS": 0, "Ranged DPS": 0 };
+        characters.forEach(c => {
+            const p = isRawMode ? rosterData.find(deep => deep.profile && deep.profile.name && deep.profile.name.toLowerCase() === (c.name || '').toLowerCase())?.profile : c.profile;
+            if (!p || !p.active_spec) return;
+            const spec = p.active_spec;
+            const cClass = isRawMode ? (c.class || 'Unknown') : getCharClass(c);
+            
+            if (["Protection", "Blood"].includes(spec) || (cClass === "Druid" && spec === "Feral Combat")) roleCounts["Tank"]++;
+            else if (["Holy", "Discipline", "Restoration"].includes(spec)) roleCounts["Healer"]++;
+            else if (["Mage", "Warlock", "Hunter"].includes(cClass) || ["Balance", "Elemental", "Shadow"].includes(spec)) roleCounts["Ranged DPS"]++;
+            else roleCounts["Melee DPS"]++;
+        });
+
+        const ctx = document.getElementById(ctxId);
+        if (!ctx) return null;
+
+        return new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: Object.keys(roleCounts),
+                datasets: [{ 
+                    data: Object.values(roleCounts), 
+                    backgroundColor: ['#e74c3c', '#2ecc71', '#e67e22', '#3498db'], 
+                    borderColor: '#111', borderWidth: 2 
+                }]
+            },
+            options: { 
+                responsive: true, maintainAspectRatio: false, cutout: '60%', layout: { padding: { top: 20, bottom: 20 } },
+                plugins: { legend: { position: 'bottom', labels: { color: '#bbb', font: { family: 'Cinzel' } } } },
+                onClick: (event, elements, chart) => {
+                    if (elements.length > 0) {
+                        const clickedLabel = chart.data.labels[elements[0].index];
+                        window.location.hash = 'filter-role-' + clickedLabel.toLowerCase().replace(/\s+/g, '-');
+                    }
+                },
+                onHover: (event, elements) => {
+                    event.native.target.style.cursor = elements.length ? 'pointer' : 'default';
+                }
+            },
+            plugins: [createPieOverlayPlugin()]
+        });
+    }
+
     function createDonutChart(ctxId, rosterToCount, isRawMode) {
         const counts = {};
         rosterToCount.forEach(char => {
@@ -3065,7 +3261,17 @@ window.addEventListener('DOMContentLoaded', async () => {
         try {
             const response = await fetch('asset/timeline.json');
             timelineData = await response.json();
-            // Run the filter immediately on load to populate the initial list
+            
+            // --- FIX: Update Epic Loot KPI dynamically after fetch ---
+            const kpiEpic = document.getElementById('kpi-epic-loot');
+            if (kpiEpic) {
+                let epicCount = 0;
+                timelineData.forEach(e => {
+                    if (e.type === 'item' && (e.item_quality === 'EPIC' || e.item_quality === 'LEGENDARY')) epicCount++;
+                });
+                kpiEpic.innerText = epicCount;
+            }
+            
             applyTimelineFilters(); 
         } catch (error) {
             console.error("Failed to load timeline data:", error);
@@ -3235,6 +3441,32 @@ window.addEventListener('DOMContentLoaded', async () => {
     const loadMoreBtn = document.getElementById('load-more-btn');
     if (loadMoreBtn) {
         loadMoreBtn.addEventListener('click', renderTimelineBatch);
+    }
+
+    // --- NEW: Hamburger Menu Logic ---
+    const menuToggle = document.querySelector('.mobile-menu-toggle');
+    const navLinksContainer = document.querySelector('.nav-links-container');
+    
+    if (menuToggle && navLinksContainer) {
+        menuToggle.addEventListener('click', (e) => {
+            e.stopPropagation();
+            menuToggle.classList.toggle('open');
+            navLinksContainer.classList.toggle('open');
+        });
+        
+        document.querySelectorAll('.nav-links-container .nav-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                menuToggle.classList.remove('open');
+                navLinksContainer.classList.remove('open');
+            });
+        });
+        
+        document.addEventListener('click', (e) => {
+            if (navLinksContainer.classList.contains('open') && !menuToggle.contains(e.target) && !navLinksContainer.contains(e.target)) {
+                menuToggle.classList.remove('open');
+                navLinksContainer.classList.remove('open');
+            }
+        });
     }
 
     route();
