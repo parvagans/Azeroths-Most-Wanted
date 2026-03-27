@@ -6,6 +6,7 @@
     <script>const whTooltips = {colorLinks: false, iconizeLinks: false, renameLinks: false};</script>
     <script src="https://wow.zamimg.com/widgets/power.js" defer></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script data-goatcounter="https://nullbit5.goatcounter.com/count" async src="//gc.zgo.at/count.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@600;700&family=Inter:wght@400;500;600&display=swap');
 
@@ -695,9 +696,9 @@ a, .item-slot, .nav-btn, .clickable-class, .tt-char, .concise-item, .tl-btn { cu
         margin-left: 25px !important; 
     }
 
-    /* Push the search bar all the way to the right side of the screen */
+    /* Place the search bar next to the dropdown */
     .controls-wrapper .search-container {
-        margin-left: auto !important;
+        margin-left: 20px !important; /* Small gap from the dropdown */
         margin-bottom: 0 !important;
     }
 }
@@ -773,15 +774,22 @@ a, .item-slot, .nav-btn, .clickable-class, .tt-char, .concise-item, .tl-btn { cu
             </button>
             
             <div class="nav-links-container">
-                <a href="javascript:void(0)" onclick="returnToHome()" class="nav-btn nav-btn-home" title="Return to guild stats page">
-                  🛡️<span class="home-text"> Armory Home</span>
-                </a>
-                <a href="#analytics" class="nav-btn nav-btn-home" title="View Guild Analytics">
-                  📊<span class="home-text"> Analytics</span>
-                </a>
-                <a href="#architecture" class="nav-btn nav-btn-home" title="How the Website Works">
-                  ⚙️<span class="home-text"> Architecture</span>
-                </a>
+                <a href="#" class="nav-btn nav-btn-home"><span class="home-text">🏰 Home Dashboard</span></a>
+                
+                <div style="color: #888; font-size: 11px; font-family: 'Cinzel'; font-weight: bold; padding: 15px 15px 5px 15px; border-bottom: 1px solid #333; width: 85%; margin-bottom: 5px;">WAR EFFORT</div>
+                <a href="#war-effort-xp" class="nav-btn">🛡️ Hero's Journey</a>
+                <a href="#war-effort-hk" class="nav-btn">🩸 Blood of the Enemy</a>
+                <a href="#war-effort-loot" class="nav-btn">🐉 Dragon's Hoard</a>
+                <a href="#war-effort-zenith" class="nav-btn">⚡ The Zenith Cohort</a>
+                
+                <div style="color: #888; font-size: 11px; font-family: 'Cinzel'; font-weight: bold; padding: 15px 15px 5px 15px; border-bottom: 1px solid #333; width: 85%; margin-bottom: 5px;">GUILD DATA</div>
+                <a href="#ladder-pve" class="nav-btn">👑 PvE Leaderboard</a>
+                <a href="#ladder-pvp" class="nav-btn">⚔️ PvP Leaderboard</a>
+                <a href="#analytics" class="nav-btn">📊 Advanced Analytics</a>
+                
+                <div style="color: #888; font-size: 11px; font-family: 'Cinzel'; font-weight: bold; padding: 15px 15px 5px 15px; border-bottom: 1px solid #333; width: 85%; margin-bottom: 5px;">COMMUNITY & INFO</div>
+                <a href="#architecture" class="nav-btn">⚙️ Architecture</a>
+                <a href="https://discord.gg/t6mufeWRNK" target="_blank" class="nav-btn" style="color: #5865F2;">💬 Join Discord</a>
             </div>
 
             <div class="custom-select-wrapper" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-controls="customCharOptions">
@@ -833,32 +841,6 @@ a, .item-slot, .nav-btn, .clickable-class, .tt-char, .concise-item, .tl-btn { cu
                     </div>
                     <div id="hero-search-autocomplete" class="search-autocomplete" style="width: 100%; top: calc(100% + 8px);"></div>
                 </div>
-                
-                <div class="stat-box-container" style="max-width: 1200px; margin: 0 auto 30px auto; z-index: 10;">
-                    <div id="stat-total" class="stat-box clickable sparkline-box" title="Click to view all members">
-                        <canvas id="spark-total" class="sparkline-canvas"></canvas>
-                        <span class="stat-value" style="position: relative; z-index: 2;">629 <span id="trend-total" class="trend-indicator"></span></span>
-                        <span class="stat-label" style="position: relative; z-index: 2;">Total Roster</span>
-                    </div>
-                    <div id="stat-active" class="stat-box clickable sparkline-box" title="Click to view characters active within 14 days" style="border-bottom-color: #2ecc71;">
-                        <canvas id="spark-active" class="sparkline-canvas"></canvas>
-                        <span class="stat-value" style="color: #2ecc71; position: relative; z-index: 2;">394 <span id="trend-active" class="trend-indicator"></span></span>
-                        <span class="stat-label" style="position: relative; z-index: 2;">Active (14 Days)</span>
-                    </div>
-                    <div id="stat-raidready" class="stat-box clickable sparkline-box" title="Click to view Level 70s" style="border-bottom-color: #ff8000;">
-                        <canvas id="spark-ready" class="sparkline-canvas"></canvas>
-                        <span class="stat-value" style="color: #ff8000; position: relative; z-index: 2;">20 <span id="trend-ready" class="trend-indicator"></span></span>
-                        <span class="stat-label" style="position: relative; z-index: 2;">Raid Ready</span>
-                    </div>
-                    <div id="stat-avgilvl" class="stat-box clickable" title="Click to sort Level 70s by Item Level" style="border-bottom-color: #a335ee;">
-                        <span id="home-kpi-ilvl" class="stat-value" style="color: #a335ee; position: relative; z-index: 2;">0</span>
-                        <span class="stat-label" style="position: relative; z-index: 2;">Avg Lvl 70 iLvl</span>
-                    </div>
-                    <div id="stat-hks" class="stat-box clickable" title="Click to view PvP Leaderboard" style="border-bottom-color: #ff4400;">
-                        <span id="home-kpi-hks" class="stat-value" style="color: #ff4400; position: relative; z-index: 2;">0</span>
-                        <span class="stat-label" style="position: relative; z-index: 2;">Total Guild HKs</span>
-                    </div>
-                </div>
 
                 <div id="recent-milestones-container" style="display:none; width: 100%; max-width: 1050px; margin: 0 auto 30px auto; animation: fadeInUp 0.5s forwards;">
                     <div class="milestone-banner">
@@ -871,47 +853,83 @@ a, .item-slot, .nav-btn, .clickable-class, .tt-char, .concise-item, .tl-btn { cu
                     <div class="heatmap-wrapper" style="flex: 1; width: 100%; max-width: 100%; margin: 0; overflow: hidden;">
                         <h3 class="heatmap-title">🔥 Guild Activity (Last 7 Days) <span style="color:#aaa; font-size: 11px;">Updates Daily</span></h3>
                         <div style="position: relative; height: 180px; width: 100%; max-width: 100%; margin-bottom: 20px;">
-                            <canvas id="activityChart" style="width: 100% !important; height: 100% !important;"></canvas>
+                            <canvas id="activityChart" style="width: 100% !important; height: 100% !important"></canvas>
                         </div>
                         <div id="heatmap-grid" class="heatmap-grid" style="display: flex; width: 100%; max-width: 100%; justify-content: space-between;"></div>
                     </div>
                 </div>
 
-                <div id="guild-xp-container" style="display:none; width: 100%; max-width: 1000px; margin: 0 auto 30px auto; background: rgba(0,0,0,0.5); border: 1px solid #ffd100; border-radius: 8px; padding: 20px; box-shadow: inset 0 0 15px rgba(255,209,0,0.1); animation: fadeInUp 0.5s forwards;">
-                    <h3 style="font-family: 'Cinzel'; color: #ffd100; text-align: center; margin-top: 0; margin-bottom: 25px; text-shadow: 0 2px 4px #000; letter-spacing: 1px;">⚔️ Weekly Guild War Effort ⚔️</h3>
+                <div id="guild-xp-container" style="display:none; width: 100%; max-width: 1000px; margin: 0 auto 30px auto; background: rgba(0,0,0,0.6); border: 1px solid #ffd100; border-radius: 12px; padding: 25px; box-shadow: inset 0 0 25px rgba(255,209,0,0.15), 0 5px 15px rgba(0,0,0,0.8); animation: fadeInUp 0.5s forwards;">
+                    <h3 style="font-family: 'Cinzel'; color: #ffd100; text-align: center; margin-top: 0; margin-bottom: 25px; text-shadow: 0 2px 4px #000; letter-spacing: 1px;">⚔️ Weekly Guild Challenges ⚔️</h3>
                     
-                    <div style="display: flex; flex-direction: column; gap: 25px;">
+                    <div style="display: flex; flex-direction: column; gap: 30px;">
                         <div>
-                            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 6px; font-family: 'Cinzel'; font-size: 15px; font-weight: bold; color: #ffd100; text-shadow: 1px 1px 2px #000;">
-                                <span>🛡️ Leveling Effort</span>
-                                <span id="guild-xp-tooltip-trigger" style="color: #aaa; font-family: sans-serif; font-size: 11px; font-weight: normal; border-bottom: 1px dotted #aaa; cursor: help; text-shadow: none;">View Top Levelers</span>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; font-family: 'Cinzel'; font-size: 16px; font-weight: bold; color: #ffd100; text-shadow: 1px 1px 2px #000;">
+                                <span>🛡️ Hero's Journey (XP Gained)</span>
+                                <span id="guild-xp-tooltip-trigger" class="war-effort-link" style="color: #bbb; font-family: sans-serif; font-size: 12px; font-weight: normal; border-bottom: 1px dotted #bbb; cursor: pointer; text-shadow: none; transition: color 0.3s;">View Contributors ➔</span>
                             </div>
-                            <div style="position: relative; width: 100%; height: 28px; background: #111; border-radius: 14px; border: 1px solid #444; overflow: hidden; box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);">
-                                <div id="guild-xp-fill" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; transition: width 1.5s ease-out;"></div>
+                            <div style="position: relative; width: 100%; height: 34px; background: #111; border-radius: 17px; border: 2px solid #333; overflow: hidden; box-shadow: inset 0 3px 8px rgba(0,0,0,0.9);">
+                                <div id="guild-xp-fill" class="progress-bar-glow" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; transition: width 1.5s cubic-bezier(0.25, 0.8, 0.25, 1);"></div>
                                 
-                                <div style="position:absolute; top:0; left:25%; width:1px; height:100%; background:rgba(255,255,255,0.1);"></div>
-                                <div style="position:absolute; top:0; left:50%; width:1px; height:100%; background:rgba(255,255,255,0.3);"></div>
-                                <div style="position:absolute; top:0; left:75%; width:1px; height:100%; background:rgba(255,255,255,0.1);"></div>
+                                <div style="position:absolute; top:0; left:25%; width:1px; height:100%; background:rgba(255,255,255,0.15);"></div>
+                                <div style="position:absolute; top:0; left:50%; width:1px; height:100%; background:rgba(255,255,255,0.4);"></div>
+                                <div style="position:absolute; top:0; left:75%; width:1px; height:100%; background:rgba(255,255,255,0.15);"></div>
                                 
-                                <div id="guild-xp-text" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #fff; font-family: 'Cinzel'; font-weight: bold; font-size: 15px; text-shadow: 1px 1px 2px #000, -1px -1px 2px #000; z-index: 2;">0 / 1,000 Levels Gained</div>
+                                <div id="guild-xp-text" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #fff; font-family: 'Cinzel'; font-weight: bold; font-size: 16px; text-shadow: 1px 1px 2px #000, -1px -1px 2px #000; z-index: 2;">0 / 750 Levels Gained</div>
                             </div>
                         </div>
 
                         <div>
-                            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 6px; font-family: 'Cinzel'; font-size: 15px; font-weight: bold; color: #ff4400; text-shadow: 1px 1px 2px #000;">
-                                <span>🩸 PvP Effort (Honorable Kills)</span>
-                                <span id="guild-hk-tooltip-trigger" style="color: #aaa; font-family: sans-serif; font-size: 11px; font-weight: normal; border-bottom: 1px dotted #aaa; cursor: help; text-shadow: none;">View Top Slayers</span>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; font-family: 'Cinzel'; font-size: 16px; font-weight: bold; color: #ff4400; text-shadow: 1px 1px 2px #000;">
+                                <span>🩸 Blood of the Enemy (HKs)</span>
+                                <span id="guild-hk-tooltip-trigger" class="war-effort-link" style="color: #bbb; font-family: sans-serif; font-size: 12px; font-weight: normal; border-bottom: 1px dotted #bbb; cursor: pointer; text-shadow: none; transition: color 0.3s;">View Contributors ➔</span>
                             </div>
-                            <div style="position: relative; width: 100%; height: 28px; background: #111; border-radius: 14px; border: 1px solid #444; overflow: hidden; box-shadow: inset 0 2px 5px rgba(0,0,0,0.8);">
-                                <div id="guild-hk-fill" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; transition: width 1.5s ease-out;"></div>
+                            <div style="position: relative; width: 100%; height: 34px; background: #111; border-radius: 17px; border: 2px solid #333; overflow: hidden; box-shadow: inset 0 3px 8px rgba(0,0,0,0.9);">
+                                <div id="guild-hk-fill" class="progress-bar-glow" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; transition: width 1.5s cubic-bezier(0.25, 0.8, 0.25, 1);"></div>
                                 
-                                <div style="position:absolute; top:0; left:25%; width:1px; height:100%; background:rgba(255,255,255,0.1);"></div>
-                                <div style="position:absolute; top:0; left:50%; width:1px; height:100%; background:rgba(255,255,255,0.3);"></div>
-                                <div style="position:absolute; top:0; left:75%; width:1px; height:100%; background:rgba(255,255,255,0.1);"></div>
+                                <div style="position:absolute; top:0; left:25%; width:1px; height:100%; background:rgba(255,255,255,0.15);"></div>
+                                <div style="position:absolute; top:0; left:50%; width:1px; height:100%; background:rgba(255,255,255,0.4);"></div>
+                                <div style="position:absolute; top:0; left:75%; width:1px; height:100%; background:rgba(255,255,255,0.15);"></div>
                                 
-                                <div id="guild-hk-text" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #fff; font-family: 'Cinzel'; font-weight: bold; font-size: 15px; text-shadow: 1px 1px 2px #000, -1px -1px 2px #000; z-index: 2;">0 / 500 HKs Gained</div>
+                                <div id="guild-hk-text" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #fff; font-family: 'Cinzel'; font-weight: bold; font-size: 16px; text-shadow: 1px 1px 2px #000, -1px -1px 2px #000; z-index: 2;">0 / 500 HKs Gained</div>
                             </div>
                         </div>
+                        
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; font-family: 'Cinzel'; font-size: 16px; font-weight: bold; color: #a335ee; text-shadow: 1px 1px 2px #000;">
+                                <span>🐉 Dragon's Hoard (Epic Loot)</span>
+                                <span id="guild-loot-tooltip-trigger" class="war-effort-link" style="color: #bbb; font-family: sans-serif; font-size: 12px; font-weight: normal; border-bottom: 1px dotted #bbb; cursor: pointer; text-shadow: none; transition: color 0.3s;">View Contributors ➔</span>
+                            </div>
+                            <div style="position: relative; width: 100%; height: 34px; background: #111; border-radius: 17px; border: 2px solid #333; overflow: hidden; box-shadow: inset 0 3px 8px rgba(0,0,0,0.9);">
+                                <div id="guild-loot-fill" class="progress-bar-glow" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; transition: width 1.5s cubic-bezier(0.25, 0.8, 0.25, 1);"></div>
+                                
+                                <div style="position:absolute; top:0; left:25%; width:1px; height:100%; background:rgba(255,255,255,0.15);"></div>
+                                <div style="position:absolute; top:0; left:50%; width:1px; height:100%; background:rgba(255,255,255,0.4);"></div>
+                                <div style="position:absolute; top:0; left:75%; width:1px; height:100%; background:rgba(255,255,255,0.15);"></div>
+                                
+                                <div id="guild-loot-text" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #fff; font-family: 'Cinzel'; font-weight: bold; font-size: 16px; text-shadow: 1px 1px 2px #000, -1px -1px 2px #000; z-index: 2;">0 / 100 Epics Looted</div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; font-family: 'Cinzel'; font-size: 16px; font-weight: bold; color: #3FC7EB; text-shadow: 1px 1px 2px #000;">
+                                <span>⚡ The Zenith Cohort (Max Level Pushes)</span>
+                                <span id="guild-zenith-tooltip-trigger" class="war-effort-link" style="color: #bbb; font-family: sans-serif; font-size: 12px; font-weight: normal; border-bottom: 1px dotted #bbb; cursor: pointer; text-shadow: none; transition: color 0.3s;">View Contributors ➔</span>
+                            </div>
+                            <div style="position: relative; width: 100%; height: 34px; background: #111; border-radius: 17px; border: 2px solid #333; overflow: hidden; box-shadow: inset 0 3px 8px rgba(0,0,0,0.9);">
+                                <div id="guild-zenith-fill" class="progress-bar-glow" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; transition: width 1.5s cubic-bezier(0.25, 0.8, 0.25, 1);"></div>
+                                
+                                <div style="position:absolute; top:0; left:25%; width:1px; height:100%; background:rgba(255,255,255,0.15);"></div>
+                                <div style="position:absolute; top:0; left:50%; width:1px; height:100%; background:rgba(255,255,255,0.4);"></div>
+                                <div style="position:absolute; top:0; left:75%; width:1px; height:100%; background:rgba(255,255,255,0.15);"></div>
+                                
+                                <div id="guild-zenith-text" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #fff; font-family: 'Cinzel'; font-weight: bold; font-size: 16px; text-shadow: 1px 1px 2px #000, -1px -1px 2px #000; z-index: 2;">0 / 10 New Level 70s</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div style="text-align: center; margin-top: 25px; font-size: 12px; color: #888; font-style: italic; border-top: 1px dashed rgba(255,255,255,0.1); padding-top: 15px;">
+                        * Note: Weekly guild challenges are currently experimental and subject to change based on community feedback.
                     </div>
                 </div>
 
@@ -1167,10 +1185,10 @@ a, .item-slot, .nav-btn, .clickable-class, .tt-char, .concise-item, .tl-btn { cu
     </div>
 
     <script id="dashboard-config" type="application/json">
-        {"last_updated": "2026-03-27T12:12:05.451288Z", "active_14_days": 394, "raid_ready_count": 20, "prev_mvps": {"pve": null, "pvp": null}}
+        {"last_updated": "2026-03-27T12:22:02.456310Z", "active_14_days": 395, "raid_ready_count": 21, "prev_mvps": {"pve": null, "pvp": null}}
     </script>
     <script id="heatmap-data" type="application/json">
-        [{"date": "2026-03-21", "day_name": "Sat", "count": 494, "loot": 400, "levels": 94, "total_roster": null, "active_roster": null}, {"date": "2026-03-22", "day_name": "Sun", "count": 691, "loot": 542, "levels": 149, "total_roster": null, "active_roster": null}, {"date": "2026-03-23", "day_name": "Mon", "count": 575, "loot": 431, "levels": 144, "total_roster": 535, "active_roster": 309}, {"date": "2026-03-24", "day_name": "Tue", "count": 524, "loot": 405, "levels": 119, "total_roster": 608, "active_roster": 370}, {"date": "2026-03-25", "day_name": "Wed", "count": 725, "loot": 559, "levels": 166, "total_roster": 624, "active_roster": 388}, {"date": "2026-03-26", "day_name": "Thu", "count": 741, "loot": 579, "levels": 162, "total_roster": 628, "active_roster": 393}, {"date": "2026-03-27", "day_name": "Fri", "count": 185, "loot": 140, "levels": 45, "total_roster": 629, "active_roster": 394}]
+        [{"date": "2026-03-21", "day_name": "Sat", "count": 494, "loot": 400, "levels": 94, "total_roster": null, "active_roster": null}, {"date": "2026-03-22", "day_name": "Sun", "count": 691, "loot": 542, "levels": 149, "total_roster": null, "active_roster": null}, {"date": "2026-03-23", "day_name": "Mon", "count": 575, "loot": 431, "levels": 144, "total_roster": 535, "active_roster": 309}, {"date": "2026-03-24", "day_name": "Tue", "count": 524, "loot": 405, "levels": 119, "total_roster": 608, "active_roster": 370}, {"date": "2026-03-25", "day_name": "Wed", "count": 725, "loot": 559, "levels": 166, "total_roster": 624, "active_roster": 388}, {"date": "2026-03-26", "day_name": "Thu", "count": 741, "loot": 579, "levels": 162, "total_roster": 628, "active_roster": 393}, {"date": "2026-03-27", "day_name": "Fri", "count": 189, "loot": 143, "levels": 46, "total_roster": 629, "active_roster": 395}]
     </script>
 
     <script>
@@ -2095,12 +2113,37 @@ window.addEventListener('DOMContentLoaded', async () => {
 
         // Apply Sorting before mapping HTML
         let sortedCharacters = [...characters];
+        const hashUrl = window.location.hash.substring(1);
+
         sortedCharacters.sort((a, b) => {
             let valA, valB;
             
             // Handle Raw vs Full data structures
             const profA = isRawMode ? (rosterData.find(c => c.profile && c.profile.name === a.name)?.profile || a) : (a.profile || a);
             const profB = isRawMode ? (rosterData.find(c => c.profile && c.profile.name === b.name)?.profile || b) : (b.profile || b);
+            const nameA = (profA.name || '').toLowerCase();
+            const nameB = (profB.name || '').toLowerCase();
+
+            // Override sorting for ALL War Effort challenges
+            if (hashUrl.startsWith('war-effort-')) {
+                if (hashUrl === 'war-effort-xp' && window.warEffortContext) {
+                    valA = window.warEffortContext[nameA] || 0;
+                    valB = window.warEffortContext[nameB] || 0;
+                    return valB - valA; // High to Low Contributions
+                } else if (hashUrl === 'war-effort-zenith' && window.warEffortContextRaw) {
+                    valA = window.warEffortContextRaw[nameA] || 0;
+                    valB = window.warEffortContextRaw[nameB] || 0;
+                    return valB - valA; // Newest first (highest timestamp)
+                } else if (hashUrl === 'war-effort-loot' && window.warEffortContext) {
+                    valA = window.warEffortContext[nameA] ? window.warEffortContext[nameA].length : 0;
+                    valB = window.warEffortContext[nameB] ? window.warEffortContext[nameB].length : 0;
+                    return valB - valA; // High to Low Contributions (Array length)
+                } else if (hashUrl === 'war-effort-hk') {
+                    valA = profA.trend_pvp || profA.trend_hks || 0;
+                    valB = profB.trend_pvp || profB.trend_hks || 0;
+                    return valB - valA; // High to Low Contributions
+                }
+            }
 
             if (currentSortMethod === 'ilvl') {
                 valA = profA.equipped_item_level || 0;
@@ -2115,25 +2158,26 @@ window.addEventListener('DOMContentLoaded', async () => {
                 valB = profB.honorable_kills || 0;
                 return valB - valA; // High to Low
             } else if (currentSortMethod === 'name') {
-                valA = (profA.name || '').toLowerCase();
-                valB = (profB.name || '').toLowerCase();
-                return valA.localeCompare(valB); // A to Z
+                return nameA.localeCompare(nameB); // A to Z
             }
             return 0;
         });
 
-        // Add Sorting Dropdown UI to the top of the list
-        let sortUI = `
-            <div class="sort-controls" style="animation: fadeIn 0.3s forwards;">
-                <span style="color: #888; font-size: 14px;">Sort By:</span>
-                <select id="concise-sort-dropdown" class="sort-select">
-                    <option value="ilvl" ${currentSortMethod === 'ilvl' ? 'selected' : ''}>Item Level</option>
-                    <option value="level" ${currentSortMethod === 'level' ? 'selected' : ''}>Character Level</option>
-                    <option value="hks" ${currentSortMethod === 'hks' ? 'selected' : ''}>Honorable Kills</option>
-                    <option value="name" ${currentSortMethod === 'name' ? 'selected' : ''}>Name (A-Z)</option>
-                </select>
-            </div>
-        `;
+        // Add Sorting Dropdown UI to the top of the list (Hide for ALL specific War Effort pages)
+        let sortUI = '';
+        if (!hashUrl.startsWith('war-effort-')) {
+            sortUI = `
+                <div class="sort-controls" style="animation: fadeIn 0.3s forwards;">
+                    <span style="color: #888; font-size: 14px;">Sort By:</span>
+                    <select id="concise-sort-dropdown" class="sort-select">
+                        <option value="ilvl" ${currentSortMethod === 'ilvl' ? 'selected' : ''}>Item Level</option>
+                        <option value="level" ${currentSortMethod === 'level' ? 'selected' : ''}>Character Level</option>
+                        <option value="hks" ${currentSortMethod === 'hks' ? 'selected' : ''}>Honorable Kills</option>
+                        <option value="name" ${currentSortMethod === 'name' ? 'selected' : ''}>Name (A-Z)</option>
+                    </select>
+                </div>
+            `;
+        }
 
         // Generate the HTML for the list
         let listHTML = sortedCharacters.map((char, index) => {
@@ -2150,7 +2194,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             let displaySpecClass = '';
             let statValue = '???';
             let statColor = 'color:#666;';
-            let trendHTML = ''; // <-- NEW: Trend Variable
+            let trendHTML = '';
 
             // 3. Populate Variables
             if (deepChar && deepChar.profile) {
@@ -2172,7 +2216,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                 statValue = currentSortMethod === 'hks' ? (p.honorable_kills || 0).toLocaleString() : (p.equipped_item_level || 0);
                 statColor = currentSortMethod === 'hks' ? 'color: #ff4400;' : '';
 
-                // NEW: Calculate Trend based on the current ladder view
+                // Calculate Trend based on the current ladder view
                 if (currentSortMethod === 'hks' || currentSortMethod === 'ilvl') {
                     const trend = currentSortMethod === 'hks' ? (p.trend_pvp || p.trend_hks || 0) : (p.trend_pve || p.trend_ilvl || 0);
                     if (trend > 0) trendHTML = `<span style="color: #2ecc71; font-size: 12px; margin-left: 10px; width: 30px; text-align: right; display: inline-block;">▲ ${trend}</span>`;
@@ -2190,8 +2234,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             }
 
             // Inject Podium Classes & Rank Number if we are on a Ladder View
-            const hash = window.location.hash.substring(1);
-            const isLadderView = hash === 'ladder-pve' || hash === 'ladder-pvp';
+            const isLadderView = hashUrl === 'ladder-pve' || hashUrl === 'ladder-pvp';
             let podiumClass = '';
             let rankHtml = '';
             
@@ -2202,63 +2245,118 @@ window.addEventListener('DOMContentLoaded', async () => {
                 rankHtml = `<div style="color: ${rankColor}; font-family: 'Cinzel'; font-weight: bold; font-size: ${rankSize}; width: 30px; text-shadow: 1px 1px 2px #000; margin-right: 10px; display: flex; align-items: center; justify-content: center;">#${index + 1}</div>`;
             }
 
+            // --- NEW: Custom War Effort Stats Overrides ---
+            let statsHtml = `
+                <span>Level <span class="c-val-lvl">${level}</span></span>
+                <span style="display:flex; align-items:center; justify-content:flex-end;">${statLabel} <span class="c-val-ilvl" style="${statColor} margin-left:4px;">${statValue}</span>${trendHTML}</span>
+            `;
+            let barStyleOverride = '';
+            let innerWrapperStyle = 'display: flex; align-items: center; width: 100%;';
+            let cStatsStyleOverride = 'display:flex; align-items:center; justify-content:flex-end; flex:1;';
+
+            if (hashUrl.startsWith('war-effort-')) {
+                // By default, stretch the bars
+                barStyleOverride = 'width: 100%; max-width: 100%; margin-bottom: 8px; padding: 12px 15px;';
+                
+                if (hashUrl === 'war-effort-hk') {
+                    const trendVal = deepChar && deepChar.profile ? (deepChar.profile.trend_pvp || deepChar.profile.trend_hks || 0) : 0;
+                    statsHtml = `<span style="color:#ff4400; font-weight:bold; font-size:18px; text-shadow: 1px 1px 2px #000;">+${trendVal.toLocaleString()} HKs Contributed</span>`;
+                } else if (window.warEffortContext) {
+                    const charKey = displayName.toLowerCase();
+                    const contextData = window.warEffortContext[charKey];
+                    
+                    if (contextData) {
+                        if (hashUrl === 'war-effort-xp') {
+                            statsHtml = `<span style="color:#ffd100; font-weight:bold; font-size:18px; text-shadow: 1px 1px 2px #000;">+${contextData} Levels Contributed</span>`;
+                        } else if (hashUrl === 'war-effort-loot') {
+                            // Turn the main bar into a column so we can stack the character info on top, and loot on the bottom
+                            barStyleOverride = 'width: 100%; max-width: 100%; margin-bottom: 8px; padding: 15px; flex-direction: column; align-items: flex-start; height: auto;';
+                            innerWrapperStyle = 'display: flex; align-items: center; width: 100%; justify-content: space-between; border-bottom: 1px dashed rgba(255,255,255,0.1); padding-bottom: 12px; margin-bottom: 12px;';
+                            cStatsStyleOverride = 'display:flex; width: 100%; flex-direction: column; align-items: flex-start;';
+
+                            const itemBadges = contextData.map(itemHtml => `<div style="background: rgba(0,0,0,0.6); padding: 5px 10px; border-radius: 6px; border: 1px solid #444; white-space: nowrap;">${itemHtml}</div>`).join('');
+                            statsHtml = `
+                                <span style="color:#888; font-size:11px; text-transform:uppercase; margin-bottom: 8px;">Epic Loot Acquired:</span>
+                                <div style="display:flex; flex-wrap:wrap; justify-content:flex-start; gap:8px; font-size:13px; line-height:1.2;">
+                                    ${itemBadges}
+                                </div>
+                            `;
+                        } else if (hashUrl === 'war-effort-zenith') {
+                            statsHtml = `
+                                <div style="display:flex; flex-direction:column; align-items:flex-end; justify-content: center;">
+                                    <span style="color:#888; font-size:11px; text-transform:uppercase;">Reached Level 70 on:</span>
+                                    <span style="color:#3FC7EB; font-weight:bold; font-size:16px; text-shadow: 1px 1px 2px #000; margin-top: 4px;">${contextData}</span>
+                                </div>
+                            `;
+                        }
+                    }
+                }
+            }
+
             // 4. Render the HTML
             if (!isClickable) {
                 return `
-                <div class="concise-char-bar ${podiumClass}" data-class="${cClass}" data-spec="unspecced" style="border-left-color:${cHex}; cursor: default;">
-                    ${rankHtml}
-                    <div class="c-main-info">
-                        <img src="${portraitURL}" class="c-portrait" loading="lazy" style="border-color:${cHex};" onerror="this.src='https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg'">
-                        <span class="c-name" style="color:${cHex};">${displayName}</span>
-                        <span class="c-meta">${raceName} ${displaySpecClass}</span>
+                <div class="concise-char-bar ${podiumClass}" data-class="${cClass}" data-spec="unspecced" style="border-left-color:${cHex}; cursor: default; ${barStyleOverride}">
+                    <div style="${innerWrapperStyle}">
+                        <div style="display: flex; align-items: center;">
+                            ${rankHtml}
+                            <div class="c-main-info">
+                                <img src="${portraitURL}" class="c-portrait" loading="lazy" style="border-color:${cHex};" onerror="this.src='https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg'">
+                                <span class="c-name" style="color:${cHex};">${displayName}</span>
+                                <span class="c-meta">${raceName} ${displaySpecClass}</span>
+                            </div>
+                        </div>
+                        ${hashUrl !== 'war-effort-loot' ? `<div class="c-stats-info" style="${cStatsStyleOverride}">${statsHtml}</div>` : ''}
                     </div>
-                    <div class="c-stats-info">
-                        <span>Level <span class="c-val-lvl">${level}</span></span>
-                        <span style="display:flex; align-items:center; justify-content:flex-end;">${statLabel} <span class="c-val-ilvl" style="${statColor} margin-left:4px;">${statValue}</span>${trendHTML}</span>
-                    </div>
+                    ${hashUrl === 'war-effort-loot' ? `<div class="c-stats-info" style="${cStatsStyleOverride}">${statsHtml}</div>` : ''}
                 </div>`;
             }
 
             return `
-            <a href="javascript:void(0)" onclick="selectCharacter('${displayName.toLowerCase()}')" class="concise-char-bar tt-char ${podiumClass}" data-char="${displayName.toLowerCase()}" data-class="${cClass}" data-spec="${activeSpecAttr}" style="border-left-color:${cHex};">
-                ${rankHtml}
-                <div class="c-main-info">
-                    <img src="${portraitURL}" class="c-portrait" loading="lazy" style="border-color:${cHex};" onerror="this.src='https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg'">
-                    <span class="c-name" style="color:${cHex};">${displayName}</span>
-                    <span class="c-meta">${raceName} &bull; ${specIconHtml}${displaySpecClass}</span>
+            <div onclick="selectCharacter('${displayName.toLowerCase()}')" class="concise-char-bar tt-char ${podiumClass}" data-char="${displayName.toLowerCase()}" data-class="${cClass}" data-spec="${activeSpecAttr}" style="border-left-color:${cHex}; ${barStyleOverride}">
+                <div style="${innerWrapperStyle}">
+                    <div style="display: flex; align-items: center;">
+                        ${rankHtml}
+                        <div class="c-main-info">
+                            <img src="${portraitURL}" class="c-portrait" loading="lazy" style="border-color:${cHex};" onerror="this.src='https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg'">
+                            <span class="c-name" style="color:${cHex};">${displayName}</span>
+                            <span class="c-meta">${raceName} &bull; ${specIconHtml}${displaySpecClass}</span>
+                        </div>
+                    </div>
+                    ${hashUrl !== 'war-effort-loot' ? `<div class="c-stats-info" style="${cStatsStyleOverride}">${statsHtml}</div>` : ''}
                 </div>
-                <div class="c-stats-info">
-                    <span>Level <span class="c-val-lvl">${level}</span></span>
-                    <span style="display:flex; align-items:center; justify-content:flex-end;">${statLabel} <span class="c-val-ilvl" style="${statColor} margin-left:4px;">${statValue}</span>${trendHTML}</span>
-                </div>
-            </a>`;
+                ${hashUrl === 'war-effort-loot' ? `<div class="c-stats-info" style="${cStatsStyleOverride}">${statsHtml}</div>` : ''}
+            </div>`;
         }).join('');
         
         // Inject the sorting UI and the List HTML
         conciseList.innerHTML = sortUI + listHTML;
 
-        // Bind the event listener to the newly created dropdown
-        document.getElementById('concise-sort-dropdown').addEventListener('change', function(e) {
-            currentSortMethod = e.target.value;
-            // Re-render the list with the exact same parameters but new sort
-            renderConciseList(title, characters, isRawMode);
-            
-            // Re-apply any active spec filters to the newly rendered HTML
-            if (typeof applyTimelineFilters === 'function') {
-                 // Trigger a click on the active badge to re-filter the DOM elements
-                 const activeBadge = document.querySelector('.dynamic-badge.active-filter');
-                 if (activeBadge) {
-                     // Briefly remove the class so the click handler re-applies it correctly
-                     activeBadge.classList.remove('active-filter'); 
-                     activeBadge.click();
-                 }
-            }
-        });
+        // Bind the event listener to the newly created dropdown if it exists
+        const sortDropdown = document.getElementById('concise-sort-dropdown');
+        if (sortDropdown) {
+            sortDropdown.addEventListener('change', function(e) {
+                currentSortMethod = e.target.value;
+                // Re-render the list with the exact same parameters but new sort
+                renderConciseList(title, characters, isRawMode);
+                
+                // Re-apply any active spec filters to the newly rendered HTML
+                if (typeof applyTimelineFilters === 'function') {
+                     // Trigger a click on the active badge to re-filter the DOM elements
+                     const activeBadge = document.querySelector('.dynamic-badge.active-filter');
+                     if (activeBadge) {
+                         // Briefly remove the class so the click handler re-applies it correctly
+                         activeBadge.classList.remove('active-filter'); 
+                         activeBadge.click();
+                     }
+                }
+            });
+        } 
 
-        setupTooltips();
-    }
+        setupTooltips();
+    }
 
-    function setupTooltips() {
+    function setupTooltips() {
         const tt_chars = document.querySelectorAll('.tt-char:not(.tt-bound)');
         tt_chars.forEach(trigger => {
             trigger.classList.add('tt-bound');
@@ -2827,8 +2925,11 @@ window.addEventListener('DOMContentLoaded', async () => {
         const kpiHks = document.getElementById('home-kpi-hks');
         if (kpiHks) kpiHks.innerText = totalHks >= 1000000 ? (totalHks/1000000).toFixed(1) + 'M' : totalHks.toLocaleString();
 
-        document.getElementById('stat-avgilvl').onclick = () => { window.location.hash = 'ladder-pve'; };
-        document.getElementById('stat-hks').onclick = () => { window.location.hash = 'ladder-pvp'; };
+        const statAvgIlvl = document.getElementById('stat-avgilvl');
+        if (statAvgIlvl) statAvgIlvl.onclick = () => { window.location.hash = 'ladder-pve'; };
+        
+        const statHks = document.getElementById('stat-hks');
+        if (statHks) statHks.onclick = () => { window.location.hash = 'ladder-pvp'; };
 
         // "Yesterday" Sparklines & Math
         if (heatmapData && heatmapData.length >= 2) {
@@ -2906,19 +3007,27 @@ window.addEventListener('DOMContentLoaded', async () => {
             return c.profile && c.profile.name ? c.profile.name.toLowerCase() : '';
         });
         
-        if (showBadges) renderDynamicBadges(characters, isRawRoster);
-        else {
+        const hash = window.location.hash.substring(1);
+        const chartViews = ['total', 'active', 'raidready', 'ladder-pve', 'ladder-pvp'];
+
+        if (showBadges) {
+            renderDynamicBadges(characters, isRawRoster);
+            document.getElementById('concise-left-col').style.display = 'flex';
+        } else {
             document.getElementById('concise-class-badges').style.display = 'none';
             const specContainer = document.getElementById('concise-spec-container');
             if (specContainer) specContainer.style.display = 'none';
+            
+            // Fix: Completely collapse the left column if no charts and no badges are needed
+            if (!chartViews.includes(hash)) {
+                document.getElementById('concise-left-col').style.display = 'none';
+            } else {
+                document.getElementById('concise-left-col').style.display = 'flex';
+            }
         }
 
        // Draw the dynamic charts & KPIs
-        const hash = window.location.hash.substring(1);
         const donutContainer = document.getElementById('concise-donut-container');
-        
-        // Expanded array of views that get charts
-        const chartViews = ['total', 'active', 'raidready', 'ladder-pve', 'ladder-pvp'];
 
         if (chartViews.includes(hash)) {
             if (donutContainer) {
@@ -3165,6 +3274,79 @@ window.addEventListener('DOMContentLoaded', async () => {
             showConciseView(`Full PvP Ladder (${sortedPvp.length})`, sortedPvp, false, true, 'hks');
             updateDropdownLabel('all');
             
+        } else if (hash.startsWith('war-effort-')) {
+            const type = hash.replace('war-effort-', '');
+            
+            const realNow = new Date();
+            const berlinString = realNow.toLocaleString("en-US", {timeZone: "Europe/Berlin"});
+            const berlinNow = new Date(berlinString);
+            const lastReset = new Date(berlinNow);
+            lastReset.setHours(0, 0, 0, 0);
+            let day = lastReset.getDay();
+            let diff = (day >= 2) ? (day - 2) : (day + 5); 
+            lastReset.setDate(lastReset.getDate() - diff);
+            const lastResetMs = lastReset.getTime();
+
+            let filteredRoster = [];
+            let title = "";
+            window.warEffortContext = {}; // Initialize custom display context
+            window.warEffortContextRaw = {}; // Initialize raw values for sorting
+
+            if (type === 'hk') {
+                filteredRoster = rosterData.filter(c => c.profile && (c.profile.trend_pvp || c.profile.trend_hks || 0) > 0);
+                title = `🩸 Blood of the Enemy Contributors (${filteredRoster.length})`;
+                // Note: The 'false' flag here hides the Class Badges
+                showConciseView(title, filteredRoster, false, false, 'hks'); 
+            } else {
+                const contributors = new Set();
+                if (typeof timelineData !== 'undefined') {
+                    timelineData.forEach(e => {
+                        let cleanTs = (e.timestamp || '').replace('Z', '+00:00');
+                        if (!cleanTs.includes('+') && !cleanTs.includes('Z')) cleanTs += 'Z';
+                        const eventDate = new Date(cleanTs).getTime();
+                        if (eventDate >= lastResetMs) {
+                            const cName = (e.character_name || '').toLowerCase();
+                            
+                            if (type === 'xp' && e.type === 'level_up') {
+                                contributors.add(cName);
+                                window.warEffortContext[cName] = (window.warEffortContext[cName] || 0) + 1;
+                            }
+                            if (type === 'loot' && e.type === 'item' && (e.item_quality === 'EPIC' || e.item_quality === 'LEGENDARY')) {
+                                contributors.add(cName);
+                                window.warEffortContext[cName] = window.warEffortContext[cName] || [];
+                                const qColor = QUALITY_COLORS[e.item_quality] || '#a335ee';
+                                window.warEffortContext[cName].push(`<a href="https://www.wowhead.com/wotlk/item=${e.item_id}" target="_blank" style="color:${qColor}; text-decoration:none;" onclick="event.stopPropagation();">[${e.item_name}]</a>`);
+                            }
+                            if (type === 'zenith' && e.type === 'level_up' && e.level === 70) {
+                                contributors.add(cName);
+                                const dateObj = new Date(cleanTs);
+                                const dd = String(dateObj.getDate()).padStart(2, '0');
+                                const mm = String(dateObj.getMonth() + 1).padStart(2, '0');
+                                const yyyy = dateObj.getFullYear();
+                                const HH = String(dateObj.getHours()).padStart(2, '0');
+                                const MM = String(dateObj.getMinutes()).padStart(2, '0');
+                                window.warEffortContext[cName] = `${dd}.${mm}.${yyyy} ${HH}:${MM}`;
+                                window.warEffortContextRaw[cName] = dateObj.getTime(); // Store the raw timestamp for perfect sorting!
+                            }
+                        }
+                    });
+                }
+                filteredRoster = rosterData.filter(c => c.profile && c.profile.name && contributors.has(c.profile.name.toLowerCase()));
+                
+                if (type === 'xp') title = `🛡️ Hero's Journey Contributors (${filteredRoster.length})`;
+                if (type === 'loot') title = `🐉 Dragon's Hoard Contributors (${filteredRoster.length})`;
+                if (type === 'zenith') title = `⚡ The Zenith Cohort (${filteredRoster.length})`;
+                
+                let sortPref = type === 'loot' ? 'ilvl' : 'level';
+                // Note: The 'false' flag here hides the Class Badges
+                showConciseView(title, filteredRoster, false, false, sortPref); 
+            }
+            
+            // Explicitly hide timeline entirely for these pages
+            if (timeline) timeline.style.display = 'none';
+            
+            updateDropdownLabel('all');
+            
         } else {
             // Final fallback: Look for a specific character
             const char = rosterData.find(c => c.profile && c.profile.name && c.profile.name.toLowerCase() === hash);
@@ -3177,10 +3359,15 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
     }
 
-    // Setup clickable stat boxes
-    document.getElementById('stat-total').addEventListener('click', () => { window.location.hash = 'total'; });
-    document.getElementById('stat-active').addEventListener('click', () => { window.location.hash = 'active'; });
-    document.getElementById('stat-raidready').addEventListener('click', () => { window.location.hash = 'raidready'; });
+    // Setup clickable stat boxes safely
+    const statTotal = document.getElementById('stat-total');
+    if (statTotal) statTotal.addEventListener('click', () => { window.location.hash = 'total'; });
+
+    const statActive = document.getElementById('stat-active');
+    if (statActive) statActive.addEventListener('click', () => { window.location.hash = 'active'; });
+
+    const statRaidReady = document.getElementById('stat-raidready');
+    if (statRaidReady) statRaidReady.addEventListener('click', () => { window.location.hash = 'raidready'; });
 
     // 🔥 RESTORED: Dynamic Home Page Class Pop-outs
     document.querySelectorAll('.clickable-class').forEach(badge => {
@@ -3549,6 +3736,8 @@ window.addEventListener('DOMContentLoaded', async () => {
             applyTimelineFilters(); 
             if (typeof window.renderGuildXPBar === 'function') window.renderGuildXPBar(); 
             
+            route();
+            
         } catch (error) {
             console.error("Failed to load timeline data:", error);
         }
@@ -3856,60 +4045,6 @@ window.addEventListener('DOMContentLoaded', async () => {
         mvpPveList.innerHTML = pveGloat + generateMvpHtml(topTrendPve, false);
         mvpPvpList.innerHTML = pvpGloat + generateMvpHtml(topTrendPvp, true);
 
-        // --- NEW: Live Countdown Timer Logic ---
-        let countdownEl = document.getElementById('mvp-countdown');
-        if (!countdownEl) {
-            countdownEl = document.createElement('div');
-            countdownEl.id = 'mvp-countdown';
-            countdownEl.style.textAlign = 'center';
-            countdownEl.style.marginBottom = '25px';
-            
-            // Insert it between the H3 title and the flex container lists
-            mvpContainer.insertBefore(countdownEl, mvpContainer.children[1]);
-
-            function updateCountdown() {
-                const realNow = new Date();
-                
-                // Get current Berlin time as a pseudo-local Date object
-                const berlinString = realNow.toLocaleString("en-US", {timeZone: "Europe/Berlin"});
-                const berlinNow = new Date(berlinString);
-                
-                // Calculate the upcoming Tuesday at 00:00 Berlin time
-                const nextResetBerlin = new Date(berlinNow);
-                nextResetBerlin.setHours(0, 0, 0, 0);
-                
-                let day = nextResetBerlin.getDay();
-                let diff = (2 - day + 7) % 7; 
-                
-                // If it is currently Tuesday but past 00:00, target NEXT Tuesday
-                if (diff === 0 && berlinNow > nextResetBerlin) {
-                    diff = 7;
-                }
-                nextResetBerlin.setDate(nextResetBerlin.getDate() + diff);
-
-                // Calculate difference in milliseconds natively
-                const timeLeft = nextResetBerlin - berlinNow;
-                
-                const d = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
-                const h = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-                const m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
-                const s = Math.floor((timeLeft % (1000 * 60)) / 1000);
-
-                const el = document.getElementById('mvp-countdown');
-                if (el) {
-                    el.innerHTML = `
-                        <div style="background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 209, 0, 0.2); padding: 8px 18px; border-radius: 6px; display: inline-block; box-shadow: inset 0 0 15px rgba(0,0,0,0.9), 0 2px 5px rgba(0,0,0,0.5);">
-                            <span style="color:#c0c0c0; font-family: 'Cinzel', serif; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; text-shadow: 1px 1px 2px #000;">Next Crowning Ceremony: </span>
-                            <span style="color:#ff8000; font-family: 'Cinzel', serif; font-weight:bold; font-size: 18px; text-shadow: 0 0 8px rgba(255, 128, 0, 0.6), 1px 1px 2px #000; margin-left: 6px;">
-                            ${d}d ${h}h ${m}m ${s}s</span>
-                        </div>`;
-                }
-            }
-
-            // Start the clock
-            setInterval(updateCountdown, 1000);
-            updateCountdown();
-        }
     };
 
     // ==========================================
@@ -3918,6 +4053,55 @@ window.addEventListener('DOMContentLoaded', async () => {
     window.renderGuildXPBar = function() {
         const xpContainer = document.getElementById('guild-xp-container');
         if (!xpContainer || !timelineData || timelineData.length === 0) return;
+
+        // --- Live Countdown Timer Logic ---
+        let countdownEl = document.getElementById('war-effort-countdown');
+        if (!countdownEl) {
+            countdownEl = document.createElement('div');
+            countdownEl.id = 'war-effort-countdown';
+            countdownEl.style.textAlign = 'center';
+            countdownEl.style.marginBottom = '25px';
+            
+            // Insert it between the H3 title and the progress bars
+            xpContainer.insertBefore(countdownEl, xpContainer.children[1]);
+
+            function updateWarEffortCountdown() {
+                const realNow = new Date();
+                const berlinString = realNow.toLocaleString("en-US", {timeZone: "Europe/Berlin"});
+                const berlinNow = new Date(berlinString);
+                
+                const nextResetBerlin = new Date(berlinNow);
+                nextResetBerlin.setHours(0, 0, 0, 0);
+                
+                let day = nextResetBerlin.getDay();
+                let diff = (2 - day + 7) % 7; 
+                
+                if (diff === 0 && berlinNow > nextResetBerlin) {
+                    diff = 7;
+                }
+                nextResetBerlin.setDate(nextResetBerlin.getDate() + diff);
+
+                const timeLeft = nextResetBerlin - berlinNow;
+                
+                const d = Math.floor(timeLeft / (1000 * 60 * 60 * 24));
+                const h = Math.floor((timeLeft % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                const s = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                const el = document.getElementById('war-effort-countdown');
+                if (el) {
+                    el.innerHTML = `
+                        <div style="background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 209, 0, 0.2); padding: 8px 18px; border-radius: 6px; display: inline-block; box-shadow: inset 0 0 15px rgba(0,0,0,0.9), 0 2px 5px rgba(0,0,0,0.5);">
+                            <span style="color:#c0c0c0; font-family: 'Cinzel', serif; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; text-shadow: 1px 1px 2px #000;">Next Weekly Reset: </span>
+                            <span style="color:#ff8000; font-family: 'Cinzel', serif; font-weight:bold; font-size: 18px; text-shadow: 0 0 8px rgba(255, 128, 0, 0.6), 1px 1px 2px #000; margin-left: 6px;">
+                            ${d}d ${h}h ${m}m ${s}s</span>
+                        </div>`;
+                }
+            }
+
+            setInterval(updateWarEffortCountdown, 1000);
+            updateWarEffortCountdown();
+        }
 
         // 1. Calculate the Berlin Time Reset Anchor
         const realNow = new Date();
@@ -3931,9 +4115,12 @@ window.addEventListener('DOMContentLoaded', async () => {
         lastReset.setDate(lastReset.getDate() - diff);
         const lastResetMs = lastReset.getTime();
 
-        // 2. Tally Leveling Effort (From Timeline)
+        // 2. Tally Leveling Effort & Zenith (From Timeline)
         let totalLevels = 0;
+        let totalZenith = 0;
         const levelContributors = {};
+        const zenithContributors = {};
+        
         timelineData.forEach(event => {
             if (event.type === 'level_up') {
                 let cleanTs = event.timestamp.replace('Z', '+00:00');
@@ -3944,6 +4131,11 @@ window.addEventListener('DOMContentLoaded', async () => {
                     totalLevels++;
                     const charName = event.character_name || 'Unknown';
                     levelContributors[charName] = (levelContributors[charName] || 0) + 1;
+                    
+                    if (event.level === 70) {
+                        totalZenith++;
+                        zenithContributors[charName] = (zenithContributors[charName] || 0) + 1;
+                    }
                 }
             }
         });
@@ -3962,11 +4154,46 @@ window.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
-        // 4. Inject Dynamic Animations for BOTH Bars
+        // 3b. Tally Dragon's Hoard (Epic Loot from Timeline)
+        let totalLoot = 0;
+        const lootContributors = {};
+        timelineData.forEach(event => {
+            if (event.type === 'item' && (event.item_quality === 'EPIC' || event.item_quality === 'LEGENDARY')) {
+                let cleanTs = event.timestamp.replace('Z', '+00:00');
+                if (!cleanTs.includes('+') && !cleanTs.includes('Z')) cleanTs += 'Z';
+                const eventDate = new Date(cleanTs).getTime();
+                
+                if (eventDate >= lastResetMs) {
+                    totalLoot++;
+                    const charName = event.character_name || 'Unknown';
+                    lootContributors[charName] = (lootContributors[charName] || 0) + 1;
+                }
+            }
+        });
+
+        // 4. Inject Dynamic Animations for Bars
         if (!document.getElementById('war-effort-styles')) {
             const style = document.createElement('style');
             style.id = 'war-effort-styles';
             style.innerHTML = `
+                .war-effort-link:hover { color: #fff !important; }
+                
+                .progress-bar-glow::after {
+                    content: '';
+                    position: absolute;
+                    top: 0; left: 0; bottom: 0; right: 0;
+                    background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%);
+                    background-size: 200% 100%;
+                    animation: shimmerWave 2.5s infinite linear;
+                    z-index: 1;
+                    pointer-events: none;
+                }
+                
+                @keyframes shimmerWave {
+                    0% { background-position: 200% 0; }
+                    100% { background-position: -200% 0; }
+                }
+
                 @keyframes pulseSlowXP { 0% { opacity: 0.8; filter: brightness(1); } 100% { opacity: 1; filter: brightness(1.2); } }
                 @keyframes pulseFastXP { 0% { opacity: 0.7; filter: brightness(1.2); } 100% { opacity: 1; filter: brightness(1.5); } }
                 @keyframes pulseMaxXP { 0% { opacity: 0.8; filter: brightness(1.5); box-shadow: 0 0 20px #ff8000; } 100% { opacity: 1; filter: brightness(2); box-shadow: 0 0 40px #ffd100; } }
@@ -3974,6 +4201,14 @@ window.addEventListener('DOMContentLoaded', async () => {
                 @keyframes pulseSlowHK { 0% { opacity: 0.8; filter: brightness(1); } 100% { opacity: 1; filter: brightness(1.2); } }
                 @keyframes pulseFastHK { 0% { opacity: 0.7; filter: brightness(1.2); } 100% { opacity: 1; filter: brightness(1.5); } }
                 @keyframes pulseMaxHK { 0% { opacity: 0.8; filter: brightness(1.5); box-shadow: 0 0 20px #e74c3c; } 100% { opacity: 1; filter: brightness(2); box-shadow: 0 0 40px #ff4400; } }
+
+                @keyframes pulseSlowLOOT { 0% { opacity: 0.8; filter: brightness(1); } 100% { opacity: 1; filter: brightness(1.2); } }
+                @keyframes pulseFastLOOT { 0% { opacity: 0.7; filter: brightness(1.2); } 100% { opacity: 1; filter: brightness(1.5); } }
+                @keyframes pulseMaxLOOT { 0% { opacity: 0.8; filter: brightness(1.5); box-shadow: 0 0 20px #a335ee; } 100% { opacity: 1; filter: brightness(2); box-shadow: 0 0 40px #ff8000; } }
+
+                @keyframes pulseSlowZENITH { 0% { opacity: 0.8; filter: brightness(1); } 100% { opacity: 1; filter: brightness(1.2); } }
+                @keyframes pulseFastZENITH { 0% { opacity: 0.7; filter: brightness(1.2); } 100% { opacity: 1; filter: brightness(1.5); } }
+                @keyframes pulseMaxZENITH { 0% { opacity: 0.8; filter: brightness(1.5); box-shadow: 0 0 20px #3FC7EB; } 100% { opacity: 1; filter: brightness(2); box-shadow: 0 0 40px #00e5ff; } }
             `;
             document.head.appendChild(style);
         }
@@ -3985,17 +4220,22 @@ window.addEventListener('DOMContentLoaded', async () => {
             const textEl = document.getElementById(textId);
             const dynamicGlow = 10 + (pct * 0.25);
             
-            const isXP = (type === 'XP');
-            const colorBase = isXP ? '#8B6508' : '#8B0000';
-            const colorMid = isXP ? '#ffd100' : '#e74c3c';
-            const colorMax = isXP ? '#ff8000' : '#ff4400';
-            const labelName = isXP ? 'Levels' : 'HKs';
+            let colorBase, colorMid, colorMax, labelName, glowColor;
+            if (type === 'XP') {
+                colorBase = '#8B6508'; colorMid = '#ffd100'; colorMax = '#ff8000'; labelName = 'Levels'; glowColor = '#ffd100';
+            } else if (type === 'HK') {
+                colorBase = '#8B0000'; colorMid = '#e74c3c'; colorMax = '#ff4400'; labelName = 'HKs'; glowColor = '#ff0000';
+            } else if (type === 'LOOT') {
+                colorBase = '#4b0082'; colorMid = '#a335ee'; colorMax = '#ff8000'; labelName = 'Epics'; glowColor = '#ff8000';
+            } else { // ZENITH
+                colorBase = '#006064'; colorMid = '#3FC7EB'; colorMax = '#00e5ff'; labelName = 'Max Levels'; glowColor = '#00e5ff';
+            }
 
             if (fillEl) {
                 setTimeout(() => { 
                     fillEl.style.width = pct + '%'; 
                     if (pct >= 100) {
-                        fillEl.style.background = `linear-gradient(90deg, ${colorMid}, ${colorMax}, ${isXP ? '#ffd100' : '#ff0000'})`;
+                        fillEl.style.background = `linear-gradient(90deg, ${colorMid}, ${colorMax}, ${glowColor})`;
                         fillEl.style.boxShadow = `0 0 40px ${colorMax}`;
                         fillEl.style.animation = `pulseMax${type} 0.5s infinite alternate`;
                     } else if (pct >= 75) {
@@ -4017,7 +4257,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             if (textEl) {
                 if (pct >= 100) {
                     textEl.innerText = `${currentVal.toLocaleString()} / ${maxVal.toLocaleString()} ➔ GOAL CRUSHED!`;
-                    textEl.style.color = isXP ? '#ffd100' : '#ff4400';
+                    textEl.style.color = colorMid;
                     textEl.style.textShadow = `0 0 10px ${colorMax}, 1px 1px 2px #000`;
                 } else {
                     textEl.innerText = `${currentVal.toLocaleString()} / ${maxVal.toLocaleString()} ${labelName} Gained`;
@@ -4025,10 +4265,12 @@ window.addEventListener('DOMContentLoaded', async () => {
             }
         }
 
-        renderBar('guild-xp-fill', 'guild-xp-text', totalLevels, 1000, 'XP');
+        renderBar('guild-xp-fill', 'guild-xp-text', totalLevels, 750, 'XP');
         renderBar('guild-hk-fill', 'guild-hk-text', totalHks, 500, 'HK');
+        renderBar('guild-loot-fill', 'guild-loot-text', totalLoot, 100, 'LOOT');
+        renderBar('guild-zenith-fill', 'guild-zenith-text', totalZenith, 10, 'ZENITH');
 
-        // 6. Tooltip Generator Helper
+        // 6. Tooltip Generator Helper (Updated to Route on Click)
         function bindTooltip(triggerId, contributorsDict, titleText, labelText) {
             const tooltipTrigger = document.getElementById(triggerId);
             if (!tooltipTrigger) return;
@@ -4037,7 +4279,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             let tooltipHtml = `<div style="font-family:'Cinzel'; color:#ffd100; font-weight:bold; margin-bottom:8px; border-bottom:1px solid #555; padding-bottom:4px;">${titleText}</div>`;
             
             if (sortedContributors.length === 0) {
-                tooltipHtml += `<div style="color:#aaa; font-style:italic;">The war effort just began!</div>`;
+                tooltipHtml += `<div style="color:#aaa; font-style:italic;">The challenges just began!</div>`;
             } else {
                 const topList = sortedContributors.slice(0, 15);
                 topList.forEach(([name, count], index) => {
@@ -4075,25 +4317,25 @@ window.addEventListener('DOMContentLoaded', async () => {
 
             newTrigger.addEventListener('mousemove', e => displayTooltip(e.clientX, e.clientY));
             newTrigger.addEventListener('mouseleave', () => tooltip.classList.remove('visible'));
+            
+            // --- NEW: Interactive Navigation ---
             newTrigger.addEventListener('click', e => {
                 e.stopPropagation();
-                if (tooltip.classList.contains('visible')) tooltip.classList.remove('visible');
-                else displayTooltip(e.clientX, e.clientY - 40);
+                tooltip.classList.remove('visible');
+                
+                if (triggerId === 'guild-xp-tooltip-trigger') window.location.hash = 'war-effort-xp';
+                else if (triggerId === 'guild-hk-tooltip-trigger') window.location.hash = 'war-effort-hk';
+                else if (triggerId === 'guild-loot-tooltip-trigger') window.location.hash = 'war-effort-loot';
+                else if (triggerId === 'guild-zenith-tooltip-trigger') window.location.hash = 'war-effort-zenith';
             });
         }
 
         bindTooltip('guild-xp-tooltip-trigger', levelContributors, "Top Leveling Heroes", "levels");
         bindTooltip('guild-hk-tooltip-trigger', hkContributors, "Top PvP Slayers", "HKs");
-
-        // 7. Global click listener to close tooltips on mobile
-        document.addEventListener('click', e => {
-            if (tooltip.classList.contains('visible') && !e.target.closest('#guild-xp-tooltip-trigger') && !e.target.closest('#guild-hk-tooltip-trigger')) {
-                tooltip.classList.remove('visible');
-            }
-        });
+        bindTooltip('guild-loot-tooltip-trigger', lootContributors, "Top Treasure Hunters", "Epics");
+        bindTooltip('guild-zenith-tooltip-trigger', zenithContributors, "The Zenith Cohort", "Max Levels");
     };
 
-    route();
     window.addEventListener('hashchange', route);
 });
     </script>
