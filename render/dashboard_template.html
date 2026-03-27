@@ -74,7 +74,56 @@
     <div class="embers-container"></div>
 
     <div class="navbar">
-        {{ nav_controls | safe }}
+        <div class="controls-wrapper">
+            <button class="mobile-menu-toggle" aria-label="Toggle Menu">
+                <span></span><span></span><span></span>
+            </button>
+            
+            <div class="nav-links-container">
+                <a href="#" class="nav-btn nav-btn-home"><span class="home-text">🏰 Home Dashboard</span></a>
+                
+                <div style="color: #888; font-size: 11px; font-family: 'Cinzel'; font-weight: bold; padding: 15px 15px 5px 15px; border-bottom: 1px solid #333; width: 85%; margin-bottom: 5px;">WAR EFFORT</div>
+                <a href="#war-effort-xp" class="nav-btn">🛡️ Hero's Journey</a>
+                <a href="#war-effort-hk" class="nav-btn">🩸 Blood of the Enemy</a>
+                <a href="#war-effort-loot" class="nav-btn">🐉 Dragon's Hoard</a>
+                <a href="#war-effort-zenith" class="nav-btn">⚡ The Zenith Cohort</a>
+                
+                <div style="color: #888; font-size: 11px; font-family: 'Cinzel'; font-weight: bold; padding: 15px 15px 5px 15px; border-bottom: 1px solid #333; width: 85%; margin-bottom: 5px;">GUILD DATA</div>
+                <a href="#ladder-pve" class="nav-btn">👑 PvE Leaderboard</a>
+                <a href="#ladder-pvp" class="nav-btn">⚔️ PvP Leaderboard</a>
+                <a href="#analytics" class="nav-btn">📊 Advanced Analytics</a>
+                
+                <div style="color: #888; font-size: 11px; font-family: 'Cinzel'; font-weight: bold; padding: 15px 15px 5px 15px; border-bottom: 1px solid #333; width: 85%; margin-bottom: 5px;">COMMUNITY & INFO</div>
+                <a href="#architecture" class="nav-btn">⚙️ Architecture</a>
+                <a href="https://discord.gg/t6mufeWRNK" target="_blank" class="nav-btn" style="color: #5865F2;">💬 Join Discord</a>
+            </div>
+
+            <div class="custom-select-wrapper" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-controls="customCharOptions">
+                <div class="custom-select" id="customCharSelect" tabindex="0">
+                    <span class="selected-value">Select View...</span>
+                    <span style="font-size: 12px; color: #aaa;">▼</span>
+                </div>
+                <div class="custom-select-options" id="customCharOptions" role="listbox">
+                    <div class="custom-option" data-value="total" role="option">
+                        <span style="font-size:16px;">🌍</span> View Entire Guild
+                    </div>
+                    <div class="custom-option" data-value="active" role="option">
+                        <span style="font-size:16px;">🔥</span> Active Roster (14 Days)
+                    </div>
+                    <div class="custom-option" data-value="raidready" role="option">
+                        <span style="font-size:16px;">⚔️</span> Raid Ready (Lvl 70)
+                    </div>
+                </div>
+            </div>
+            
+            <div class="search-container">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="charSearch" autocomplete="off" placeholder="Search armory..." />
+                </div>
+                <div id="search-autocomplete" class="search-autocomplete"></div>
+            </div>
+        </div>
     </div>
     
     <div id="custom-tooltip" class="custom-tooltip"></div>
@@ -120,7 +169,7 @@
                     
                     <div style="display: flex; flex-direction: column; gap: 30px;">
                         <div>
-                            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; font-family: 'Cinzel'; font-size: 16px; font-weight: bold; color: #ffd100; text-shadow: 1px 1px 2px #000;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; font-family: 'Cinzel'; font-size: 16px; font-weight: bold; color: #ffd100; text-shadow: 1px 1px 2px #000;">
                                 <span>🛡️ Hero's Journey (XP Gained)</span>
                                 <span id="guild-xp-tooltip-trigger" class="war-effort-link" style="color: #bbb; font-family: sans-serif; font-size: 12px; font-weight: normal; border-bottom: 1px dotted #bbb; cursor: pointer; text-shadow: none; transition: color 0.3s;">View Contributors ➔</span>
                             </div>
@@ -136,7 +185,7 @@
                         </div>
 
                         <div>
-                            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; font-family: 'Cinzel'; font-size: 16px; font-weight: bold; color: #ff4400; text-shadow: 1px 1px 2px #000;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; font-family: 'Cinzel'; font-size: 16px; font-weight: bold; color: #ff4400; text-shadow: 1px 1px 2px #000;">
                                 <span>🩸 Blood of the Enemy (HKs)</span>
                                 <span id="guild-hk-tooltip-trigger" class="war-effort-link" style="color: #bbb; font-family: sans-serif; font-size: 12px; font-weight: normal; border-bottom: 1px dotted #bbb; cursor: pointer; text-shadow: none; transition: color 0.3s;">View Contributors ➔</span>
                             </div>
@@ -152,7 +201,7 @@
                         </div>
                         
                         <div>
-                            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; font-family: 'Cinzel'; font-size: 16px; font-weight: bold; color: #a335ee; text-shadow: 1px 1px 2px #000;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; font-family: 'Cinzel'; font-size: 16px; font-weight: bold; color: #a335ee; text-shadow: 1px 1px 2px #000;">
                                 <span>🐉 Dragon's Hoard (Epic Loot)</span>
                                 <span id="guild-loot-tooltip-trigger" class="war-effort-link" style="color: #bbb; font-family: sans-serif; font-size: 12px; font-weight: normal; border-bottom: 1px dotted #bbb; cursor: pointer; text-shadow: none; transition: color 0.3s;">View Contributors ➔</span>
                             </div>
@@ -168,7 +217,7 @@
                         </div>
 
                         <div>
-                            <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 8px; font-family: 'Cinzel'; font-size: 16px; font-weight: bold; color: #3FC7EB; text-shadow: 1px 1px 2px #000;">
+                            <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; font-family: 'Cinzel'; font-size: 16px; font-weight: bold; color: #3FC7EB; text-shadow: 1px 1px 2px #000;">
                                 <span>⚡ The Zenith Cohort (Max Level Pushes)</span>
                                 <span id="guild-zenith-tooltip-trigger" class="war-effort-link" style="color: #bbb; font-family: sans-serif; font-size: 12px; font-weight: normal; border-bottom: 1px dotted #bbb; cursor: pointer; text-shadow: none; transition: color 0.3s;">View Contributors ➔</span>
                             </div>
@@ -192,11 +241,11 @@
                 <div id="weekly-mvps-container" style="display:none; width: 100%; max-width: 1000px; margin: 0 auto 30px auto; animation: fadeInUp 0.5s forwards;">
                     <h3 style="font-family: 'Cinzel'; color: #ffd100; text-align: center; margin-bottom: 20px; text-shadow: 0 2px 4px #000; letter-spacing: 1px;">🏆 7-Day Guild MVPs 🏆</h3>
                     <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
-                        <div style="flex: 1; min-width: 320px; background: rgba(0,0,0,0.5); border: 1px solid #ff8000; border-radius: 8px; padding: 15px; box-shadow: inset 0 0 15px rgba(255,128,0,0.1);">
+                        <div style="flex: 1; min-width: 280px; background: rgba(0,0,0,0.5); border: 1px solid #ff8000; border-radius: 8px; padding: 15px; box-shadow: inset 0 0 15px rgba(255,128,0,0.1);">
                             <h4 style="color: #ff8000; text-align: center; font-family: 'Cinzel'; margin-top: 0; margin-bottom: 15px;">🛡️ Biggest Upgrades (iLvl)</h4>
                             <div id="mvp-pve-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
                         </div>
-                        <div style="flex: 1; min-width: 320px; background: rgba(0,0,0,0.5); border: 1px solid #ff4400; border-radius: 8px; padding: 15px; box-shadow: inset 0 0 15px rgba(255,68,0,0.1);">
+                        <div style="flex: 1; min-width: 280px; background: rgba(0,0,0,0.5); border: 1px solid #ff4400; border-radius: 8px; padding: 15px; box-shadow: inset 0 0 15px rgba(255,68,0,0.1);">
                             <h4 style="color: #ff4400; text-align: center; font-family: 'Cinzel'; margin-top: 0; margin-bottom: 15px;">⚔️ Deadliest (HKs)</h4>
                             <div id="mvp-pvp-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
                         </div>
@@ -396,7 +445,32 @@
             <div id="full-card-container" class="full-card-container"></div>
         </div> 
 
-        {{ timeline_html | safe }}
+        <div id="timeline" class="timeline-container">
+            <h2 id="timeline-title" class="timeline-title">📜 Guild Recent Activity</h2>
+            <div class="timeline-filters">
+                <div class="filter-group">
+                    <button class="tl-btn" data-type="all">All</button>
+                    <button class="tl-btn active" style="color: #0070dd; border-color: rgba(0, 112, 221, 0.5);" data-type="rare_plus">Rare+</button>
+                    <button class="tl-btn" style="color: #a335ee; border-color: rgba(163, 53, 238, 0.5);" data-type="epic">Epics+</button>
+                    <button class="tl-btn" data-type="level_up">Levels</button>
+                </div>
+                <div class="filter-group">
+                    <select id="tl-date-filter" class="tl-select">
+                        <option value="12">Last 12 Hours</option>
+                        <option value="24">Last 24 Hours</option>
+                        <option value="48">Last 48 Hours</option>
+                        <option value="all" selected>All Available</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="timeline-feed" id="timeline-feed-container">
+                </div>
+
+            <div style="text-align: center; margin-top: 20px; margin-bottom: 40px;">
+                <button id="load-more-btn" style="padding: 10px 20px; cursor: pointer; display: none; background: rgba(0,0,0,0.8); color: #ffd100; border: 1px solid #ffd100; border-radius: 4px; font-family: 'Cinzel', serif; transition: all 0.3s ease;">Load More Activity</button>
+            </div>
+        </div>
 
     </div> 
     
