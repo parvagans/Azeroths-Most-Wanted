@@ -92,8 +92,6 @@ async def setup_database(session):
         "CREATE TABLE IF NOT EXISTS gear (character_name TEXT, slot TEXT, item_id INTEGER, name TEXT, quality TEXT, icon_data TEXT, tooltip_params TEXT, last_detected TIMESTAMP DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (character_name, slot, item_id))",
         "CREATE TABLE IF NOT EXISTS timeline (timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, character_name TEXT, class TEXT, type TEXT, item_id INTEGER, item_name TEXT, item_quality TEXT, item_icon TEXT, level INTEGER)",
         "CREATE INDEX IF NOT EXISTS idx_timeline_timestamp ON timeline (timestamp DESC)",
-        "CREATE TABLE IF NOT EXISTS daily_snapshot (id TEXT PRIMARY KEY, snapshot_date TEXT, val1 INTEGER, val2 INTEGER, val3 INTEGER)",
-        "CREATE TABLE IF NOT EXISTS character_trends (char_name TEXT PRIMARY KEY, last_ilvl INTEGER, trend_ilvl INTEGER, last_hks INTEGER, trend_hks INTEGER)",
         "CREATE TABLE IF NOT EXISTS global_trends (id TEXT PRIMARY KEY, last_total INTEGER, trend_total INTEGER, last_active INTEGER, trend_active INTEGER, last_ready INTEGER, trend_ready INTEGER)",
         "CREATE TABLE IF NOT EXISTS daily_roster_stats (date TEXT PRIMARY KEY, total_roster INTEGER DEFAULT 0, active_roster INTEGER DEFAULT 0, avg_ilvl_70 INTEGER DEFAULT 0, total_hks INTEGER DEFAULT 0)",
         "CREATE TABLE IF NOT EXISTS char_history (char_name TEXT, record_date TEXT, ilvl INTEGER, hks INTEGER, PRIMARY KEY (char_name, record_date))"
@@ -295,28 +293,43 @@ async def main_async():
         print("💾 Compiling Batch Payload for Turso...")
         batch_stmts = []
         
+        # Create a lookup for original character rows to prevent redundant writes
+        orig_chars = {r['name']: r for r in char_rows}
+
         for char_name, data in history_data.items():
-            batch_stmts.append({
-                "q": """
-                    INSERT OR REPLACE INTO characters 
-                    (name, level, class, race, faction, equipped_item_level, last_login_ms, portrait_url, active_spec, honorable_kills) 
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                """,
-                "params": [
-                    char_name, 
-                    data.get('level', 0),
-                    data.get('class'),
-                    data.get('race'),
-                    data.get('faction'),
-                    data.get('equipped_item_level'),
-                    data.get('last_login_ms'),
-                    data.get('portrait_url'),
-                    data.get('active_spec'),
-                    data.get('honorable_kills')
-                ]
-            })
+            orig = orig_chars.get(char_name, {})
+            
+            # Only write to characters table if stats actually changed or it is a new character
+            if (orig.get('equipped_item_level') != data.get('equipped_item_level') or 
+                orig.get('level') != data.get('level') or
+                orig.get('last_login_ms') != data.get('last_login_ms') or 
+                orig.get('honorable_kills') != data.get('honorable_kills') or
+                orig.get('active_spec') != data.get('active_spec') or
+                not orig):
+                
+                batch_stmts.append({
+                    "q": """
+                        INSERT OR REPLACE INTO characters 
+                        (name, level, class, race, faction, equipped_item_level, last_login_ms, portrait_url, active_spec, honorable_kills) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    """,
+                    "params": [
+                        char_name, 
+                        data.get('level', 0),
+                        data.get('class'),
+                        data.get('race'),
+                        data.get('faction'),
+                        data.get('equipped_item_level'),
+                        data.get('last_login_ms'),
+                        data.get('portrait_url'),
+                        data.get('active_spec'),
+                        data.get('honorable_kills')
+                    ]
+                })
+                
+            # Only write gear if it is explicitly marked as new or changed
             for slot, item in data.items():
-                if isinstance(item, dict) and 'item_id' in item:
+                if isinstance(item, dict) and 'item_id' in item and item.get('is_new'):
                     batch_stmts.append({
                         "q": "INSERT OR REPLACE INTO gear (character_name, slot, item_id, name, quality, icon_data, tooltip_params) VALUES (?, ?, ?, ?, ?, ?, ?)",
                         "params": [char_name, slot, item.get('item_id'), item.get('name'), item.get('quality'), item.get('icon_data'), item.get('tooltip_params')]
@@ -344,7 +357,13 @@ async def main_async():
 
         for row in char_history_inserts:
             batch_stmts.append({
-                "q": "INSERT OR REPLACE INTO char_history (char_name, record_date, ilvl, hks) VALUES (?, ?, ?, ?)",
+                "q": """
+                    INSERT INTO char_history (char_name, record_date, ilvl, hks) 
+                    VALUES (?, ?, ?, ?) 
+                    ON CONFLICT(char_name, record_date) 
+                    DO UPDATE SET ilvl=excluded.ilvl, hks=excluded.hks 
+                    WHERE char_history.ilvl != excluded.ilvl OR char_history.hks != excluded.hks
+                """,
                 "params": list(row)
             })
             
@@ -358,24 +377,21 @@ async def main_async():
             "params": list(new_daily_stats_row)
         })
 
+        # Automatically delete characters and gear for players who left the guild
+        if roster_names:
+            placeholders = ",".join(["?"] * len(roster_names))
+            batch_stmts.append({
+                "q": f"DELETE FROM characters WHERE name NOT IN ({placeholders})",
+                "params": roster_names
+            })
+            batch_stmts.append({
+                "q": f"DELETE FROM gear WHERE character_name NOT IN ({placeholders})",
+                "params": roster_names
+            })
+
         print(f"☁️ Pushing {len(batch_stmts)} statements to Turso via HTTP API...")
         await push_turso_batch(session, batch_stmts)
         print("✅ Final push to Turso complete!")
-
-        print("🩹 Healing corrupted timeline icons...")
-        heal_stmt = {
-            "q": """
-                UPDATE timeline 
-                SET item_icon = (
-                    SELECT icon_data 
-                    FROM gear 
-                    WHERE gear.item_id = timeline.item_id AND gear.character_name = timeline.character_name 
-                    LIMIT 1
-                ) 
-                WHERE type = 'item' AND (item_icon IS NULL OR item_icon LIKE '%amw%')
-            """
-        }
-        await push_turso_batch(session, [heal_stmt])
 
         print("🌐 Generating final HTML Dashboard...")
         dashboard_feed = await fetch_turso(session, "SELECT * FROM timeline ORDER BY timestamp DESC LIMIT 5000")
