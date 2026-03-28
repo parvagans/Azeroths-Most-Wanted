@@ -88,7 +88,7 @@ async def setup_database(session):
     """Ensures database schema exists via HTTP API."""
     print("📂 Ensuring Turso schema exists...")
     schema_queries = [
-        "CREATE TABLE IF NOT EXISTS characters (name TEXT PRIMARY KEY, class TEXT, race TEXT, faction TEXT, guild TEXT, level INTEGER, equipped_item_level INTEGER, xp INTEGER, xp_max INTEGER, health INTEGER, power INTEGER, last_login_ms INTEGER, portrait_url TEXT, active_spec TEXT, honorable_kills INTEGER)",
+        "CREATE TABLE IF NOT EXISTS characters (name TEXT PRIMARY KEY, class TEXT, race TEXT, faction TEXT, guild TEXT, level INTEGER, equipped_item_level INTEGER, xp INTEGER, xp_max INTEGER, health INTEGER, power INTEGER, last_login_ms INTEGER, portrait_url TEXT, active_spec TEXT, honorable_kills INTEGER, power_type TEXT, strength_base INTEGER, strength_effective INTEGER, agility_base INTEGER, agility_effective INTEGER, intellect_base INTEGER, intellect_effective INTEGER, stamina_base INTEGER, stamina_effective INTEGER, melee_crit_value REAL, melee_haste_value REAL, attack_power INTEGER, main_hand_min REAL, main_hand_max REAL, main_hand_speed REAL, main_hand_dps REAL, off_hand_min REAL, off_hand_max REAL, off_hand_speed REAL, off_hand_dps REAL, spell_power INTEGER, spell_penetration INTEGER, spell_crit_value REAL, mana_regen REAL, mana_regen_combat REAL, armor_base INTEGER, armor_effective INTEGER, dodge REAL, parry REAL, block REAL, ranged_crit REAL, ranged_haste REAL, spell_haste REAL, spirit_base INTEGER, spirit_effective INTEGER, defense_base INTEGER, defense_effective INTEGER)",
         "CREATE TABLE IF NOT EXISTS gear (character_name TEXT, slot TEXT, item_id INTEGER, name TEXT, quality TEXT, icon_data TEXT, tooltip_params TEXT, last_detected TIMESTAMP DEFAULT CURRENT_TIMESTAMP, PRIMARY KEY (character_name, slot, item_id))",
         "CREATE TABLE IF NOT EXISTS timeline (timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP, character_name TEXT, class TEXT, type TEXT, item_id INTEGER, item_name TEXT, item_quality TEXT, item_icon TEXT, level INTEGER)",
         "CREATE INDEX IF NOT EXISTS idx_timeline_timestamp ON timeline (timestamp DESC)",
@@ -310,20 +310,36 @@ async def main_async():
                 batch_stmts.append({
                     "q": """
                         INSERT OR REPLACE INTO characters 
-                        (name, level, class, race, faction, equipped_item_level, last_login_ms, portrait_url, active_spec, honorable_kills) 
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        (name, level, class, race, faction, equipped_item_level, last_login_ms, portrait_url, active_spec, honorable_kills,
+                        health, power, power_type, strength_base, strength_effective, agility_base, agility_effective, 
+                        intellect_base, intellect_effective, stamina_base, stamina_effective, melee_crit_value, 
+                        melee_haste_value, attack_power, main_hand_min, main_hand_max, main_hand_speed, main_hand_dps, 
+                        off_hand_min, off_hand_max, off_hand_speed, off_hand_dps, spell_power, spell_penetration, 
+                        spell_crit_value, mana_regen, mana_regen_combat, armor_base, armor_effective, dodge, parry, 
+                        block, ranged_crit, ranged_haste, spell_haste, spirit_base, spirit_effective, defense_base, defense_effective) 
+                        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     """,
                     "params": [
-                        char_name, 
-                        data.get('level', 0),
-                        data.get('class'),
-                        data.get('race'),
-                        data.get('faction'),
-                        data.get('equipped_item_level'),
-                        data.get('last_login_ms'),
-                        data.get('portrait_url'),
-                        data.get('active_spec'),
-                        data.get('honorable_kills')
+                        char_name, data.get('level', 0), data.get('class'), data.get('race'), data.get('faction'),
+                        data.get('equipped_item_level'), data.get('last_login_ms'), data.get('portrait_url'),
+                        data.get('active_spec'), data.get('honorable_kills'),
+                        
+                        data.get('health'), data.get('power'), data.get('power_type'),
+                        data.get('strength_base'), data.get('strength_effective'),
+                        data.get('agility_base'), data.get('agility_effective'),
+                        data.get('intellect_base'), data.get('intellect_effective'),
+                        data.get('stamina_base'), data.get('stamina_effective'),
+                        data.get('melee_crit_value'), data.get('melee_haste_value'),
+                        data.get('attack_power'),
+                        data.get('main_hand_min'), data.get('main_hand_max'), data.get('main_hand_speed'), data.get('main_hand_dps'),
+                        data.get('off_hand_min'), data.get('off_hand_max'), data.get('off_hand_speed'), data.get('off_hand_dps'),
+                        data.get('spell_power'), data.get('spell_penetration'), data.get('spell_crit_value'),
+                        data.get('mana_regen'), data.get('mana_regen_combat'),
+                        data.get('armor_base'), data.get('armor_effective'),
+                        data.get('dodge'), data.get('parry'), data.get('block'),
+                        data.get('ranged_crit'), data.get('ranged_haste'), data.get('spell_haste'),
+                        data.get('spirit_base'), data.get('spirit_effective'),
+                        data.get('defense_base'), data.get('defense_effective')
                     ]
                 })
                 
@@ -404,6 +420,86 @@ async def main_async():
         print("🌐 Generating final HTML Dashboard...")
         dashboard_feed = await fetch_turso(session, "SELECT * FROM timeline ORDER BY timestamp DESC LIMIT 5000")
         
+        # --- NEW: WAR EFFORT TIME-LOCKING LOGIC (BULLETPROOF) ---
+        we_file = "asset/war_effort.json"
+        
+        berlin_tz = ZoneInfo("Europe/Berlin")
+        now_berlin = datetime.now(berlin_tz)
+        days_since_tuesday = (now_berlin.weekday() - 1) % 7
+        last_reset_berlin = now_berlin - timedelta(days=days_since_tuesday)
+        last_reset_berlin = last_reset_berlin.replace(hour=0, minute=0, second=0, microsecond=0)
+        last_reset_iso = last_reset_berlin.astimezone(timezone.utc).strftime("%Y-%m-%d %H:%M:%S")
+        
+        we_data = {"week_anchor": last_reset_berlin.strftime("%Y-%m-%d"), "locks": {}}
+        if os.path.exists(we_file):
+            try:
+                with open(we_file, "r", encoding="utf-8") as f:
+                    old_we = json.load(f)
+                    if old_we.get("week_anchor") == we_data["week_anchor"]:
+                        we_data["locks"] = old_we.get("locks", {})
+            except Exception:
+                pass
+
+        # 1. XP Lock (Safe)
+        if "xp" not in we_data["locks"]:
+            xp_events = [e for e in dashboard_feed if e.get('type') == 'level_up' and str(e.get('timestamp', '')).replace('T', ' ') >= last_reset_iso]
+            if len(xp_events) >= 750:
+                counts = {}
+                for e in xp_events: 
+                    c_name = e.get('character_name')
+                    if not c_name: continue
+                    counts[c_name.lower()] = counts.get(c_name.lower(), 0) + 1
+                top3 = [k for k, v in sorted(counts.items(), key=lambda item: item[1], reverse=True)[:3]]
+                mvp = top3[0].title() if top3 else "Unknown"
+                we_data["locks"]["xp"] = {"vanguards": top3, "monument": {"title": "🛡️ Hero's Journey", "desc": f"<span style='color:#ffd100; font-weight:bold;'>{mvp}</span> hit the 750th level!", "timestamp": now_berlin.isoformat()}}
+
+        # 2. HK Lock (Safe)
+        if "hk" not in we_data["locks"]:
+            hk_counts = {}
+            total_hks = 0
+            for r in roster_data:
+                if not r or not r.get("profile"): continue
+                prof = r["profile"]
+                trend = prof.get("trend_pvp") or prof.get("trend_hks") or 0
+                if trend > 0:
+                    total_hks += trend
+                    hk_counts[prof.get("name", "Unknown").lower()] = trend
+
+            if total_hks >= 500:
+                top3 = [k for k, v in sorted(hk_counts.items(), key=lambda item: item[1], reverse=True)[:3]]
+                mvp = top3[0].title() if top3 else "Unknown"
+                we_data["locks"]["hk"] = {"vanguards": top3, "monument": {"title": "🩸 Blood of the Enemy", "desc": f"<span style='color:#ff4400; font-weight:bold;'>{mvp}</span> led the 500 HK charge!", "timestamp": now_berlin.isoformat()}}
+
+        # 3. Loot Lock (Safe)
+        if "loot" not in we_data["locks"]:
+            loot_events = [e for e in dashboard_feed if e.get('type') == 'item' and e.get('item_quality') in ('EPIC', 'LEGENDARY') and str(e.get('timestamp', '')).replace('T', ' ') >= last_reset_iso]
+            if len(loot_events) >= 100:
+                counts = {}
+                for e in loot_events: 
+                    c_name = e.get('character_name')
+                    if not c_name: continue
+                    counts[c_name.lower()] = counts.get(c_name.lower(), 0) + 1
+                top3 = [k for k, v in sorted(counts.items(), key=lambda item: item[1], reverse=True)[:3]]
+                mvp = top3[0].title() if top3 else "Unknown"
+                we_data["locks"]["loot"] = {"vanguards": top3, "monument": {"title": "🐉 Dragon's Hoard", "desc": f"<span style='color:#a335ee; font-weight:bold;'>{mvp}</span> looted the 100th Epic!", "timestamp": now_berlin.isoformat()}}
+
+        # 4. Zenith Lock (Safe)
+        if "zenith" not in we_data["locks"]:
+            zenith_events = [e for e in dashboard_feed if e.get('type') == 'level_up' and e.get('level') == 70 and str(e.get('timestamp', '')).replace('T', ' ') >= last_reset_iso]
+            if len(zenith_events) >= 10:
+                counts = {}
+                for e in zenith_events: 
+                    c_name = e.get('character_name')
+                    if not c_name: continue
+                    counts[c_name.lower()] = counts.get(c_name.lower(), 0) + 1
+                top3 = [k for k, v in sorted(counts.items(), key=lambda item: item[1], reverse=True)[:3]]
+                mvp = top3[0].title() if top3 else "Unknown"
+                we_data["locks"]["zenith"] = {"vanguards": top3, "monument": {"title": "⚡ The Zenith Cohort", "desc": f"<span style='color:#3FC7EB; font-weight:bold;'>{mvp}</span> was the 10th Level 70!", "timestamp": now_berlin.isoformat()}}
+
+        with open(we_file, "w", encoding="utf-8") as f:
+            json.dump(we_data, f, ensure_ascii=False)
+        # --- END TIME-LOCKING LOGIC ---
+
         # Dump the heavy timeline payload to an external JSON file
         with open("asset/timeline.json", "w", encoding="utf-8") as f:
             json.dump(dashboard_feed, f, ensure_ascii=False)
