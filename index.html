@@ -928,10 +928,10 @@ a, .item-slot, .nav-btn, .clickable-class, .tt-char, .concise-item, .tl-btn, #ba
     </div>
 
     <script id="dashboard-config" type="application/json">
-        {"last_updated": "2026-03-29T10:41:50.145367Z", "active_14_days": 408, "raid_ready_count": 21, "prev_mvps": {"pve": null, "pvp": null}}
+        {"last_updated": "2026-03-29T13:54:53.199206Z", "active_14_days": 408, "raid_ready_count": 21, "prev_mvps": {"pve": null, "pvp": null}}
     </script>
     <script id="heatmap-data" type="application/json">
-        [{"date": "2026-03-23", "day_name": "Mon", "count": 575, "loot": 431, "levels": 144, "total_roster": 535, "active_roster": 309}, {"date": "2026-03-24", "day_name": "Tue", "count": 524, "loot": 405, "levels": 119, "total_roster": 608, "active_roster": 370}, {"date": "2026-03-25", "day_name": "Wed", "count": 725, "loot": 559, "levels": 166, "total_roster": 624, "active_roster": 388}, {"date": "2026-03-26", "day_name": "Thu", "count": 741, "loot": 579, "levels": 162, "total_roster": 628, "active_roster": 393}, {"date": "2026-03-27", "day_name": "Fri", "count": 586, "loot": 430, "levels": 156, "total_roster": 641, "active_roster": 405}, {"date": "2026-03-28", "day_name": "Sat", "count": 787, "loot": 594, "levels": 193, "total_roster": 643, "active_roster": 409}, {"date": "2026-03-29", "day_name": "Sun", "count": 233, "loot": 182, "levels": 51, "total_roster": 642, "active_roster": 408}]
+        [{"date": "2026-03-23", "day_name": "Mon", "count": 575, "loot": 431, "levels": 144, "total_roster": 535, "active_roster": 309}, {"date": "2026-03-24", "day_name": "Tue", "count": 524, "loot": 405, "levels": 119, "total_roster": 608, "active_roster": 370}, {"date": "2026-03-25", "day_name": "Wed", "count": 725, "loot": 559, "levels": 166, "total_roster": 624, "active_roster": 388}, {"date": "2026-03-26", "day_name": "Thu", "count": 741, "loot": 579, "levels": 162, "total_roster": 628, "active_roster": 393}, {"date": "2026-03-27", "day_name": "Fri", "count": 586, "loot": 430, "levels": 156, "total_roster": 641, "active_roster": 405}, {"date": "2026-03-28", "day_name": "Sat", "count": 787, "loot": 594, "levels": 193, "total_roster": 643, "active_roster": 409}, {"date": "2026-03-29", "day_name": "Sun", "count": 353, "loot": 269, "levels": 84, "total_roster": 643, "active_roster": 408}]
     </script>
 
     <script>
@@ -965,6 +965,29 @@ const TBC_XP = {
     60: 494000, 61: 517000, 62: 550000, 63: 587000, 64: 632000, 65: 684000, 66: 745000, 67: 815000, 68: 895000, 69: 985000
 };
 
+// --- Helper: Safely Parse Arrays ---
+function safeParseArray(val) {
+    if (!val) return [];
+    if (Array.isArray(val)) return val;
+    if (typeof val === 'string') {
+        try {
+            const parsed = JSON.parse(val);
+            return Array.isArray(parsed) ? parsed : [];
+        } catch (e) {
+            return [];
+        }
+    }
+    return [];
+}
+
+// --- Helper: Summarize Badges for Tooltips ---
+function summarizeBadges(badgeArray) {
+    const arr = safeParseArray(badgeArray);
+    if (arr.length === 0) return "";
+    const counts = arr.reduce((acc, val) => { acc[val] = (acc[val] || 0) + 1; return acc; }, {});
+    return Object.entries(counts).map(([k, v]) => `${v}x ${k}`).join(', ');
+}
+
 // NEW: Added 'async' so we can fetch the external files
 window.addEventListener('DOMContentLoaded', async () => {
 
@@ -976,12 +999,13 @@ window.addEventListener('DOMContentLoaded', async () => {
     let rawGuildRoster = [];
     let warEffortLocks = {}; 
     
-    // 1. Fetch CRITICAL Roster Data First
+    // 1. Fetch CRITICAL Roster Data Firstt
     try {
-        const rosterRes = await fetch('asset/roster.json');
+        const cb = new Date().getTime(); // Cache Buster
+        const rosterRes = await fetch(`asset/roster.json?t=${cb}`);
         rosterData = await rosterRes.json();
         
-        const rawRes = await fetch('asset/raw_roster.json');
+        const rawRes = await fetch(`asset/raw_roster.json?t=${cb}`);
         rawGuildRoster = await rawRes.json();
     } catch (error) {
         console.error("Failed to load armory data:", error);
@@ -995,7 +1019,8 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     // 2. Fetch NON-CRITICAL War Effort Locks (Ignore if it fails or is missing)
     try {
-        const weRes = await fetch('asset/war_effort.json');
+        const cb = new Date().getTime();
+        const weRes = await fetch(`asset/war_effort.json?t=${cb}`);
         if (weRes.ok) {
             const weData = await weRes.json();
             warEffortLocks = weData.locks || {};
@@ -1703,15 +1728,31 @@ window.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
-        // --- NEW: Grab the Guild Rank ---
+        // --- NEW: Grab the Guild Rank & Badges (With Failsafe Fallbacks) ---
         const guildRank = p.guild_rank || 'Member';
+        const vBadges = safeParseArray(p.vanguard_badges || char.vanguard_badges);
+        const cBadges = safeParseArray(p.campaign_badges || char.campaign_badges);
+        const vCount = vBadges.length;
+        const cCount = cBadges.length;
+        const pveChamp = parseInt(p.pve_champ_count || char.pve_champ_count) || 0;
+        const pvpChamp = parseInt(p.pvp_champ_count || char.pvp_champ_count) || 0;
 
+        const vTooltip = summarizeBadges(vBadges);
+        const cTooltip = summarizeBadges(cBadges);
+        
+        let extraBadges = '';
+        if (pveChamp > 0) extraBadges += `<span class="badge char-badge" style="background: rgba(255, 128, 0, 0.15); border-color: #ff8000; color: #ffad33; font-weight: bold; box-shadow: 0 0 10px rgba(255,128,0,0.5);" title="${pveChamp}x PvE Champion">👑 PvE Champ x${pveChamp}</span>`;
+        if (pvpChamp > 0) extraBadges += `<span class="badge char-badge" style="background: rgba(255, 68, 0, 0.15); border-color: #ff4400; color: #ff7733; font-weight: bold; box-shadow: 0 0 10px rgba(255,68,0,0.5);" title="${pvpChamp}x PvP Champion">⚔️ PvP Champ x${pvpChamp}</span>`;
+        if (vCount > 0) extraBadges += `<span class="badge char-badge" style="background: rgba(0, 255, 204, 0.15); border-color: #00ffcc; color: #66ffeb; font-weight: bold; box-shadow: 0 0 10px rgba(0,255,204,0.5);" title="Vanguard: ${vTooltip}">🌟 Vanguard x${vCount}</span>`;
+        if (cCount > 0) extraBadges += `<span class="badge char-badge" style="background: rgba(170, 170, 170, 0.15); border-color: #aaa; color: #ddd; font-weight: bold; box-shadow: 0 0 8px rgba(255,255,255,0.2);" title="Campaigns: ${cTooltip}">🎖️ Campaigns x${cCount}</span>`;
+        
         return `
 <div class="char-card ${factionCls}" style="border-top-color:${cHex};">
     <div style="text-align:center; margin-bottom:25px; border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:20px;">
         <h2 style="color:${cHex}; font-family:Cinzel; font-size:38px; margin:0; text-shadow:0 2px 4px #000;">${p.name || 'Unknown'}</h2>
         <div class="char-badges-container">
             <span class="badge char-badge" style="border-color: #ffd100; color: #ffd100; text-shadow: 1px 1px 2px #000;">🛡️ ${guildRank}</span>
+            ${extraBadges}
             <span class="badge char-badge default-badge">Level ${p.level || 0}</span>
             <span class="badge char-badge" style="border-color: #ff8000; color: #ff8000;">iLvl ${p.equipped_item_level || 0}</span>
             <span class="badge char-badge default-badge">${raceName}</span>
@@ -2063,6 +2104,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             
             // 2. Setup Variables
             let isClickable = false;
+            let cleanName = ''; // <--- NEW: Strict logic name
             let displayName, cClass, raceName, cHex, portraitURL, level;
             let activeSpecAttr = 'unspecced';
             let specIconHtml = '';
@@ -2075,7 +2117,27 @@ window.addEventListener('DOMContentLoaded', async () => {
             if (deepChar && deepChar.profile) {
                 const p = deepChar.profile;
                 isClickable = true;
-                displayName = p.name || 'Unknown';
+                
+                // Add tiny MVP and Vanguard stars (With Failsafe Fallbacks)
+                const vBadges = safeParseArray(p.vanguard_badges || deepChar.vanguard_badges);
+                const cBadges = safeParseArray(p.campaign_badges || deepChar.campaign_badges);
+                const vCount = vBadges.length;
+                const cCount = cBadges.length;
+                const pveChamp = parseInt(p.pve_champ_count || deepChar.pve_champ_count) || 0;
+                const pvpChamp = parseInt(p.pvp_champ_count || deepChar.pvp_champ_count) || 0;
+                
+                const vTooltip = summarizeBadges(vBadges);
+                const cTooltip = summarizeBadges(cBadges);
+
+                let cBadgesHtml = '<div style="display:inline-flex; gap:4px; margin-left:8px; vertical-align:middle;">';
+                if (pveChamp > 0) cBadgesHtml += `<span style="display:inline-flex; align-items:center; background:rgba(255, 128, 0, 0.15); border:1px solid rgba(255, 128, 0, 0.4); color:#ffad33; font-size:10px; font-weight:bold; padding:1px 4px; border-radius:4px; box-shadow:0 0 5px rgba(255,128,0,0.3);" title="${pveChamp}x PvE Champion">👑 ${pveChamp}</span>`;
+                if (pvpChamp > 0) cBadgesHtml += `<span style="display:inline-flex; align-items:center; background:rgba(255, 68, 0, 0.15); border:1px solid rgba(255, 68, 0, 0.4); color:#ff7733; font-size:10px; font-weight:bold; padding:1px 4px; border-radius:4px; box-shadow:0 0 5px rgba(255,68,0,0.3);" title="${pvpChamp}x PvP Champion">⚔️ ${pvpChamp}</span>`;
+                if (vCount > 0) cBadgesHtml += `<span style="display:inline-flex; align-items:center; background:rgba(0, 255, 204, 0.15); border:1px solid rgba(0, 255, 204, 0.4); color:#66ffeb; font-size:10px; font-weight:bold; padding:1px 4px; border-radius:4px; box-shadow:0 0 5px rgba(0,255,204,0.3);" title="Vanguard: ${vTooltip}">🌟 ${vCount}</span>`;
+                if (cCount > 0) cBadgesHtml += `<span style="display:inline-flex; align-items:center; background:rgba(170, 170, 170, 0.15); border:1px solid rgba(170, 170, 170, 0.4); color:#ddd; font-size:10px; font-weight:bold; padding:1px 4px; border-radius:4px; box-shadow:0 0 5px rgba(255,255,255,0.1);" title="Campaigns: ${cTooltip}">🎖️ ${cCount}</span>`;
+                cBadgesHtml += '</div>';
+
+                cleanName = (p.name || 'Unknown').toLowerCase();
+                displayName = (p.name || 'Unknown') + cBadgesHtml;
                 cClass = getCharClass(deepChar);
                 raceName = p.race && p.race.name ? (typeof p.race.name === 'string' ? p.race.name : (p.race.name.en_US || 'Unknown')) : 'Unknown';
                 cHex = CLASS_COLORS[cClass] || "#fff";
@@ -2099,6 +2161,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                     else trendHTML = `<span style="color: #555; font-size: 12px; margin-left: 10px; width: 30px; text-align: right; display: inline-block;">-</span>`;
                 }
             } else {
+                cleanName = (char.name || 'Unknown').toLowerCase();
                 displayName = char.name || 'Unknown';
                 cClass = char.class || 'Unknown';
                 raceName = char.race || 'Unknown';
@@ -2125,15 +2188,15 @@ window.addEventListener('DOMContentLoaded', async () => {
             let vanguardBadgeHtml = '';
             if (hashUrl.startsWith('war-effort-') && window.warEffortVanguards) {
                 const type = hashUrl.replace('war-effort-', '');
-                if (window.warEffortVanguards[type] && window.warEffortVanguards[type].includes(displayName.toLowerCase())) {
+                if (window.warEffortVanguards[type] && window.warEffortVanguards[type].includes(cleanName)) { // FIXED: Using cleanName
                     vanguardClass = 'vanguard-aura';
                     let timeText = '';
                     
-                    // Grab the locked timestamp and format it nicely
+                    // Grab the locked timestamp and format it nicely (24-Hour)
                     if (window.warEffortLockTimes && window.warEffortLockTimes[type]) {
                         const dt = new Date(window.warEffortLockTimes[type]);
                         if (!isNaN(dt)) {
-                            timeText = ` <span style="color:#aaa; font-size:9px; font-weight:normal; margin-left:4px; text-transform:none;">(${dt.toLocaleDateString(undefined, {month:'short', day:'numeric'})} ${dt.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})})</span>`;
+                            timeText = ` <span style="color:#aaa; font-size:9px; font-weight:normal; margin-left:4px; text-transform:none;">(${dt.toLocaleString('en-GB', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', hour12:false}).replace(',', '')})</span>`;
                         }
                     }
                     
@@ -2158,7 +2221,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                     const trendVal = deepChar && deepChar.profile ? (deepChar.profile.trend_pvp || deepChar.profile.trend_hks || 0) : 0;
                     statsHtml = `<span style="color:#ff4400; font-weight:bold; font-size:18px; text-shadow: 1px 1px 2px #000;">+${trendVal.toLocaleString()} HKs Contributed</span>`;
                 } else if (window.warEffortContext) {
-                    const charKey = displayName.toLowerCase();
+                    const charKey = cleanName; // FIXED: Using cleanName
                     const contextData = window.warEffortContext[charKey];
                     
                     if (contextData) {
@@ -2209,7 +2272,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             }
 
             return `
-            <div onclick="selectCharacter('${displayName.toLowerCase()}')" class="concise-char-bar tt-char ${podiumClass} ${vanguardClass}" data-char="${displayName.toLowerCase()}" data-class="${cClass}" data-spec="${activeSpecAttr}" style="border-left-color:${cHex}; ${barStyleOverride}">
+            <div onclick="selectCharacter('${cleanName}')" class="concise-char-bar tt-char ${podiumClass} ${vanguardClass}" data-char="${cleanName}" data-class="${cClass}" data-spec="${activeSpecAttr}" style="border-left-color:${cHex}; ${barStyleOverride}">
                 <div style="${innerWrapperStyle}">
                     <div style="display: flex; align-items: center;">
                         ${rankHtml}
@@ -2274,11 +2337,27 @@ window.addEventListener('DOMContentLoaded', async () => {
                 const specIconHtml = specIconUrl ? `<img src="${specIconUrl}" style="width: 14px; height: 14px; border-radius: 50%; vertical-align: middle; margin-right: 4px; border: 1px solid #222;">` : '';
                 const displaySpecClass = activeSpec ? `${activeSpec} ${cClass}` : cClass;
                 
-                // --- NEW: Grab the Guild Rank from the profile ---
+                // --- NEW: Grab the Guild Rank & MVP Badges (With Failsafe Fallbacks) ---
                 const guildRank = p.guild_rank || 'Member';
+                const vBadges = safeParseArray(p.vanguard_badges || char.vanguard_badges);
+                const cBadges = safeParseArray(p.campaign_badges || char.campaign_badges);
+                const vCount = vBadges.length;
+                const cCount = cBadges.length;
+                const pveChamp = parseInt(p.pve_champ_count || char.pve_champ_count) || 0;
+                const pvpChamp = parseInt(p.pvp_champ_count || char.pvp_champ_count) || 0;
+
+                const vTooltip = summarizeBadges(vBadges);
+                const cTooltip = summarizeBadges(cBadges);
                 
+                let cBadgesHtml = '<div style="display:inline-flex; gap:4px; margin-left:10px; vertical-align:middle;">';
+                if (pveChamp > 0) cBadgesHtml += `<span style="background:rgba(255, 128, 0, 0.2); border:1px solid rgba(255, 128, 0, 0.5); color:#ffad33; padding:1px 4px; border-radius:4px; font-size:10px; font-weight:bold;">👑 ${pveChamp}</span>`;
+                if (pvpChamp > 0) cBadgesHtml += `<span style="background:rgba(255, 68, 0, 0.2); border:1px solid rgba(255, 68, 0, 0.5); color:#ff7733; padding:1px 4px; border-radius:4px; font-size:10px; font-weight:bold;">⚔️ ${pvpChamp}</span>`;
+                if (vCount > 0) cBadgesHtml += `<span style="background:rgba(0, 255, 204, 0.2); border:1px solid rgba(0, 255, 204, 0.5); color:#66ffeb; padding:1px 4px; border-radius:4px; font-size:10px; font-weight:bold;">🌟 ${vCount}</span>`;
+                if (cCount > 0) cBadgesHtml += `<span style="background:rgba(170, 170, 170, 0.2); border:1px solid rgba(170, 170, 170, 0.5); color:#ddd; padding:1px 4px; border-radius:4px; font-size:10px; font-weight:bold;">🎖️ ${cCount}</span>`;
+                cBadgesHtml += '</div>';
+
                 tooltip.innerHTML = `
-                    <div class="tt-name" style="color:${cHex};">${p.name || 'Unknown'}</div>
+                    <div class="tt-name" style="color:${cHex}; display:flex; align-items:center;">${p.name || 'Unknown'}${cBadgesHtml}</div>
                     <div class="tt-row"><span class="tt-label">Guild Rank</span><span class="tt-val" style="color:#ffd100;">${guildRank}</span></div>
                     <div class="tt-row"><span class="tt-label">Level / Race</span><span class="tt-val">${p.level || 0} / ${raceName}</span></div>
                     <div class="tt-row"><span class="tt-label">Class</span><span class="tt-val" style="color:${cHex}; display:flex; align-items:center;">${specIconHtml}${displaySpecClass}</span></div>
@@ -2892,7 +2971,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                             let cleanTs = (recent.timestamp || '').replace('Z', '+00:00');
                             if (!cleanTs.includes('+') && !cleanTs.includes('Z')) cleanTs += 'Z';
                             const dt = new Date(cleanTs);
-                            if (!isNaN(dt.getTime())) timeStr = ` <span style="color:#888; font-size:11px; white-space:nowrap; margin-left:4px;">(${dt.toLocaleDateString(undefined, {month:'short', day:'numeric'})})</span>`;
+                            if (!isNaN(dt.getTime())) timeStr = ` <span style="color:#888; font-size:11px; white-space:nowrap; margin-left:4px;">(${dt.toLocaleString('en-GB', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', hour12:false}).replace(',', '')})</span>`;
                         } catch(e) {}
 
                         if (recent.type === 'level_up') {
@@ -3665,7 +3744,8 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     async function fetchTimeline() {
         try {
-            const response = await fetch('asset/timeline.json');
+            const cb = new Date().getTime();
+            const response = await fetch(`asset/timeline.json?t=${cb}`);
             timelineData = await response.json();
             
             // --- FIX: Update Epic Loot KPI dynamically after fetch ---
@@ -3792,13 +3872,13 @@ window.addEventListener('DOMContentLoaded', async () => {
                 eventEl.setAttribute('data-quality', event.item_quality);
             }
             
-            // Format the date to match production (e.g., "Mar 24")
+            // Format the date to 24-hour clock (e.g., "24 Mar 14:30")
             let date_str = event.timestamp.substring(0, 10);
             try {
                 const cleanTs = event.timestamp.replace('Z', '+00:00');
                 const dt = new Date(cleanTs);
                 if (!isNaN(dt.getTime())) {
-                    date_str = dt.toLocaleString('en-US', { month: 'short', day: 'numeric' });
+                    date_str = dt.toLocaleString('en-GB', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).replace(',', '');
                 }
             } catch(e) {}
             
@@ -3938,7 +4018,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                         <span style="color: ${cHex}; font-family: 'Cinzel'; font-weight: bold; font-size: 14px; text-shadow: 1px 1px 2px #000;">${p.name}</span>
                     </div>
                     <div style="display: flex; align-items: center; color: #2ecc71; font-weight: bold; font-size: 15px; text-shadow: 1px 1px 2px #000;">
-                        ▲ ${trend.toLocaleString()} <span style="font-size:10px; color:#888; margin-left: 3px;">${label}</span>
+                        ▲ ${trend.toLocaleString()} <span style="font-size:10px; color:#888; margin-left: 3px; text-transform:uppercase;">${label}</span>
                     </div>
                 </div>`;
             }).join('');
@@ -4254,9 +4334,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                     const eventEl = document.createElement('div');
                     eventEl.className = 'monument-card';
                     const dt = new Date(mon.timestamp);
-                    const timeOptions = { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' };
-                    const timeStr = isNaN(dt) ? '' : dt.toLocaleDateString(undefined, timeOptions);
-                    
+                    const timeStr = isNaN(dt) ? '' : dt.toLocaleString('en-GB', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', hour12:false}).replace(',', '');
                     eventEl.innerHTML = `
                         <div class="mon-header">
                             <span class="mon-icon">🏆</span>
