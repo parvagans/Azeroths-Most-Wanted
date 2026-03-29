@@ -766,8 +766,14 @@ window.addEventListener('DOMContentLoaded', async () => {
             }
         });
 
-        // --- NEW: Grab the Guild Rank ---
+        // --- NEW: Grab the Guild Rank & Badges ---
         const guildRank = p.guild_rank || 'Member';
+        const vCount = p.vanguard_count || 0;
+        const cCount = p.campaigns_count || 0;
+        
+        let extraBadges = '';
+        if (vCount > 0) extraBadges += `<span class="badge char-badge" style="border-color: #00ffcc; color: #00ffcc; box-shadow: 0 0 8px rgba(0,255,204,0.4);">🌟 Vanguard x${vCount}</span>`;
+        if (cCount > 0) extraBadges += `<span class="badge char-badge" style="border-color: #aaa; color: #fff;">🎖️ ${cCount} Campaigns</span>`;
 
         return `
 <div class="char-card ${factionCls}" style="border-top-color:${cHex};">
@@ -775,6 +781,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         <h2 style="color:${cHex}; font-family:Cinzel; font-size:38px; margin:0; text-shadow:0 2px 4px #000;">${p.name || 'Unknown'}</h2>
         <div class="char-badges-container">
             <span class="badge char-badge" style="border-color: #ffd100; color: #ffd100; text-shadow: 1px 1px 2px #000;">🛡️ ${guildRank}</span>
+            ${extraBadges}
             <span class="badge char-badge default-badge">Level ${p.level || 0}</span>
             <span class="badge char-badge" style="border-color: #ff8000; color: #ff8000;">iLvl ${p.equipped_item_level || 0}</span>
             <span class="badge char-badge default-badge">${raceName}</span>
@@ -1126,6 +1133,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             
             // 2. Setup Variables
             let isClickable = false;
+            let cleanName = ''; // <--- NEW: Strict logic name
             let displayName, cClass, raceName, cHex, portraitURL, level;
             let activeSpecAttr = 'unspecced';
             let specIconHtml = '';
@@ -1138,7 +1146,19 @@ window.addEventListener('DOMContentLoaded', async () => {
             if (deepChar && deepChar.profile) {
                 const p = deepChar.profile;
                 isClickable = true;
-                displayName = p.name || 'Unknown';
+                
+                // Add tiny MVP and Vanguard stars
+                const vCount = p.vanguard_count || 0;
+                const pveChamp = p.pve_champ_count || 0;
+                const pvpChamp = p.pvp_champ_count || 0;
+                
+                let cBadges = '';
+                if (pveChamp > 0) cBadges += `<span style="color:#ff8000; font-size:12px; margin-left:6px; filter:drop-shadow(0 0 2px #ff8000);" title="${pveChamp}x PvE Champ">👑</span>`;
+                if (pvpChamp > 0) cBadges += `<span style="color:#ff4400; font-size:12px; margin-left:2px; filter:drop-shadow(0 0 2px #ff4400);" title="${pvpChamp}x PvP Champ">⚔️</span>`;
+                if (vCount > 0) cBadges += `<span style="color:#00ffcc; font-size:12px; margin-left:2px; filter:drop-shadow(0 0 2px #00ffcc);" title="${vCount}x Vanguard">🌟</span>`;
+                
+                cleanName = (p.name || 'Unknown').toLowerCase();
+                displayName = (p.name || 'Unknown') + cBadges;
                 cClass = getCharClass(deepChar);
                 raceName = p.race && p.race.name ? (typeof p.race.name === 'string' ? p.race.name : (p.race.name.en_US || 'Unknown')) : 'Unknown';
                 cHex = CLASS_COLORS[cClass] || "#fff";
@@ -1162,6 +1182,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                     else trendHTML = `<span style="color: #555; font-size: 12px; margin-left: 10px; width: 30px; text-align: right; display: inline-block;">-</span>`;
                 }
             } else {
+                cleanName = (char.name || 'Unknown').toLowerCase();
                 displayName = char.name || 'Unknown';
                 cClass = char.class || 'Unknown';
                 raceName = char.race || 'Unknown';
@@ -1188,15 +1209,15 @@ window.addEventListener('DOMContentLoaded', async () => {
             let vanguardBadgeHtml = '';
             if (hashUrl.startsWith('war-effort-') && window.warEffortVanguards) {
                 const type = hashUrl.replace('war-effort-', '');
-                if (window.warEffortVanguards[type] && window.warEffortVanguards[type].includes(displayName.toLowerCase())) {
+                if (window.warEffortVanguards[type] && window.warEffortVanguards[type].includes(cleanName)) { // FIXED: Using cleanName
                     vanguardClass = 'vanguard-aura';
                     let timeText = '';
                     
-                    // Grab the locked timestamp and format it nicely
+                    // Grab the locked timestamp and format it nicely (24-Hour)
                     if (window.warEffortLockTimes && window.warEffortLockTimes[type]) {
                         const dt = new Date(window.warEffortLockTimes[type]);
                         if (!isNaN(dt)) {
-                            timeText = ` <span style="color:#aaa; font-size:9px; font-weight:normal; margin-left:4px; text-transform:none;">(${dt.toLocaleDateString(undefined, {month:'short', day:'numeric'})} ${dt.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'})})</span>`;
+                            timeText = ` <span style="color:#aaa; font-size:9px; font-weight:normal; margin-left:4px; text-transform:none;">(${dt.toLocaleString('en-GB', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', hour12:false}).replace(',', '')})</span>`;
                         }
                     }
                     
@@ -1221,7 +1242,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                     const trendVal = deepChar && deepChar.profile ? (deepChar.profile.trend_pvp || deepChar.profile.trend_hks || 0) : 0;
                     statsHtml = `<span style="color:#ff4400; font-weight:bold; font-size:18px; text-shadow: 1px 1px 2px #000;">+${trendVal.toLocaleString()} HKs Contributed</span>`;
                 } else if (window.warEffortContext) {
-                    const charKey = displayName.toLowerCase();
+                    const charKey = cleanName; // FIXED: Using cleanName
                     const contextData = window.warEffortContext[charKey];
                     
                     if (contextData) {
@@ -1272,7 +1293,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             }
 
             return `
-            <div onclick="selectCharacter('${displayName.toLowerCase()}')" class="concise-char-bar tt-char ${podiumClass} ${vanguardClass}" data-char="${displayName.toLowerCase()}" data-class="${cClass}" data-spec="${activeSpecAttr}" style="border-left-color:${cHex}; ${barStyleOverride}">
+            <div onclick="selectCharacter('${cleanName}')" class="concise-char-bar tt-char ${podiumClass} ${vanguardClass}" data-char="${cleanName}" data-class="${cClass}" data-spec="${activeSpecAttr}" style="border-left-color:${cHex}; ${barStyleOverride}">
                 <div style="${innerWrapperStyle}">
                     <div style="display: flex; align-items: center;">
                         ${rankHtml}
@@ -1337,11 +1358,13 @@ window.addEventListener('DOMContentLoaded', async () => {
                 const specIconHtml = specIconUrl ? `<img src="${specIconUrl}" style="width: 14px; height: 14px; border-radius: 50%; vertical-align: middle; margin-right: 4px; border: 1px solid #222;">` : '';
                 const displaySpecClass = activeSpec ? `${activeSpec} ${cClass}` : cClass;
                 
-                // --- NEW: Grab the Guild Rank from the profile ---
+                // --- NEW: Grab the Guild Rank & Vanguard Status ---
                 const guildRank = p.guild_rank || 'Member';
+                const vCount = p.vanguard_count || 0;
+                const vBadgeHtml = vCount > 0 ? `<span style="color:#00ffcc; font-size:12px; margin-left:8px; text-shadow: 0 0 4px rgba(0,255,204,0.8);">🌟x${vCount}</span>` : '';
                 
                 tooltip.innerHTML = `
-                    <div class="tt-name" style="color:${cHex};">${p.name || 'Unknown'}</div>
+                    <div class="tt-name" style="color:${cHex}; display:flex; align-items:center;">${p.name || 'Unknown'}${vBadgeHtml}</div>
                     <div class="tt-row"><span class="tt-label">Guild Rank</span><span class="tt-val" style="color:#ffd100;">${guildRank}</span></div>
                     <div class="tt-row"><span class="tt-label">Level / Race</span><span class="tt-val">${p.level || 0} / ${raceName}</span></div>
                     <div class="tt-row"><span class="tt-label">Class</span><span class="tt-val" style="color:${cHex}; display:flex; align-items:center;">${specIconHtml}${displaySpecClass}</span></div>
@@ -1955,7 +1978,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                             let cleanTs = (recent.timestamp || '').replace('Z', '+00:00');
                             if (!cleanTs.includes('+') && !cleanTs.includes('Z')) cleanTs += 'Z';
                             const dt = new Date(cleanTs);
-                            if (!isNaN(dt.getTime())) timeStr = ` <span style="color:#888; font-size:11px; white-space:nowrap; margin-left:4px;">(${dt.toLocaleDateString(undefined, {month:'short', day:'numeric'})})</span>`;
+                            if (!isNaN(dt.getTime())) timeStr = ` <span style="color:#888; font-size:11px; white-space:nowrap; margin-left:4px;">(${dt.toLocaleString('en-GB', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', hour12:false}).replace(',', '')})</span>`;
                         } catch(e) {}
 
                         if (recent.type === 'level_up') {
@@ -2855,13 +2878,13 @@ window.addEventListener('DOMContentLoaded', async () => {
                 eventEl.setAttribute('data-quality', event.item_quality);
             }
             
-            // Format the date to match production (e.g., "Mar 24")
+            // Format the date to 24-hour clock (e.g., "24 Mar 14:30")
             let date_str = event.timestamp.substring(0, 10);
             try {
                 const cleanTs = event.timestamp.replace('Z', '+00:00');
                 const dt = new Date(cleanTs);
                 if (!isNaN(dt.getTime())) {
-                    date_str = dt.toLocaleString('en-US', { month: 'short', day: 'numeric' });
+                    date_str = dt.toLocaleString('en-GB', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).replace(',', '');
                 }
             } catch(e) {}
             
@@ -3001,7 +3024,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                         <span style="color: ${cHex}; font-family: 'Cinzel'; font-weight: bold; font-size: 14px; text-shadow: 1px 1px 2px #000;">${p.name}</span>
                     </div>
                     <div style="display: flex; align-items: center; color: #2ecc71; font-weight: bold; font-size: 15px; text-shadow: 1px 1px 2px #000;">
-                        ▲ ${trend.toLocaleString()} <span style="font-size:10px; color:#888; margin-left: 3px;">${label}</span>
+                        ▲ ${trend.toLocaleString()} <span style="font-size:10px; color:#888; margin-left: 3px; text-transform:uppercase;">${label}</span>
                     </div>
                 </div>`;
             }).join('');
@@ -3317,9 +3340,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                     const eventEl = document.createElement('div');
                     eventEl.className = 'monument-card';
                     const dt = new Date(mon.timestamp);
-                    const timeOptions = { month: 'short', day: 'numeric', hour: '2-digit', minute:'2-digit' };
-                    const timeStr = isNaN(dt) ? '' : dt.toLocaleDateString(undefined, timeOptions);
-                    
+                    const timeStr = isNaN(dt) ? '' : dt.toLocaleString('en-GB', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', hour12:false}).replace(',', '');
                     eventEl.innerHTML = `
                         <div class="mon-header">
                             <span class="mon-icon">🏆</span>
