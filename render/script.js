@@ -551,14 +551,19 @@ window.addEventListener('DOMContentLoaded', async () => {
                 let podiumTrend = '<span style="color: #555;">-</span>';
                 if (trend > 0) podiumTrend = `<span style="color: #2ecc71;">▲ ${trend}</span>`;
                 else if (trend < 0) podiumTrend = `<span style="color: #e74c3c;">▼ ${Math.abs(trend)}</span>`;
+                
+                const crownHtml = rank === 1 ? `<div class="podium-crown">👑</div>` : '';
 
                 pveHTML += `
                 <div class="podium-block ${stepClass} tt-char" data-char="${(p.name || '').toLowerCase()}" onclick="selectCharacter('${(p.name || '').toLowerCase()}')" style="border-top: 3px solid ${cHex};">
+                    ${crownHtml}
                     <img src="${portraitURL}" class="podium-avatar" style="border-color: ${cHex};">
                     <div class="podium-rank" style="color: ${rankColor};">#${rank}</div>
                     <div style="color: ${cHex}; font-family: 'Cinzel'; font-weight: bold; font-size: 13px; text-shadow: 1px 1px 2px #000; z-index: 2; margin-bottom: 4px; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</div>
-                    <div style="color: #ff8000; font-weight: bold; font-size: 12px; text-shadow: 1px 1px 2px #000; z-index: 2; margin-bottom: 2px;">${p.equipped_item_level || 0} <span style="font-size:9px; color:#888; text-transform:uppercase;">iLvl</span></div>
-                    <div style="z-index: 2; text-align: center; font-size: 12px; font-weight: bold;">${podiumTrend}</div>
+                    <div class="podium-pill">
+                        <div style="color: #ff8000; font-weight: bold; font-size: 13px; text-shadow: 1px 1px 2px #000; margin-bottom: 2px;">${p.equipped_item_level || 0} <span style="font-size:9px; color:#888; text-transform:uppercase;">iLvl</span></div>
+                        <div style="text-align: center; font-size: 12px; font-weight: bold;">${podiumTrend}</div>
+                    </div>
                 </div>`;
             } else {
                 pveListHTML += `
@@ -615,13 +620,18 @@ window.addEventListener('DOMContentLoaded', async () => {
                 if (trend > 0) podiumTrend = `<span style="color: #2ecc71;">▲ ${trend}</span>`;
                 else if (trend < 0) podiumTrend = `<span style="color: #e74c3c;">▼ ${Math.abs(trend)}</span>`;
 
+                const crownHtml = rank === 1 ? `<div class="podium-crown">👑</div>` : '';
+
                 pvpHTML += `
                 <div class="podium-block ${stepClass} tt-char" data-char="${(p.name || '').toLowerCase()}" onclick="selectCharacter('${(p.name || '').toLowerCase()}')" style="border-top: 3px solid ${cHex};">
+                    ${crownHtml}
                     <img src="${portraitURL}" class="podium-avatar" style="border-color: ${cHex};">
                     <div class="podium-rank" style="color: ${rankColor};">#${rank}</div>
                     <div style="color: ${cHex}; font-family: 'Cinzel'; font-weight: bold; font-size: 13px; text-shadow: 1px 1px 2px #000; z-index: 2; margin-bottom: 4px; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</div>
-                    <div style="color: #ff4400; font-weight: bold; font-size: 12px; text-shadow: 1px 1px 2px #000; z-index: 2; margin-bottom: 2px;">${hkCount} <span style="font-size:9px; color:#888; text-transform:uppercase;">HKs</span></div>
-                    <div style="z-index: 2; text-align: center; font-size: 12px; font-weight: bold;">${podiumTrend}</div>
+                    <div class="podium-pill">
+                        <div style="color: #ff4400; font-weight: bold; font-size: 13px; text-shadow: 1px 1px 2px #000; margin-bottom: 2px;">${hkCount} <span style="font-size:9px; color:#888; text-transform:uppercase;">HKs</span></div>
+                        <div style="text-align: center; font-size: 12px; font-weight: bold;">${podiumTrend}</div>
+                    </div>
                 </div>`;
             } else {
                 pvpListHTML += `
@@ -1696,13 +1706,16 @@ window.addEventListener('DOMContentLoaded', async () => {
                     pVanguard = `<div style="position:absolute; top:-10px; right:-10px; font-size:22px; filter:drop-shadow(0 0 5px #00ffcc); z-index:10;" title="Vanguard">🌟</div>`;
                 }
 
+                const crownHtml = rank === 1 ? `<div class="podium-crown">👑</div>` : '';
+
                 podiumsHTML += `
                 <div class="podium-block ${stepClass} tt-char" data-char="${cleanName}" data-class="${cClass}" data-spec="${activeSpecAttr}" data-awards="${awardsAttr.join(',')}" onclick="selectCharacter('${cleanName}')" style="border-top: 3px solid ${cHex};">
+                    ${crownHtml}
                     ${pVanguard}
                     <img src="${portraitURL}" class="podium-avatar" style="border-color: ${cHex};">
                     <div class="podium-rank" style="color: ${rankColor};">#${rank}</div>
                     <div style="color: ${cHex}; font-family: 'Cinzel'; font-weight: bold; font-size: 13px; text-shadow: 1px 1px 2px #000; z-index: 2; margin-bottom: 4px; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${baseName}</div>
-                    <div style="z-index: 2; text-align: center;">${podiumStatText}</div>
+                    <div class="podium-pill">${podiumStatText}</div>
                 </div>`;
             } else {
                 listItemsHTML += rowHTML;
@@ -1966,6 +1979,10 @@ window.addEventListener('DOMContentLoaded', async () => {
         if (searchInput) searchInput.value = '';
         if (searchAutoComplete) searchAutoComplete.classList.remove('show');
         
+        // Show nav search by default on sub-pages
+        const navSearch = document.querySelector('.navbar .search-container');
+        if (navSearch) navSearch.style.display = 'block';
+
         if (timeline) timeline.style.display = 'block';
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
@@ -2382,6 +2399,10 @@ window.addEventListener('DOMContentLoaded', async () => {
         emptyState.style.display = 'block';
         if (navbar) navbar.style.background = 'rgba(15, 15, 15, 0.85)';
         updateDropdownLabel('all');
+
+        // Hide nav search purely on the homepage
+        const navSearch = document.querySelector('.navbar .search-container');
+        if (navSearch) navSearch.style.display = 'none';
 
         const xpCont = document.getElementById('guild-xp-container');
         if (xpCont) xpCont.style.display = 'block';
@@ -3570,14 +3591,18 @@ window.addEventListener('DOMContentLoaded', async () => {
                 // Assign unique step heights & flex-orders based on rank
                 const stepClass = rank === 1 ? 'podium-step-1' : (rank === 2 ? 'podium-step-2' : 'podium-step-3');
                 const rankColor = rank === 1 ? '#ffd100' : (rank === 2 ? '#c0c0c0' : '#cd7f32');
+                const crownHtml = rank === 1 ? `<div class="podium-crown">👑</div>` : '';
                 
                 return `
                 <div class="podium-block ${stepClass} tt-char" data-char="${(p.name || '').toLowerCase()}" onclick="selectCharacter('${(p.name || '').toLowerCase()}')" style="border-top: 3px solid ${cHex};">
+                    ${crownHtml}
                     <img src="${portraitURL}" class="podium-avatar" style="border-color: ${cHex};">
                     <div class="podium-rank" style="color: ${rankColor};">#${rank}</div>
                     <div style="color: ${cHex}; font-family: 'Cinzel'; font-weight: bold; font-size: 13px; text-shadow: 1px 1px 2px #000; z-index: 2; margin-bottom: 4px; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${p.name}</div>
-                    <div style="color: #2ecc71; font-weight: bold; font-size: 12px; text-shadow: 1px 1px 2px #000; z-index: 2;">
-                        ▲ ${trend.toLocaleString()} <span style="font-size:9px; color:#888; text-transform:uppercase;">${label}</span>
+                    <div class="podium-pill">
+                        <div style="color: #2ecc71; font-weight: bold; font-size: 13px; text-shadow: 1px 1px 2px #000;">
+                            ▲ ${trend.toLocaleString()} <span style="font-size:9px; color:#888; text-transform:uppercase;">${label}</span>
+                        </div>
                     </div>
                 </div>`;
             }).join('');
@@ -3650,17 +3675,10 @@ window.addEventListener('DOMContentLoaded', async () => {
         const xpContainer = document.getElementById('guild-xp-container');
         if (!xpContainer || !timelineData || timelineData.length === 0) return;
 
-        // --- Live Countdown Timer Logic ---
-        let countdownEl = document.getElementById('war-effort-countdown');
-        if (!countdownEl) {
-            countdownEl = document.createElement('div');
-            countdownEl.id = 'war-effort-countdown';
-            countdownEl.style.textAlign = 'center';
-            countdownEl.style.marginBottom = '25px';
+        // --- Live Countdown Timer Logic (Command Ribbon) ---
+        if (!window.warEffortTimerInitialized) {
+            window.warEffortTimerInitialized = true;
             
-            // Insert it between the H3 title and the progress bars
-            xpContainer.insertBefore(countdownEl, xpContainer.children[1]);
-
             function updateWarEffortCountdown() {
                 const realNow = new Date();
                 const berlinString = realNow.toLocaleString("en-US", {timeZone: "Europe/Berlin"});
@@ -3684,17 +3702,16 @@ window.addEventListener('DOMContentLoaded', async () => {
                 const m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
                 const s = Math.floor((timeLeft % (1000 * 60)) / 1000);
 
-                const el = document.getElementById('war-effort-countdown');
+                const el = document.getElementById('ribbon-countdown');
                 if (el) {
                     el.innerHTML = `
-                        <div style="background: rgba(0, 0, 0, 0.6); border: 1px solid rgba(255, 209, 0, 0.2); padding: 8px 18px; border-radius: 6px; display: inline-block; box-shadow: inset 0 0 15px rgba(0,0,0,0.9), 0 2px 5px rgba(0,0,0,0.5);">
-                            <span style="color:#c0c0c0; font-family: 'Cinzel', serif; font-size: 13px; text-transform: uppercase; letter-spacing: 1px; text-shadow: 1px 1px 2px #000;">Next Weekly Reset: </span>
-                            <span style="color:#ff8000; font-family: 'Cinzel', serif; font-weight:bold; font-size: 18px; text-shadow: 0 0 8px rgba(255, 128, 0, 0.6), 1px 1px 2px #000; margin-left: 6px;">
+                        <div style="display: flex; flex-direction: column; align-items: center; justify-content: center;">
+                            <span style="color:#c0c0c0; font-family: 'Cinzel', serif; font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 6px; text-shadow: 1px 1px 2px #000;">Next Weekly Reset</span>
+                            <span style="color:#ff8000; font-family: 'Cinzel', serif; font-weight:bold; font-size: 20px; text-shadow: 0 0 12px rgba(255, 128, 0, 0.5), 1px 1px 2px #000; letter-spacing: 1px;">
                             ${d}d ${h}h ${m}m ${s}s</span>
                         </div>`;
                 }
             }
-
             setInterval(updateWarEffortCountdown, 1000);
             updateWarEffortCountdown();
         }
@@ -3901,12 +3918,16 @@ window.addEventListener('DOMContentLoaded', async () => {
                     const dt = new Date(mon.timestamp);
                     const timeStr = isNaN(dt) ? '' : dt.toLocaleString('en-GB', {month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', hour12:false}).replace(',', '');
                     eventEl.innerHTML = `
-                        <div class="mon-header">
-                            <span class="mon-icon">🏆</span>
-                            <span class="mon-time">${timeStr}</span>
+                        <div style="display: flex; align-items: center; gap: 12px; width: 100%;">
+                            <span style="font-size: 20px; filter: drop-shadow(0 0 4px rgba(255,209,0,0.6));">🏆</span>
+                            <div style="display: flex; flex-direction: column; flex: 1;">
+                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                                    <span style="font-family: 'Cinzel'; font-size: 13px; color: #ffd100; font-weight: bold; text-shadow: 1px 1px 2px #000;">${mon.title}</span>
+                                    <span style="font-size: 10px; color: #888; background: rgba(0,0,0,0.5); padding: 2px 6px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05);">${timeStr}</span>
+                                </div>
+                                <div style="font-size: 12px; color: #ddd; line-height: 1.3;">${mon.desc}</div>
+                            </div>
                         </div>
-                        <div class="mon-title">${mon.title}</div>
-                        <div class="mon-desc">${mon.desc}</div>
                     `;
                     monContainer.appendChild(eventEl);
                 });
