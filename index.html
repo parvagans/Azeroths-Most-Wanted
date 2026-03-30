@@ -456,6 +456,20 @@ a, .item-slot, .nav-btn, .clickable-class, .tt-char, .concise-item, .tl-btn, #ba
 .podium-step-3 .podium-rank { color: #cd7f32 !important; opacity: 0.25 !important; text-shadow: 0 0 15px rgba(205,127,50,0.8), 2px 2px 5px rgba(0,0,0,0.8) !important; }
 .podium-rank { font-family: 'Cinzel'; font-weight: bold; text-shadow: 1px 1px 2px #000; position: absolute; opacity: 0.15; bottom: -2px; left: 50%; transform: translateX(-50%); font-size: 45px; pointer-events: none; line-height: 1; }
 .lb-podium-wrap { display: flex; align-items: flex-end; justify-content: center; gap: 8px; margin-top: 25px; margin-bottom: 15px; width: 100%; } .lb-list-wrap { display: flex; flex-direction: column; gap: 8px; width: 100%; } @media(max-width:600px){ .lb-podium-wrap { gap: 4px; } .podium-block { padding: 30px 2px 8px 2px; } }
+
+.home-dashboard-grid { display: grid; grid-template-columns: 1fr; gap: 30px; width: 100%; max-width: 1200px; margin: 0 auto; } @media(min-width: 1024px) { .home-dashboard-grid { grid-template-columns: 1fr 1fr; grid-template-areas: "heatmap heatmap" "wareffort mvps" "leaderboards leaderboards"; align-items: stretch; gap: 40px; } .home-dashboard-grid > div:nth-child(1) { grid-area: heatmap; } .home-dashboard-grid > #guild-xp-container { grid-area: wareffort; margin: 0 !important; } .home-dashboard-grid > #weekly-mvps-container { grid-area: mvps; margin: 0 !important; } .home-dashboard-grid > #leaderboards-wrapper { grid-area: leaderboards; margin: 0 auto !important; } }
+.pvp-row, .podium-block { position: relative; overflow: hidden; } .pvp-row::after, .podium-block::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent); transition: 0s; pointer-events: none; z-index: 10; } .pvp-row:hover::after, .podium-block:hover::after { left: 100%; transition: left 0.5s ease-in-out; }
+
+.collapsed-list .leaderboard-row:nth-child(n+3) { display: none !important; } .expand-lb-btn { display: block; width: 100%; margin-top: 10px; padding: 10px; background: linear-gradient(90deg, transparent, rgba(255, 209, 0, 0.05), transparent); border: 1px dashed rgba(255, 209, 0, 0.4); border-radius: 8px; color: #ffd100; font-family: 'Cinzel', serif; font-weight: bold; font-size: 13px; cursor: pointer; transition: all 0.3s ease; text-transform: uppercase; letter-spacing: 1px; } .expand-lb-btn:hover { background: rgba(255, 209, 0, 0.15); border-style: solid; border-color: #ffd100; text-shadow: 0 0 5px rgba(255,209,0,0.8); }
+
+.view-all-btn, .expand-lb-btn { position: relative; overflow: hidden; } .view-all-btn::after, .expand-lb-btn::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent); transition: 0s; pointer-events: none; z-index: 10; } .view-all-btn:hover::after, .expand-lb-btn:hover::after { left: 100%; transition: left 0.5s ease-in-out; }
+.view-heroes-btn { margin-top: 35px; width: 100%; padding: 12px; background: linear-gradient(90deg, rgba(255,209,0,0.1), rgba(255,128,0,0.2)); border: 1px solid #ffd100; color: #ffd100; font-family: 'Cinzel', serif; font-size: 16px; font-weight: bold; cursor: pointer; border-radius: 6px; box-shadow: 0 0 10px rgba(255,209,0,0.3); transition: all 0.3s ease; position: relative; overflow: hidden; } .view-heroes-btn:hover { box-shadow: 0 0 20px rgba(255,209,0,0.6); background: linear-gradient(90deg, rgba(255,209,0,0.2), rgba(255,128,0,0.4)); } .view-heroes-btn::after { content: ''; position: absolute; top: 0; left: -100%; width: 50%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.25), transparent); transition: 0s; pointer-events: none; z-index: 10; } .view-heroes-btn:hover::after { left: 100%; transition: left 0.5s ease-in-out; }
+
+.podium-block { overflow: visible !important; } .podium-block::after { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent); background-size: 200% 100%; background-position: -200% 0; transition: 0s; pointer-events: none; z-index: 10; border-radius: inherit; } .podium-block:hover::after { background-position: 200% 0; transition: background-position 0.6s ease-in-out; }
+.home-dashboard-grid { display: flex !important; flex-direction: column !important; gap: 40px !important; }
+.podium-block::after { display: none !important; content: none !important; } .podium-block { overflow: visible !important; }
+
+
     </style>
 </head>
 <body>
@@ -598,12 +612,15 @@ a, .item-slot, .nav-btn, .clickable-class, .tt-char, .concise-item, .tl-btn, #ba
                     <div id="hero-search-autocomplete" class="search-autocomplete" style="width: 100%; top: calc(100% + 8px);"></div>
                 </div>
 
+
                 <div id="recent-milestones-container" style="display:none; width: 100%; max-width: 1050px; margin: 0 auto 30px auto; animation: fadeInUp 0.5s forwards;">
                     <div class="milestone-banner">
                         <span class="milestone-icon">🌟</span>
                         <div id="milestone-text" class="milestone-text"></div>
                     </div>
                 </div>
+
+                <div class="home-dashboard-grid">
 
                 <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; width: 100%; max-width: 1100px; margin-bottom: 30px;">
                     <div class="heatmap-wrapper" style="flex: 1; width: 100%; max-width: 100%; margin: 0; overflow: hidden;">
@@ -681,7 +698,7 @@ a, .item-slot, .nav-btn, .clickable-class, .tt-char, .concise-item, .tl-btn, #ba
                         </div>
                     </div>
                     
-                    <button onclick="window.location.hash='badges'" style="margin-top: 35px; width: 100%; padding: 12px; background: linear-gradient(90deg, rgba(255,209,0,0.1), rgba(255,128,0,0.2)); border: 1px solid #ffd100; color: #ffd100; font-family: 'Cinzel'; font-size: 16px; font-weight: bold; cursor: pointer; border-radius: 6px; box-shadow: 0 0 10px rgba(255,209,0,0.3); transition: all 0.3s ease;" onmouseover="this.style.boxShadow='0 0 20px rgba(255,209,0,0.6)'; this.style.background='linear-gradient(90deg, rgba(255,209,0,0.2), rgba(255,128,0,0.4))';" onmouseout="this.style.boxShadow='0 0 10px rgba(255,209,0,0.3)'; this.style.background='linear-gradient(90deg, rgba(255,209,0,0.1), rgba(255,128,0,0.2))';">
+                    <button onclick="window.location.hash='badges'" class="view-heroes-btn">
                         🌟 View Hall of Heroes
                     </button>
                     
@@ -716,7 +733,8 @@ a, .item-slot, .nav-btn, .clickable-class, .tt-char, .concise-item, .tl-btn, #ba
                         <button onclick="window.location.hash='ladder-pvp'" class="view-all-btn" style="border-color: #ff4400; color: #ff4400;">View Full PvP Ladder ➔</button>
                     </div>
                 </div>
-            </div> 
+                
+                </div> </div> 
             <div id="analytics-view" style="display: none; animation: fadeInUp 0.5s forwards;">
                 <h2 style="color: #ffd100; font-family: 'Cinzel', serif; text-align: center; text-shadow: 0 2px 4px #000; margin-bottom: 20px; font-size: 32px;">Guild Analytics</h2>
                 
@@ -940,10 +958,10 @@ a, .item-slot, .nav-btn, .clickable-class, .tt-char, .concise-item, .tl-btn, #ba
     </div>
 
     <script id="dashboard-config" type="application/json">
-        {"last_updated": "2026-03-30T12:31:48.438563Z", "active_14_days": 411, "raid_ready_count": 19, "prev_mvps": {"pve": null, "pvp": null}}
+        {"last_updated": "2026-03-30T12:41:33.096293Z", "active_14_days": 411, "raid_ready_count": 19, "prev_mvps": {"pve": null, "pvp": null}}
     </script>
     <script id="heatmap-data" type="application/json">
-        [{"date": "2026-03-24", "day_name": "Tue", "count": 524, "loot": 405, "levels": 119, "total_roster": 608, "active_roster": 370}, {"date": "2026-03-25", "day_name": "Wed", "count": 725, "loot": 559, "levels": 166, "total_roster": 624, "active_roster": 388}, {"date": "2026-03-26", "day_name": "Thu", "count": 741, "loot": 579, "levels": 162, "total_roster": 628, "active_roster": 393}, {"date": "2026-03-27", "day_name": "Fri", "count": 586, "loot": 430, "levels": 156, "total_roster": 641, "active_roster": 405}, {"date": "2026-03-28", "day_name": "Sat", "count": 787, "loot": 594, "levels": 193, "total_roster": 643, "active_roster": 409}, {"date": "2026-03-29", "day_name": "Sun", "count": 659, "loot": 495, "levels": 164, "total_roster": 647, "active_roster": 407}, {"date": "2026-03-30", "day_name": "Mon", "count": 207, "loot": 156, "levels": 51, "total_roster": 651, "active_roster": 411}]
+        [{"date": "2026-03-24", "day_name": "Tue", "count": 524, "loot": 405, "levels": 119, "total_roster": 608, "active_roster": 370}, {"date": "2026-03-25", "day_name": "Wed", "count": 725, "loot": 559, "levels": 166, "total_roster": 624, "active_roster": 388}, {"date": "2026-03-26", "day_name": "Thu", "count": 741, "loot": 579, "levels": 162, "total_roster": 628, "active_roster": 393}, {"date": "2026-03-27", "day_name": "Fri", "count": 586, "loot": 430, "levels": 156, "total_roster": 641, "active_roster": 405}, {"date": "2026-03-28", "day_name": "Sat", "count": 787, "loot": 594, "levels": 193, "total_roster": 643, "active_roster": 409}, {"date": "2026-03-29", "day_name": "Sun", "count": 659, "loot": 495, "levels": 164, "total_roster": 647, "active_roster": 407}, {"date": "2026-03-30", "day_name": "Mon", "count": 211, "loot": 158, "levels": 53, "total_roster": 651, "active_roster": 411}]
     </script>
 
     <script>
@@ -1478,7 +1496,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (topPve.length > 0 && pveContainer) {
         pveWrapper.style.display = 'block';
         let pveHTML = '<div class="lb-podium-wrap">';
-        let pveListHTML = '<div class="lb-list-wrap">';
+        let pveListHTML = '<div class="lb-list-wrap collapsed-list">';
         topPve.forEach((char, index) => {
             const p = char.profile;
             const cClass = getCharClass(char);
@@ -1525,7 +1543,8 @@ window.addEventListener('DOMContentLoaded', async () => {
                 </div>`;
             }
         });
-        pveContainer.innerHTML = pveHTML + '</div>' + pveListHTML + '</div>';
+        const toggleBtn = topPve.length > 5 ? `<button class="expand-lb-btn" onclick="this.previousElementSibling.classList.toggle('collapsed-list'); this.innerText = this.innerText.includes('▼') ? 'Collapse Leaderboard ▲' : 'Show Top 25 ▼';">Show Top 25 ▼</button>` : '';
+        pveContainer.innerHTML = pveHTML + '</div>' + pveListHTML + '</div>' + toggleBtn;
     }
 
     const pvpContainer = document.getElementById('pvp-leaderboard');
@@ -1539,7 +1558,7 @@ window.addEventListener('DOMContentLoaded', async () => {
     if (topPvp.length > 0 && pvpContainer) {
         pvpWrapper.style.display = 'block';
         let pvpHTML = '<div class="lb-podium-wrap">';
-        let pvpListHTML = '<div class="lb-list-wrap">';
+        let pvpListHTML = '<div class="lb-list-wrap collapsed-list">';
         topPvp.forEach((char, index) => {
             const p = char.profile;
             const cClass = getCharClass(char);
@@ -1587,7 +1606,8 @@ window.addEventListener('DOMContentLoaded', async () => {
                 </div>`;
             }
         });
-        pvpContainer.innerHTML = pvpHTML + '</div>' + pvpListHTML + '</div>';
+        const togglePvpBtn = topPvp.length > 5 ? `<button class="expand-lb-btn" onclick="this.previousElementSibling.classList.toggle('collapsed-list'); this.innerText = this.innerText.includes('▼') ? 'Collapse Leaderboard ▲' : 'Show Top 25 ▼';">Show Top 25 ▼</button>` : '';
+        pvpContainer.innerHTML = pvpHTML + '</div>' + pvpListHTML + '</div>' + togglePvpBtn;
     }
     
     setupTooltips();
