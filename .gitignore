@@ -47,3 +47,4 @@ create_sql.py
 restore_db.py
 dump.py
 _backup/
+purge_departed_members.py

@@ -347,27 +347,57 @@ async def main_async():
             "params": list(new_daily_stats_row)
         })
 
-        # Automatically delete characters and gear for players who left the guild
+        # Automatically purge departed members from live Turso tables
         if roster_names:
-            departed_chars = [char for char in history_data.keys() if char not in roster_names]
+            departed_chars = sorted({str(char).lower() for char in history_data.keys() if str(char).lower() not in roster_names})
             if departed_chars:
                 formatted_names = [name.title() for name in departed_chars]
-                print(f"🧹 Removing {len(departed_chars)} departed guild member(s): {', '.join(formatted_names)}")
+                print(f"🧹 Purging {len(departed_chars)} departed guild member(s): {', '.join(formatted_names)}")
+
+                for departed in departed_chars:
+                    history_data.pop(departed, None)
 
             placeholders = ",".join(["?"] * len(roster_names))
             batch_stmts_initial.append({
-                "q": f"DELETE FROM characters WHERE name NOT IN ({placeholders})",
+                "q": f"DELETE FROM characters WHERE lower(name) NOT IN ({placeholders})",
                 "params": roster_names
             })
             batch_stmts_initial.append({
-                "q": f"DELETE FROM gear WHERE character_name NOT IN ({placeholders})",
+                "q": f"DELETE FROM gear WHERE lower(character_name) NOT IN ({placeholders})",
+                "params": roster_names
+            })
+            batch_stmts_initial.append({
+                "q": f"DELETE FROM timeline WHERE lower(character_name) NOT IN ({placeholders})",
+                "params": roster_names
+            })
+            batch_stmts_initial.append({
+                "q": f"DELETE FROM char_history WHERE lower(char_name) NOT IN ({placeholders})",
                 "params": roster_names
             })
 
         if batch_stmts_initial:
             await push_turso_batch(session, batch_stmts_initial)
 
+        active_roster_set = set(roster_names)
 
+        def filter_active_we_names(names):
+            filtered = []
+            for name in names or []:
+                clean = str(name).lower()
+                if clean and clean in active_roster_set and clean not in filtered:
+                    filtered.append(clean)
+            return filtered
+
+        def rebuild_locked_vanguards(existing_vanguards, ranked_names, limit=3):
+            final_vanguards = filter_active_we_names(existing_vanguards)
+            for name in ranked_names or []:
+                clean = str(name).lower()
+                if clean in active_roster_set and clean not in final_vanguards:
+                    final_vanguards.append(clean)
+                if len(final_vanguards) >= limit:
+                    break
+            return final_vanguards[:limit]
+        
         print("🌐 Fetching updated timeline for War Efforts...")
         dashboard_feed = await fetch_turso(session, "SELECT * FROM timeline ORDER BY timestamp DESC LIMIT 10000")
 
@@ -391,11 +421,79 @@ async def main_async():
             except Exception:
                 pass
 
+        for cat, lock in list(we_data["locks"].items()):
+            if not isinstance(lock, dict):
+                we_data["locks"].pop(cat, None)
+                continue
+
+            clean_vanguards = filter_active_we_names(lock.get("vanguards", []))
+            if clean_vanguards:
+                we_data["locks"][cat]["vanguards"] = clean_vanguards
+            else:
+                we_data["locks"].pop(cat, None)
+
         # Ensure the history tables exist in Turso
         try:
             await fetch_turso(session, "CREATE TABLE IF NOT EXISTS war_effort_history (week_anchor TEXT, category TEXT, vanguards TEXT, participants TEXT, PRIMARY KEY(week_anchor, category))")
             await fetch_turso(session, "CREATE TABLE IF NOT EXISTS reigning_champs_history (week_anchor TEXT, category TEXT, champion TEXT, score INTEGER, PRIMARY KEY(week_anchor, category))")
         except Exception: pass
+
+        # Destructive cleanup: remove departed members from historical Turso records
+        try:
+            if roster_names:
+                placeholders = ",".join(["?"] * len(roster_names))
+                purge_stmts = [
+                    {
+                        "q": f"DELETE FROM reigning_champs_history WHERE lower(champion) NOT IN ({placeholders})",
+                        "params": roster_names
+                    },
+                    {
+                        "q": f"DELETE FROM ladder_history WHERE lower(champion) NOT IN ({placeholders})",
+                        "params": roster_names
+                    }
+                ]
+
+                historical_we_rows = await fetch_turso(session, "SELECT week_anchor, category, vanguards, participants FROM war_effort_history")
+                for row in historical_we_rows:
+                    week = row.get('week_anchor')
+                    category = row.get('category')
+                    raw_v = row.get('vanguards') or '[]'
+                    raw_p = row.get('participants') or '[]'
+
+                    try:
+                        old_v = json.loads(raw_v or '[]')
+                    except Exception:
+                        old_v = []
+
+                    try:
+                        old_p = json.loads(raw_p or '[]')
+                    except Exception:
+                        old_p = []
+
+                    clean_v = filter_active_we_names(old_v)
+                    clean_p = filter_active_we_names(old_p)
+
+                    old_v_json = json.dumps(old_v)
+                    old_p_json = json.dumps(old_p)
+                    clean_v_json = json.dumps(clean_v)
+                    clean_p_json = json.dumps(clean_p)
+
+                    if old_v_json != clean_v_json or old_p_json != clean_p_json:
+                        if not clean_v and not clean_p:
+                            purge_stmts.append({
+                                "q": "DELETE FROM war_effort_history WHERE week_anchor = ? AND category = ?",
+                                "params": [week, category]
+                            })
+                        else:
+                            purge_stmts.append({
+                                "q": "INSERT OR REPLACE INTO war_effort_history (week_anchor, category, vanguards, participants) VALUES (?, ?, ?, ?)",
+                                "params": [week, category, clean_v_json, clean_p_json]
+                            })
+
+                if purge_stmts:
+                    await push_turso_batch(session, purge_stmts)
+        except Exception as e:
+            print(f"⚠️ Failed to purge departed historical records: {e}")
 
         # THE "DIFF CHECKER" TO PREVENT WRITE BLEED
         db_we_state, db_mvp_state = {}, {}
@@ -411,7 +509,7 @@ async def main_async():
                     # FIX: Restore locks directly from the database to survive JSON file loss or timeline limits!
                     try:
                         # Add "or '[]'" so it parses an empty array instead of crashing on None
-                        parsed_v = json.loads(v or '[]') 
+                        parsed_v = filter_active_we_names(json.loads(v or '[]'))
                         if parsed_v and len(parsed_v) > 0 and cat not in we_data["locks"]:
                             we_data["locks"][cat] = {"vanguards": parsed_v}
                     except: pass
@@ -425,25 +523,32 @@ async def main_async():
                     db_mvp_state[cat] = {'champion': champ, 'score': score}
         except Exception: pass
 
-        async def smart_update_we(category, vanguards_list, participants_list):
+        async def smart_update_we(category, vanguards_list, participants_list, preserve_existing_vanguards=True):
             old = db_we_state.get(category, {})
-            
-            # ULTIMATE SHIELD: Merge arrays so Turso never forgets a player
-            final_vanguards = list(vanguards_list)
-            final_participants = list(participants_list)
-            
-            # Safely parse old database values
-            try: old_v = json.loads(old.get('vanguards') or '[]')
+
+            final_vanguards = filter_active_we_names(vanguards_list)
+            final_participants = filter_active_we_names(participants_list)
+
+            try: old_v = filter_active_we_names(json.loads(old.get('vanguards') or '[]'))
             except: old_v = []
-            try: old_p = json.loads(old.get('participants') or '[]')
+            try: old_p = filter_active_we_names(json.loads(old.get('participants') or '[]'))
             except: old_p = []
-            
-            # Add existing database players into the new lists (Deduplicated)
-            for v in old_v:
-                if v not in final_vanguards: final_vanguards.append(v)
+
+            if preserve_existing_vanguards:
+                for v in old_v:
+                    if v not in final_vanguards:
+                        final_vanguards.append(v)
+
             for p in old_p:
-                if p not in final_participants: final_participants.append(p)
-                
+                if p not in final_participants:
+                    final_participants.append(p)
+
+            if not final_vanguards and not final_participants:
+                if old:
+                    try: await fetch_turso(session, f"DELETE FROM war_effort_history WHERE week_anchor='{week_anchor}' AND category='{category}'")
+                    except Exception: pass
+                return
+
             v_json = json.dumps(final_vanguards)
             p_json = json.dumps(final_participants)
 
@@ -459,24 +564,37 @@ async def main_async():
                 except Exception: pass
 
         # 1. XP Logic
-        xp_events = [e for e in dashboard_feed if e.get('type') == 'level_up' and str(e.get('timestamp', '')).replace('T', ' ') >= last_reset_iso]
+        xp_events = [
+            e for e in dashboard_feed
+            if e.get('type') == 'level_up'
+            and str(e.get('timestamp', '')).replace('T', ' ') >= last_reset_iso
+            and str(e.get('character_name', '')).lower() in active_roster_set
+        ]
         xp_counts = {}
-        for e in xp_events: 
+        for e in xp_events:
             c_name = e.get('character_name')
-            if c_name: xp_counts[c_name.lower()] = xp_counts.get(c_name.lower(), 0) + 1
+            if c_name:
+                clean_name = c_name.lower()
+                if clean_name in active_roster_set:
+                    xp_counts[clean_name] = xp_counts.get(clean_name, 0) + 1
 
+        ranked_xp_names = [k for k, v in sorted(xp_counts.items(), key=lambda item: item[1], reverse=True)]
         current_vanguards = []
-        if "xp" not in we_data["locks"]:
-            if len(xp_events) >= 750:
-                top3 = [k for k, v in sorted(xp_counts.items(), key=lambda item: item[1], reverse=True)[:3]]
+        xp_threshold_met = len(xp_events) >= 750
+
+        if xp_threshold_met:
+            if "xp" not in we_data["locks"]:
+                top3 = ranked_xp_names[:3]
                 mvp = top3[0].title() if top3 else "Unknown"
                 we_data["locks"]["xp"] = {"vanguards": top3, "monument": {"title": "🛡️ Hero's Journey", "desc": f"<span style='color:#ffd100; font-weight:bold;'>{mvp}</span> hit the 750th level!", "timestamp": now_berlin.isoformat()}}
                 current_vanguards = top3
+            else:
+                current_vanguards = rebuild_locked_vanguards(we_data["locks"]["xp"]["vanguards"], ranked_xp_names)
+                we_data["locks"]["xp"]["vanguards"] = current_vanguards
         else:
-            current_vanguards = we_data["locks"]["xp"]["vanguards"]
+            we_data["locks"].pop("xp", None)
 
-        if current_vanguards or len(xp_counts) > 0:
-            await smart_update_we('xp', current_vanguards, list(xp_counts.keys()))
+        await smart_update_we('xp', current_vanguards, list(xp_counts.keys()), preserve_existing_vanguards=xp_threshold_met)
 
         # 2. HK Logic
         hk_counts = {}
@@ -486,63 +604,97 @@ async def main_async():
             prof = r["profile"]
             trend = prof.get("trend_pvp") or prof.get("trend_hks") or 0
             if trend > 0:
-                total_hks += trend
-                hk_counts[prof.get("name", "Unknown").lower()] = trend
+                clean_name = prof.get("name", "Unknown").lower()
+                if clean_name in active_roster_set:
+                    total_hks += trend
+                    hk_counts[clean_name] = trend
 
+        ranked_hk_names = [k for k, v in sorted(hk_counts.items(), key=lambda item: item[1], reverse=True)]
         current_vanguards = []
-        if "hk" not in we_data["locks"]:
-            if total_hks >= 500:
-                top3 = [k for k, v in sorted(hk_counts.items(), key=lambda item: item[1], reverse=True)[:3]]
-                mvp = top3[0].title() if top3 else "Unknown"
-                we_data["locks"]["hk"] = {"vanguards": top3, "monument": {"title": "🩸 Blood of the Enemy", "desc": f"<span style='color:#ff4400; font-weight:bold;'>{mvp}</span> led the 500 HK charge!", "timestamp": now_berlin.isoformat()}}
-                current_vanguards = top3
-        else:
-            current_vanguards = we_data["locks"]["hk"]["vanguards"]
+        hk_threshold_met = total_hks >= 1000
 
-        if current_vanguards or len(hk_counts) > 0:
-            await smart_update_we('hk', current_vanguards, list(hk_counts.keys()))
+        if hk_threshold_met:
+            if "hk" not in we_data["locks"]:
+                top3 = ranked_hk_names[:3]
+                mvp = top3[0].title() if top3 else "Unknown"
+                we_data["locks"]["hk"] = {"vanguards": top3, "monument": {"title": "🩸 Blood of the Enemy", "desc": f"<span style='color:#ff4400; font-weight:bold;'>{mvp}</span> led the 1000 HK charge!", "timestamp": now_berlin.isoformat()}}
+                current_vanguards = top3
+            else:
+                current_vanguards = rebuild_locked_vanguards(we_data["locks"]["hk"]["vanguards"], ranked_hk_names)
+                we_data["locks"]["hk"]["vanguards"] = current_vanguards
+        else:
+            we_data["locks"].pop("hk", None)
+
+        await smart_update_we('hk', current_vanguards, list(hk_counts.keys()), preserve_existing_vanguards=hk_threshold_met)
 
         # 3. Loot Logic
-        loot_events = [e for e in dashboard_feed if e.get('type') == 'item' and e.get('item_quality') in ('EPIC', 'LEGENDARY') and str(e.get('timestamp', '')).replace('T', ' ') >= last_reset_iso]
+        loot_events = [
+            e for e in dashboard_feed
+            if e.get('type') == 'item'
+            and e.get('item_quality') in ('EPIC', 'LEGENDARY')
+            and str(e.get('timestamp', '')).replace('T', ' ') >= last_reset_iso
+            and str(e.get('character_name', '')).lower() in active_roster_set
+        ]
         loot_counts = {}
-        for e in loot_events: 
+        for e in loot_events:
             c_name = e.get('character_name')
-            if c_name: loot_counts[c_name.lower()] = loot_counts.get(c_name.lower(), 0) + 1
+            if c_name:
+                clean_name = c_name.lower()
+                if clean_name in active_roster_set:
+                    loot_counts[clean_name] = loot_counts.get(clean_name, 0) + 1
             
+        ranked_loot_names = [k for k, v in sorted(loot_counts.items(), key=lambda item: item[1], reverse=True)]
         current_vanguards = []
-        if "loot" not in we_data["locks"]:
-            if len(loot_events) >= 100:
-                top3 = [k for k, v in sorted(loot_counts.items(), key=lambda item: item[1], reverse=True)[:3]]
-                mvp = top3[0].title() if top3 else "Unknown"
-                we_data["locks"]["loot"] = {"vanguards": top3, "monument": {"title": "🐉 Dragon's Hoard", "desc": f"<span style='color:#a335ee; font-weight:bold;'>{mvp}</span> looted the 100th Epic!", "timestamp": now_berlin.isoformat()}}
-                current_vanguards = top3
-        else:
-            current_vanguards = we_data["locks"]["loot"]["vanguards"]
+        loot_threshold_met = len(loot_events) >= 60
 
-        if current_vanguards or len(loot_counts) > 0:
-            await smart_update_we('loot', current_vanguards, list(loot_counts.keys()))
+        if loot_threshold_met:
+            if "loot" not in we_data["locks"]:
+                top3 = ranked_loot_names[:3]
+                mvp = top3[0].title() if top3 else "Unknown"
+                we_data["locks"]["loot"] = {"vanguards": top3, "monument": {"title": "🐉 Dragon's Hoard", "desc": f"<span style='color:#a335ee; font-weight:bold;'>{mvp}</span> looted the 60th Epic!", "timestamp": now_berlin.isoformat()}}
+                current_vanguards = top3
+            else:
+                current_vanguards = rebuild_locked_vanguards(we_data["locks"]["loot"]["vanguards"], ranked_loot_names)
+                we_data["locks"]["loot"]["vanguards"] = current_vanguards
+        else:
+            we_data["locks"].pop("loot", None)
+
+        await smart_update_we('loot', current_vanguards, list(loot_counts.keys()), preserve_existing_vanguards=loot_threshold_met)
 
         # 4. Zenith Logic
-        zenith_events = [e for e in dashboard_feed if e.get('type') == 'level_up' and e.get('level') == 70 and str(e.get('timestamp', '')).replace('T', ' ') >= last_reset_iso]
+        zenith_events = [
+            e for e in dashboard_feed
+            if e.get('type') == 'level_up'
+            and e.get('level') == 70
+            and str(e.get('timestamp', '')).replace('T', ' ') >= last_reset_iso
+            and str(e.get('character_name', '')).lower() in active_roster_set
+        ]
         zenith_events_sorted = sorted(zenith_events, key=lambda x: str(x.get('timestamp', '')))
         unique_70s = []
         for e in zenith_events_sorted:
             c_name = e.get('character_name')
-            if c_name and c_name.lower() not in unique_70s:
-                unique_70s.append(c_name.lower())
+            if c_name:
+                clean_name = c_name.lower()
+                if clean_name in active_roster_set and clean_name not in unique_70s:
+                    unique_70s.append(clean_name)
 
+        ranked_zenith_names = list(unique_70s)
         current_vanguards = []
-        if "zenith" not in we_data["locks"]:
-            if len(unique_70s) >= 10:
-                top3 = unique_70s[:3]
+        zenith_threshold_met = len(unique_70s) >= 10
+
+        if zenith_threshold_met:
+            if "zenith" not in we_data["locks"]:
+                top3 = ranked_zenith_names[:3]
                 tenth_man = unique_70s[9].title() if len(unique_70s) > 9 else "Unknown"
                 we_data["locks"]["zenith"] = {"vanguards": top3, "monument": {"title": "⚡ The Zenith Cohort", "desc": f"<span style='color:#3FC7EB; font-weight:bold;'>{tenth_man}</span> was the 10th Level 70!", "timestamp": now_berlin.isoformat()}}
                 current_vanguards = top3
+            else:
+                current_vanguards = rebuild_locked_vanguards(we_data["locks"]["zenith"]["vanguards"], ranked_zenith_names)
+                we_data["locks"]["zenith"]["vanguards"] = current_vanguards
         else:
-            current_vanguards = we_data["locks"]["zenith"]["vanguards"]
+            we_data["locks"].pop("zenith", None)
 
-        if current_vanguards or len(unique_70s) > 0:
-            await smart_update_we('zenith', current_vanguards, unique_70s)
+        await smart_update_we('zenith', current_vanguards, unique_70s, preserve_existing_vanguards=zenith_threshold_met)
 
         # 5. MVP Reigning Champs Logic (Save CONFIRMED winners from last week)
         # We must NOT save the current week's leader until the week is actually over!
