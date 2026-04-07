@@ -18,17 +18,6 @@ def generate_html_dashboard(roster_data, realm_data=None, timeline_data=None, ra
     # Safely filter out any characters whose profile failed to load from the API
     roster_data = [char for char in roster_data if char and isinstance(char.get("profile"), dict)]
 
-    CLASS_COLORS = {
-        "Druid": "#FF7C0A", "Hunter": "#ABD473", "Mage": "#3FC7EB", 
-        "Paladin": "#F48CBA", "Priest": "#FFFFFF", "Rogue": "#FFF468",
-        "Shaman": "#0070DE", "Warlock": "#8788EE", "Warrior": "#C69B6D",
-        "Death Knight": "#C41E3A"
-    }
-    QUALITY_COLORS = {
-        "POOR": "#9d9d9d", "COMMON": "#ffffff", "UNCOMMON": "#1eff00",
-        "RARE": "#0070dd", "EPIC": "#a335ee", "LEGENDARY": "#ff8000"
-    }
-
     last_updated_iso = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
     sorted_roster = sorted(roster_data, key=lambda x: x.get("profile", {}).get("name", "").lower())
     sorted_stats_roster = sorted(roster_data, key=lambda x: (
@@ -126,25 +115,28 @@ def generate_html_dashboard(roster_data, realm_data=None, timeline_data=None, ra
             "active_roster": hist_active
         })
     
-    safe_heatmap_data = json.dumps(heatmap_data)
+        safe_heatmap_data = json.dumps(heatmap_data)
 
     base_dir = os.path.dirname(__file__)
+
     try:
         with open(os.path.join(base_dir, "style.css"), "r", encoding="utf-8") as f:
             css_content = f.read()
-    except FileNotFoundError: css_content = ""
-        
+    except FileNotFoundError:
+        css_content = ""
+
     try:
         with open(os.path.join(base_dir, "script.js"), "r", encoding="utf-8") as f:
             js_content = f.read()
-    except FileNotFoundError: js_content = ""
+    except FileNotFoundError:
+        js_content = ""
 
     os.makedirs("asset", exist_ok=True)
     with open("asset/roster.json", "w", encoding="utf-8") as f:
         json.dump(sorted_stats_roster, f)
     with open("asset/raw_roster.json", "w", encoding="utf-8") as f:
         json.dump(raw_guild_roster, f)
-        
+
     dashboard_config = {
         "last_updated": last_updated_iso,
         "active_14_days": active_14_days,
@@ -156,7 +148,7 @@ def generate_html_dashboard(roster_data, realm_data=None, timeline_data=None, ra
     # Render Template
     env = Environment(loader=FileSystemLoader(base_dir))
     template = env.get_template("dashboard_template.html")
-    
+
     html = template.render(
         css_content=css_content,
         display_total_members=display_total_members,

@@ -18,7 +18,7 @@
             <div class="loader-text">Fetching Armory Data...</div>
         </div>
     </div>
-    <div id="intro-container" onclick="killIntro()" style="cursor: pointer;">
+    <div id="intro-container" class="intro-clickable">
         <video id="intro-video" autoplay muted playsinline>
             <source src="asset/Amw.mp4" type="video/mp4">
             Your browser does not support the video tag.
@@ -27,112 +27,702 @@
             Click anywhere to skip ⏭️
         </div>
     </div>
-    <script>
-        function killIntro() {
-            // Set a flag in the browser's session storage so it doesn't play on reload
-            sessionStorage.setItem('amwIntroPlayed', 'true');
-            
-            var intro = document.getElementById('intro-container');
-            var dash = document.querySelector('.dashboard-layout');
-            
-            if (intro && !intro.classList.contains('fade-out')) {
-                intro.classList.add('fade-out'); // Fade it to black
-                if (dash) {
-                    dash.style.opacity = '1';
-                    dash.style.transition = 'opacity 2s ease-in-out';
-                }
-                setTimeout(function() { if (intro) intro.remove(); }, 1000);
-            }
-        }
+    
+    <template id="tpl-hero-search-result">
+        <div class="autocomplete-item hero-ac-item">
+            <img src="" class="ac-icon hero-ac-icon">
+            <div class="ac-info">
+                <span class="ac-name hero-ac-name"></span>
+                <span class="ac-meta"></span>
+            </div>
+        </div>
+    </template>
 
-        // Check if the intro has already been played this session
-        if (sessionStorage.getItem('amwIntroPlayed') === 'true') {
-            // Remove the video container immediately
-            var intro = document.getElementById('intro-container');
-            if (intro) intro.remove();
-            
-            // Wait for the DOM to load, then instantly show the dashboard without the fade-in
-            document.addEventListener('DOMContentLoaded', function() {
-                var dash = document.querySelector('.dashboard-layout');
-                if (dash) {
-                    dash.style.opacity = '1';
-                    dash.style.transition = 'none';
-                }
-            });
-        } else {
-            // If it hasn't played, run the normal video logic
-            var vid = document.getElementById('intro-video');
-            if (vid) {
-                vid.playbackRate = 1.75; 
-                vid.addEventListener('ended', killIntro); 
-                vid.addEventListener('error', killIntro); 
-            }
-            // Failsafe to kill intro after 6 seconds
-            setTimeout(killIntro, 6000);
-        }
-    </script>
-    <div class="embers-container"></div>
+    <template id="tpl-heatmap-col">
+        <div class="heatmap-col">
+            <span class="heatmap-label"></span>
+            <div class="heatmap-cell tt-heatmap"></div>
+        </div>
+    </template>
+
+    <template id="tpl-heatmap-tooltip">
+        <div class="tooltip-activity"></div>
+        <div class="tooltip-date"></div>
+        <div class="tooltip-hint">Click to filter timeline</div>
+    </template>
+
+    <template id="tpl-we-tooltip-header">
+        <div class="we-tt-header"></div>
+    </template>
+
+    <template id="tpl-we-tooltip-empty">
+        <div class="we-tt-empty">The challenges just began!</div>
+    </template>
+
+    <template id="tpl-we-tooltip-row">
+        <div class="we-tt-row">
+            <span class="we-tt-name"></span>
+            <span class="we-tt-score"></span>
+        </div>
+    </template>
+
+    <template id="tpl-we-tooltip-footer">
+        <div class="we-tt-footer"></div>
+    </template>
+
+    <template id="tpl-char-tooltip">
+        <div class="tt-name tooltip-name-wrap">
+            <span class="tooltip-char-name"></span>
+            <span class="tooltip-badges-container"></span>
+        </div>
+        <div class="tt-row"><span class="tt-label">Guild Rank</span><span class="tt-val tooltip-guild-rank"></span></div>
+        <div class="tt-row"><span class="tt-label">Level / Race</span><span class="tt-val tooltip-level-race"></span></div>
+        <div class="tt-row"><span class="tt-label">Class</span><span class="tt-val tooltip-class-wrap"></span></div>
+        <div class="tt-row"><span class="tt-label">Equipped iLvl</span><span class="tt-val tooltip-ilvl"></span></div>
+        <div class="tt-row"><span class="tt-label tt-no-border">HP / <span class="tooltip-power-label"></span></span><span class="tt-val tt-no-border tooltip-health-power"></span></div>
+    </template>
+
+    <template id="tpl-ac-empty-state">
+        <div class="ac-empty-state">
+            <img src="https://wow.zamimg.com/images/wow/icons/large/inv_misc_head_murloc_01.jpg" loading="lazy" class="ac-empty-icon">
+            <span class="ac-empty-text">No heroes found... Mrgrlrl!</span>
+        </div>
+    </template>
+
+    <template id="tpl-dynamic-badge">
+        <div class="stat-badge dynamic-badge">
+            <span class="stat-badge-cls"></span>
+            <span class="stat-badge-count"></span>
+        </div>
+    </template>
+
+    <template id="tpl-award-badge">
+        <div class="stat-badge dynamic-award-badge">
+            <span class="stat-badge-cls"></span>
+            <span class="stat-badge-count"></span>
+        </div>
+    </template>
+
+    <template id="tpl-spec-badge">
+        <div class="stat-badge spec-btn concise-spec-btn spec-badge-wrapper">
+            <span class="stat-badge-cls spec-badge-cls"></span>
+            <span class="stat-badge-count spec-badge-count"></span>
+        </div>
+    </template>
+
+    <template id="tpl-home-spec-badge">
+        <div class="stat-badge spec-btn home-spec-badge-btn">
+            <span class="stat-badge-cls home-spec-badge-cls"></span>
+            <span class="stat-badge-count home-spec-badge-count"></span>
+        </div>
+    </template>
+    
+    <template id="tpl-timeline-levelup">
+        <div class="timeline-node timeline-node-gold"></div>
+        <div class="tl-event-header">
+            <span class="tl-event-name"></span>
+            <span class="tl-event-date"></span>
+        </div>
+        <div class="event-box event-box-gold">
+            <span class="event-icon-star">⭐</span>
+            <span class="tl-event-level-text"></span>
+        </div>
+    </template>
+
+    <template id="tpl-timeline-loot">
+        <div class="timeline-node"></div>
+        <div class="tl-event-header">
+            <span class="tl-event-name"></span>
+            <span class="tl-event-date"></span>
+        </div>
+        <div class="event-box">
+            <img class="tl-event-icon" src="" alt="icon">
+            <a class="tl-event-item-link" href="#" target="_blank"></a>
+        </div>
+    </template>
+    
+    <template id="tpl-timeline-badge">
+        <div class="timeline-node tl-badge-node"></div>
+        <div class="tl-badge-wrapper">
+            <div class="tl-badge-inner">
+                <span class="tl-badge-name"></span>
+                <div class="tl-badge-pill">
+                    <span class="tl-badge-icon"></span>
+                    <span class="tl-badge-text-wrap">
+                        <span class="tl-badge-text"></span>
+                        <span class="tl-badge-category"></span>
+                    </span>
+                </div>
+            </div>
+            <span class="tl-badge-date"></span>
+        </div>
+    </template>
+
+    <template id="tpl-timeline-badge-filters">
+        <div class="filter-group">
+            <button class="tl-btn tl-btn-badge-all active" data-type="badge_all">All Awards</button>
+            <button class="tl-btn tl-btn-badge-ladder" data-type="badge_ladder">Medals</button>
+            <button class="tl-btn tl-btn-badge-mvp" data-type="badge_mvp">MVP</button>
+            <button class="tl-btn tl-btn-badge-vanguard" data-type="badge_vanguard">Vanguards</button>
+            <button class="tl-btn tl-btn-badge-campaign" data-type="badge_campaign">Campaigns</button>
+        </div>
+    </template>
+
+    <template id="tpl-sort-badges">
+        <div class="sort-controls sort-controls-animated">
+            <span class="sort-label">Sort By:</span>
+            <select class="sort-select concise-sort-dropdown">
+                <option value="badges">Total Badges</option>
+                <option value="name">Name (A-Z)</option>
+            </select>
+        </div>
+    </template>
+    
+    <template id="tpl-sort-default">
+        <div class="sort-controls sort-controls-animated">
+            <span class="sort-label">Sort By:</span>
+            <select class="sort-select concise-sort-dropdown">
+                <option value="ilvl">Item Level</option>
+                <option value="level">Character Level</option>
+                <option value="hks">Honorable Kills</option>
+                <option value="name">Name (A-Z)</option>
+            </select>
+        </div>
+    </template>
+    
+    <template id="tpl-monument-card">
+        <div class="monument-inner-wrapper">
+            <span class="monument-trophy">🏆</span>
+            <div class="monument-content">
+                <div class="monument-header">
+                    <span class="mon-title-text"></span>
+                    <span class="mon-time-text"></span>
+                </div>
+                <div class="mon-desc-text"></div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-monument-highlight">
+        <span class="monument-highlight-span"></span>
+    </template>
+
+    <template id="tpl-mvp-placeholder">
+        <div class="mvp-placeholder-card">
+            <div class="mvp-placeholder-icon">👑</div>
+            <div class="mvp-placeholder-avatar">?</div>
+            <div class="mvp-placeholder-info">
+                <span class="mvp-placeholder-title">Reigning Champion</span>
+                <span class="mvp-placeholder-status">Awaiting Data</span>
+            </div>
+            <div class="mvp-placeholder-meta">
+                <span class="mvp-placeholder-label"></span>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-mvp-gloat">
+        <div class="mvp-gloat-card">
+            <div class="gloat-icon">👑</div>
+            <img src="" class="gloat-avatar">
+            <div class="gloat-info">
+                <span class="gloat-title">Reigning Champion</span>
+                <span class="gloat-name"></span>
+            </div>
+            <div class="gloat-meta">
+                <span class="gloat-score"></span>
+                <span class="gloat-label"></span>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-mvp-empty">
+        <div class="mvp-empty-state">
+            <div class="mvp-empty-icon"></div>
+            <div class="mvp-empty-title">The Week Just Started!</div>
+            <div class="mvp-empty-desc"></div>
+        </div>
+    </template>
+
+    <template id="tpl-mvp-podium-block">
+        <div class="podium-block tt-char" data-char="">
+            <div class="podium-crown" hidden>👑</div>
+            <img src="" class="podium-avatar">
+            <div class="podium-rank"></div>
+            <div class="podium-name"></div>
+            <div class="podium-pill">
+                <div class="podium-trend-text">
+                    <span class="podium-trend-val"></span> <span class="podium-trend-label"></span>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-mvp-podium-wrap">
+        <div class="mvp-podium-container"></div>
+    </template>
+    
+    <template id="tpl-home-leaderboard-podium">
+        <div class="podium-block tt-char" data-char="">
+            <div class="podium-crown" hidden>👑</div>
+            <img src="" class="podium-avatar">
+            <div class="podium-rank"></div>
+            <div class="podium-name"></div>
+            <div class="podium-pill">
+                <div class="podium-stat-line">
+                    <span class="podium-stat-val"></span>
+                    <span class="podium-stat-lbl"></span>
+                </div>
+                <div class="podium-trend-container"></div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-home-leaderboard-row">
+        <div class="pvp-row tt-char leaderboard-row" data-char="">
+            <div class="lb-rank"></div>
+            <img src="" class="lb-portrait">
+            <div class="lb-info">
+                <span class="lb-name"></span>
+                <span class="lb-spec"></span>
+            </div>
+            <div class="lb-score">
+                <span class="lb-score-value"></span>
+                <span class="lb-score-label"></span>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-home-leaderboard-podium-wrap">
+        <div class="lb-podium-wrap"></div>
+    </template>
+
+    <template id="tpl-home-leaderboard-list-wrap">
+        <div class="lb-list-wrap collapsed-list"></div>
+    </template>
+
+    <template id="tpl-home-leaderboard-expand-btn">
+        <button type="button" class="expand-lb-btn">Show Full Report ▼</button>
+    </template>
+
+    <template id="tpl-concise-row">
+        <div class="concise-char-bar">
+            <div class="concise-row-inner">
+                <div class="concise-row-main">
+                    <div class="concise-rank-slot"></div>
+                    <div class="c-main-info">
+                        <img src="" class="c-portrait" loading="lazy" alt="">
+                        <span class="c-name"></span>
+                        <span class="c-meta"></span>
+                    </div>
+                </div>
+                <div class="c-stats-info concise-row-stats-top"></div>
+            </div>
+            <div class="c-stats-info concise-row-stats-bottom" hidden></div>
+        </div>
+    </template>
+
+    <template id="tpl-concise-rank-indicator">
+        <div class="concise-rank-indicator"></div>
+    </template>
+
+    <template id="tpl-concise-vanguard-badge">
+        <span class="vanguard-badge">🎖️ VANGUARD <span class="vanguard-badge-time" hidden></span></span>
+    </template>
+
+    <template id="tpl-we-stat-loot">
+        <span class="we-loot-header">Epic Loot Acquired:</span>
+        <div class="we-loot-container"></div>
+    </template>
+
+    <template id="tpl-we-loot-badge">
+        <div class="we-loot-badge"></div>
+    </template>
+
+    <template id="tpl-we-stat-hk">
+        <span class="we-stat-hk"></span>
+    </template>
+
+    <template id="tpl-concise-default-stats">
+        <span class="concise-stat-line">
+            <span>Level</span>
+            <span class="c-val-lvl" data-role="level-value"></span>
+        </span>
+        <span class="concise-stat-line">
+            <span data-role="stat-label"></span>
+            <span class="c-val-ilvl" data-role="stat-value"></span>
+            <span data-role="trend-slot"></span>
+        </span>
+    </template>
+
+    <template id="tpl-concise-trend-indicator">
+        <span class="trend-indicator-concise"></span>
+    </template>
+
+    <template id="tpl-trend-indicator">
+        <span class="trend-indicator"></span>
+    </template>
+
+    <template id="tpl-podium-trend-indicator">
+        <span class="podium-trend-indicator"></span>
+    </template>
+
+    <template id="tpl-we-stat-xp">
+        <span class="we-stat-xp"></span>
+    </template>
+
+    <template id="tpl-we-stat-zenith">
+        <div class="we-zenith-wrapper">
+            <span class="we-zenith-lbl">Reached Level 70 on:</span>
+            <span class="we-zenith-val"></span>
+        </div>
+    </template>
+
+    <template id="tpl-concise-badges-wrapper">
+        <span class="c-badges-wrapper"></span>
+    </template>
+
+    <template id="tpl-concise-badge-pill">
+        <span class="c-badge-pill"></span>
+    </template>
+
+    <template id="tpl-concise-badge-reigning">
+        <span class="c-badge-reigning"></span>
+    </template>
+
+    <template id="tpl-spec-filter-wrapper">
+        <div class="class-stat-container spec-filter-wrapper"></div>
+    </template>
+
+    <template id="tpl-spec-badge-icon">
+        <img src="" class="spec-badge-icon" loading="lazy" alt="">
+    </template>
+
+    <template id="tpl-spec-icon-sm">
+        <img src="" class="spec-icon-sm" loading="lazy" alt="">
+    </template>
+
+    <template id="tpl-concise-spec-icon">
+        <img src="" class="concise-spec-icon" loading="lazy" alt="">
+    </template>
+
+    <template id="tpl-tooltip-spec-icon">
+        <img src="" class="spec-icon-tt" loading="lazy" alt="">
+    </template>
+
+    <template id="tpl-we-loot-link">
+        <a href="#" target="_blank" class="we-loot-link"></a>
+    </template>
+
+    <template id="tpl-concise-podium">
+        <div class="podium-block tt-char" data-char="">
+            <div class="podium-crown" hidden>👑</div>
+            <div class="vanguard-floating-icon" title="Vanguard" hidden>🎖️</div>
+            <img src="" class="podium-avatar" alt="">
+            <div class="podium-rank"></div>
+            <div class="podium-name"></div>
+            <div class="podium-meta"></div>
+            <div class="podium-pill">
+                <div class="podium-stat-line">
+                    <span class="podium-stat-val"></span>
+                    <span class="podium-stat-lbl"></span>
+                </div>
+                <div class="podium-trend-container"></div>
+            </div>
+            <div class="podium-rivalry"></div>
+        </div>
+    </template>
+
+    <template id="tpl-ladder-podium">
+        <div class="podium-block ladder-podium-block tt-char" data-char="">
+            <div class="podium-crown" hidden>👑</div>
+            <div class="podium-rank"></div>
+            <img src="" class="podium-avatar" alt="">
+            <div class="podium-name"></div>
+            <div class="podium-pill">
+                <div class="podium-stat-line">
+                    <span class="podium-stat-val"></span>
+                    <span class="podium-stat-lbl"></span>
+                </div>
+                <div class="podium-trend-container"></div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-ladder-shell">
+        <section class="ladder-hero-shell">
+            <div class="ladder-hero-head">
+                <span class="ladder-overline"></span>
+                <h3 class="ladder-hero-title"></h3>
+                <p class="ladder-hero-desc"></p>
+            </div>
+            <div class="ladder-hero-stats"></div>
+            <div class="ladder-hero-tools">
+                <div class="ladder-find-wrap">
+                    <label class="ladder-find-label" for="ladder-rank-search">Find your rank</label>
+                    <div class="ladder-find-controls">
+                        <input type="text" id="ladder-rank-search" class="ladder-find-input" autocomplete="off" placeholder="Enter a character name...">
+                        <button type="button" class="ladder-find-btn">Jump to player</button>
+                    </div>
+                    <div class="ladder-find-status" aria-live="polite">Search the ladder and jump directly to any ranked character.</div>
+                </div>
+            </div>
+            <div class="ladder-info-band"></div>
+        </section>
+        <div class="ladder-podium-heading">
+            <span class="ladder-section-kicker"></span>
+            <h3 class="ladder-section-title"></h3>
+            <p class="ladder-section-desc"></p>
+        </div>
+    </template>
+
+    <template id="tpl-ladder-hero-stat">
+        <div class="ladder-hero-stat-card">
+            <span class="ladder-hero-stat-value"></span>
+            <span class="ladder-hero-stat-label"></span>
+        </div>
+    </template>
+
+    <template id="tpl-ladder-insight-card">
+        <article class="ladder-insight-card tt-char" data-char="" data-class="" data-spec="unspecced" data-awards="">
+            <span class="ladder-insight-kicker"></span>
+            <span class="ladder-insight-value"></span>
+            <span class="ladder-insight-meta"></span>
+        </article>
+    </template>
+
+    <template id="tpl-ladder-rank-separator">
+        <div class="ladder-rank-separator">
+            <span class="ladder-rank-separator-label"></span>
+        </div>
+    </template>
+
+
+    <template id="tpl-command-view-shell">
+        <section class="command-hero-shell">
+            <div class="command-hero-head">
+                <span class="command-overline"></span>
+                <h2 class="command-hero-title"></h2>
+                <p class="command-hero-desc"></p>
+            </div>
+            <div class="command-hero-ribbon">
+                <span class="command-hero-ribbon-label">Roster Rule</span>
+                <span class="command-hero-ribbon-text"></span>
+            </div>
+            <div class="command-hero-stats"></div>
+            <div class="command-info-band"></div>
+        </section>
+    </template>
+
+    <template id="tpl-war-effort-shell">
+        <section class="war-effort-shell">
+            <div class="war-effort-hero-head">
+                <span class="war-effort-overline"></span>
+                <h2 class="war-effort-hero-title"></h2>
+                <p class="war-effort-hero-desc"></p>
+            </div>
+
+            <div class="war-effort-hero-ribbon">
+                <span class="war-effort-hero-ribbon-label">Weekly Objective</span>
+                <span class="war-effort-hero-ribbon-text"></span>
+                <span class="war-effort-hero-ribbon-divider" aria-hidden="true"></span>
+                <span class="war-effort-hero-ribbon-reset"></span>
+            </div>
+
+            <div class="war-effort-shell-progress-card">
+                <div class="war-effort-shell-progress-head">
+                    <span class="war-effort-shell-progress-label"></span>
+                    <span class="war-effort-shell-progress-meta"></span>
+                </div>
+                <div class="war-effort-shell-progress-track">
+                    <div class="war-effort-shell-progress-fill challenge-fill"></div>
+                    <div class="war-effort-shell-progress-glare"></div>
+                    <div class="war-effort-shell-progress-text challenge-text"></div>
+                </div>
+            </div>
+
+            <div class="war-effort-hero-stats"></div>
+            <div class="war-effort-info-band"></div>
+        </section>
+    </template>
+
+    <template id="tpl-war-effort-hero-stat">
+        <div class="war-effort-hero-stat">
+            <span class="war-effort-hero-stat-value"></span>
+            <span class="war-effort-hero-stat-label"></span>
+        </div>
+    </template>
+
+    <template id="tpl-command-view-stat">
+        <div class="command-hero-stat">
+            <span class="command-hero-stat-value"></span>
+            <span class="command-hero-stat-label"></span>
+        </div>
+    </template>
+
+    <template id="tpl-hero-band-item">
+        <article class="hero-band-item">
+            <span class="hero-band-kicker"></span>
+            <span class="hero-band-value"></span>
+            <span class="hero-band-meta"></span>
+        </article>
+    </template>
+    
+    <template id="tpl-concise-dashboard-widgets">
+        <div class="kpi-flex-row concise-kpi-container"></div>
+        <div class="charts-flex-row">
+            <div class="concise-chart-panel">
+                <h4 class="concise-chart-title">Raid Roles</h4>
+                <canvas id="conciseRoleChart"></canvas>
+            </div>
+            <div class="concise-chart-panel">
+                <h4 class="concise-chart-title">Class Distribution</h4>
+                <canvas id="conciseClassChart"></canvas>
+            </div>
+        </div>
+    </template>
+    
+    <template id="tpl-concise-kpi-box">
+        <div class="stat-box concise-stat-box">
+            <span class="stat-value concise-stat-value"></span>
+            <span class="stat-label concise-stat-label"></span>
+        </div>
+    </template>
+
+    <template id="tpl-milestone-level">
+        <span>Congratulations to <span class="milestone-highlight ms-char"></span> for reaching <span class="milestone-highlight">Level 70!</span> 🎉<span class="ms-time"></span></span>
+    </template>
+    
+    <template id="tpl-milestone-loot">
+        <span><span class="milestone-highlight ms-char"></span> just looted <a href="#" target="_blank" class="ms-loot-link"></a>!<span class="ms-time"></span></span>
+    </template>
+
+    <template id="tpl-timeline-filters-default">
+        <div class="filter-group">
+            <button class="tl-btn" data-type="all">All</button>
+            <button class="tl-btn tl-btn-rare active" data-type="rare_plus">Rare+</button>
+            <button class="tl-btn tl-btn-epic" data-type="epic">Epics+</button>
+            <button class="tl-btn" data-type="level_up">Levels</button>
+        </div>
+        <div class="filter-group">
+            <select id="tl-date-filter" class="tl-select">
+                <option value="12">Last 12 Hours</option>
+                <option value="24">Last 24 Hours</option>
+                <option value="48">Last 48 Hours</option>
+                <option value="all" selected>All Available</option>
+            </select>
+        </div>
+    </template>
+
+    <template id="tpl-timeline-filters-badges">
+        <div class="filter-group">
+            <button class="tl-btn tl-btn-badge-all active" data-type="badge_all">All Awards</button>
+            <button class="tl-btn tl-btn-badge-ladder" data-type="badge_ladder">Medals</button>
+            <button class="tl-btn tl-btn-badge-mvp" data-type="badge_mvp">MVP</button>
+            <button class="tl-btn tl-btn-badge-vanguard" data-type="badge_vanguard">Vanguards</button>
+            <button class="tl-btn tl-btn-badge-campaign" data-type="badge_campaign">Campaigns</button>
+        </div>
+    </template>
+
+    <div class="embers-container"></div> 
 
     <div class="navbar">
         <div class="controls-wrapper">
-            <button class="mobile-menu-toggle" aria-label="Toggle Menu">
+            <button class="mobile-menu-toggle" type="button" aria-label="Toggle Menu" aria-expanded="false" aria-controls="primaryNav">
                 <span></span><span></span><span></span>
             </button>
-            
-            <div class="nav-links-container">
-                <a href="#" class="nav-btn nav-btn-home"><span class="home-text">🏰 Home Dashboard</span></a>
-                
-                <div style="color: #888; font-size: 11px; font-family: 'Cinzel'; font-weight: bold; padding: 15px 15px 5px 15px; border-bottom: 1px solid #333; width: 85%; margin-bottom: 5px;">WAR EFFORT</div>
-                <a href="#war-effort-xp" class="nav-btn">🛡️ Hero's Journey</a>
-                <a href="#war-effort-hk" class="nav-btn">🩸 Blood of the Enemy</a>
-                <a href="#war-effort-loot" class="nav-btn">🐉 Dragon's Hoard</a>
-                <a href="#war-effort-zenith" class="nav-btn">⚡ The Zenith Cohort</a>
-                <button class="nav-btn" onclick="window.location.hash='badges'" style="color: #ffd100; font-weight: bold; background: transparent; border: none; text-align: left; width: 100%; cursor: pointer;">🌟 Hall of Heroes</button>
-                
-                <div style="color: #888; font-size: 11px; font-family: 'Cinzel'; font-weight: bold; padding: 15px 15px 5px 15px; border-bottom: 1px solid #333; width: 85%; margin-bottom: 5px;">GUILD DATA</div>
-                <a href="#ladder-pve" class="nav-btn">👑 PvE Leaderboard</a>
-                <a href="#ladder-pvp" class="nav-btn">⚔️ PvP Leaderboard</a>
-                <a href="#analytics" class="nav-btn">📊 Advanced Analytics</a>
-                
-                <div style="color: #888; font-size: 11px; font-family: 'Cinzel'; font-weight: bold; padding: 15px 15px 5px 15px; border-bottom: 1px solid #333; width: 85%; margin-bottom: 5px;">COMMUNITY & INFO</div>
-                <a href="#architecture" class="nav-btn">⚙️ Architecture</a>
-                <a href="https://discord.gg/t6mufeWRNK" target="_blank" class="nav-btn" style="color: #5865F2;">💬 Join Discord</a>
+
+            <div class="nav-scrim" aria-hidden="true"></div>
+
+            <div class="nav-links-container" id="primaryNav" aria-hidden="true">
+                <div class="nav-drawer-top">
+                    <div class="nav-drawer-brand">
+                        <span class="nav-drawer-kicker">Guild Command</span>
+                        <span class="nav-drawer-title">Azeroth's Most Wanted</span>
+                    </div>
+                    <button class="nav-drawer-close" type="button" aria-label="Close Menu">✕</button>
+                </div>
+
+                <div class="nav-desktop-links">
+                    <a href="#" class="nav-btn nav-btn-home nav-btn-route" data-nav-target="home"><span class="home-text">🏰 Home</span></a>
+
+                    <div class="nav-dropdown">
+                        <button class="nav-btn nav-btn-route nav-dropdown-trigger" type="button" data-nav-target="war-effort" aria-haspopup="true">
+                            <span class="nav-dropdown-label">⚔️ War Effort</span>
+                            <span class="nav-dropdown-icon">▾</span>
+                        </button>
+                        <div class="nav-dropdown-menu">
+                            <a href="#war-effort-xp" class="nav-dropdown-link">🛡️ Hero's Journey</a>
+                            <a href="#war-effort-hk" class="nav-dropdown-link">🩸 Blood of the Enemy</a>
+                            <a href="#war-effort-loot" class="nav-dropdown-link">🐉 Dragon's Hoard</a>
+                            <a href="#war-effort-zenith" class="nav-dropdown-link">⚡ The Zenith Cohort</a>
+                        </div>
+                    </div>
+                    
+                    <a href="#badges" class="nav-btn nav-btn-route hall-of-heroes-btn" data-nav-target="badges">🌟 Hall of Heroes</a>
+                    <a href="#ladder-pve" class="nav-btn nav-btn-route" data-nav-target="ladder-pve">👑 PvE</a>
+                    <a href="#ladder-pvp" class="nav-btn nav-btn-route" data-nav-target="ladder-pvp">⚔️ PvP</a>
+                    <a href="#analytics" class="nav-btn nav-btn-route" data-nav-target="analytics">📊 Analytics</a>
+                </div>
+
+                <div class="nav-mobile-groups">
+                    <a href="#" class="nav-btn nav-btn-home nav-btn-route" data-nav-target="home"><span class="home-text">🏰 Home Dashboard</span></a>
+
+                    <div class="nav-section-header">WAR EFFORT</div>
+                    <a href="#war-effort-xp" class="nav-btn nav-btn-route" data-nav-target="war-effort">🛡️ Hero's Journey</a>
+                    <a href="#war-effort-hk" class="nav-btn nav-btn-route" data-nav-target="war-effort">🩸 Blood of the Enemy</a>
+                    <a href="#war-effort-loot" class="nav-btn nav-btn-route" data-nav-target="war-effort">🐉 Dragon's Hoard</a>
+                    <a href="#war-effort-zenith" class="nav-btn nav-btn-route" data-nav-target="war-effort">⚡ The Zenith Cohort</a>
+                    <a href="#badges" class="nav-btn nav-btn-route hall-of-heroes-btn" data-nav-target="badges">🌟 Hall of Heroes</a>
+
+                    <div class="nav-section-header">GUILD DATA</div>
+                    <a href="#ladder-pve" class="nav-btn nav-btn-route" data-nav-target="ladder-pve">👑 PvE Leaderboard</a>
+                    <a href="#ladder-pvp" class="nav-btn nav-btn-route" data-nav-target="ladder-pvp">⚔️ PvP Leaderboard</a>
+                    <a href="#analytics" class="nav-btn nav-btn-route" data-nav-target="analytics">📊 Advanced Analytics</a>
+
+                    <div class="nav-section-header">COMMUNITY & INFO</div>
+                    <a href="#architecture" class="nav-btn nav-btn-route" data-nav-target="architecture">⚙️ Architecture</a>
+                    <a href="https://discord.gg/t6mufeWRNK" target="_blank" class="nav-btn nav-btn-discord">💬 Join Discord</a>
+                </div>
             </div>
 
-            <div class="custom-select-wrapper" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-controls="customCharOptions">
-                <div class="custom-select" id="customCharSelect" tabindex="0">
-                    <span class="selected-value">Select View...</span>
-                    <span style="font-size: 12px; color: #aaa;">▼</span>
+            <div class="nav-utility-cluster">
+                <div class="custom-select-wrapper" role="combobox" aria-expanded="false" aria-haspopup="listbox" aria-controls="customCharOptions">
+                    <div class="custom-select" id="customCharSelect" tabindex="0">
+                        <span class="selected-value">Select View...</span>
+                        <span class="custom-select-arrow">▼</span>
+                    </div>
+                    <div class="custom-select-options" id="customCharOptions" role="listbox">
+                        <div class="custom-option" data-value="total" role="option">
+                            <span class="opt-icon-emoji">🌍</span> View Entire Guild
+                        </div>
+                        <div class="custom-option" data-value="active" role="option">
+                            <span class="opt-icon-emoji">🔥</span> Active Roster (14 Days)
+                        </div>
+                        <div class="custom-option" data-value="raidready" role="option">
+                            <span class="opt-icon-emoji">⚔️</span> Raid Ready (Lvl 70)
+                        </div>
+                        <div class="custom-option opt-hall-of-heroes" data-value="badges" role="option">
+                            <span class="opt-icon-emoji">🌟</span> Hall of Heroes
+                        </div>
+                    </div>
                 </div>
-                <div class="custom-select-options" id="customCharOptions" role="listbox">
-                    <div class="custom-option" data-value="total" role="option">
-                        <span style="font-size:16px;">🌍</span> View Entire Guild
+
+                <div class="search-container">
+                    <div class="search-box">
+                        <span class="search-icon">🔍</span>
+                        <input type="text" id="charSearch" autocomplete="off" placeholder="Search armory..." />
                     </div>
-                    <div class="custom-option" data-value="active" role="option">
-                        <span style="font-size:16px;">🔥</span> Active Roster (14 Days)
-                    </div>
-                    <div class="custom-option" data-value="raidready" role="option">
-                        <span style="font-size:16px;">⚔️</span> Raid Ready (Lvl 70)
-                    </div>
-                    <div class="custom-option" data-value="badges" role="option" style="color: #ffd100; font-weight: bold;">
-                        <span style="font-size:16px;">🌟</span> Hall of Heroes
-                    </div>
+                    <div id="search-autocomplete" class="search-autocomplete"></div>
                 </div>
-            </div>
-            
-            <div class="search-container">
-                <div class="search-box">
-                    <span class="search-icon">🔍</span>
-                    <input type="text" id="charSearch" autocomplete="off" placeholder="Search armory..." />
-                </div>
-                <div id="search-autocomplete" class="search-autocomplete"></div>
             </div>
         </div>
     </div>
     
-    <div id="custom-tooltip" class="custom-tooltip"></div>
+    <div id="badge-hover-tooltip" class="badge-hover-tooltip" data-tone="default" role="tooltip" aria-hidden="true"></div>
     
-    <div id="main-dashboard" class="dashboard-layout" style="opacity: 0; transition: opacity 1.5s ease-in-out;">
+    <div id="main-dashboard" class="dashboard-layout dashboard-hidden">
+        <div id="custom-tooltip" class="custom-tooltip" data-tone="character" aria-hidden="true"></div>
         <div class="main-content">
             <div id="empty-state">
                 
@@ -141,220 +731,740 @@
                         <img src="asset/amw.webp" alt="Azeroths Most Wanted Logo" class="main-logo">
                     </div>
                     <div class="hero-text-col">
-                        <h2 style="color: #ffd100; font-family: 'Cinzel', serif; font-size: 32px; letter-spacing: 1px; text-shadow: 0 2px 4px #000; margin-top: 0; margin-bottom: 20px;">Azeroths Most Wanted Armory</h2>
+                        <span class="home-hero-kicker">Guild Command Board</span>
+                        <h2 class="hero-title">Azeroths Most Wanted Armory</h2>
+                        <p class="hero-subtitle">
+                            Track the guild at a glance with roster intelligence, live activity, raid readiness, and ladder dispatches built for officers and raiders alike.
+                        </p>
                         
-                        <div class="search-container" style="position: relative; max-width: 450px; width: 100%;">
-                            <div class="search-box hero-search-box" style="box-sizing: border-box;">
-                                <span class="search-icon" style="font-size: 18px; padding-left: 15px;">🔍</span>
-                                <input type="text" id="heroCharSearch" autocomplete="off" placeholder="Search for a guild member..." style="width: 100%; height: 46px; font-size: 16px; padding: 0 15px; box-sizing: border-box;" />
+                        <div class="search-container hero-search-wrapper">
+                            <div class="search-box hero-search-box hero-search-box-inner">
+                                <span class="search-icon hero-search-icon">🔍</span>
+                                <input type="text" id="heroCharSearch" class="hero-search-input" autocomplete="off" placeholder="Search for a guild member..." />
                             </div>
-                            <div id="hero-search-autocomplete" class="search-autocomplete" style="width: 100%; top: calc(100% + 8px);"></div>
+                            <div id="hero-search-autocomplete" class="search-autocomplete hero-search-ac"></div>
                         </div>
                     </div>
                 </div>
 
                 <div id="command-ribbon-container" class="command-ribbon-container">
-                    <div id="recent-milestones-container" class="ribbon-left" style="display:none;">
+                    <div id="recent-milestones-container" class="ribbon-left" hidden>
                         <div class="milestone-banner">
                             <span class="milestone-icon">🌟</span>
                             <div id="milestone-text" class="milestone-text"></div>
                         </div>
                     </div>
-                    
                     <div id="weekly-reset-module" class="ribbon-right">
-                        <div id="ribbon-countdown" style="width: 100%;"></div>
+                        <div id="ribbon-countdown" class="countdown-wrapper">
+                            <span class="countdown-label">Next Weekly Reset</span>
+                            <span id="countdown-timer-text" class="countdown-timer">--d --h --m --s</span>
+                        </div>
                     </div>
                 </div>
+
+                <section class="home-command-section">
+                    <div class="home-section-heading">
+                        <span class="home-section-kicker">Dispatch Board</span>
+                        <h3 class="home-section-title">Choose the right guild view fast</h3>
+                        <p class="home-section-subtitle">Jump straight into the roster page that answers the question you have right now.</p>
+                    </div>
+
+                    <div class="home-command-deck">
+                        <button type="button" class="home-nav-card home-command-card home-command-card-total" data-home-route="total">
+                            <span class="home-nav-eyebrow">Guild Census</span>
+                            <strong id="home-command-total-value" class="home-nav-value">0</strong>
+                            <span class="home-nav-title">Entire Guild</span>
+                            <span class="home-nav-copy">Inspect the full roster, class depth, and leveling spread.</span>
+                            <span class="home-nav-cta">Open roster overview ➔</span>
+                        </button>
+
+                        <button type="button" class="home-nav-card home-command-card home-command-card-active" data-home-route="active">
+                            <span class="home-nav-eyebrow">Current Warband</span>
+                            <strong id="home-command-active-value" class="home-nav-value">0</strong>
+                            <span class="home-nav-title">Active Roster</span>
+                            <span class="home-nav-copy">See who has shown signs of life and who is ready to answer the call.</span>
+                            <span class="home-nav-cta">Open active roster ➔</span>
+                        </button>
+
+                        <button type="button" class="home-nav-card home-command-card home-command-card-raidready" data-home-route="raidready">
+                            <span class="home-nav-eyebrow">Deployment Board</span>
+                            <strong id="home-command-raidready-value" class="home-nav-value">0</strong>
+                            <span class="home-nav-title">Raid Ready</span>
+                            <span class="home-nav-copy">Review the characters that can step into progression content now.</span>
+                            <span class="home-nav-cta">Open raid-ready view ➔</span>
+                        </button>
+
+                        <button type="button" class="home-nav-card home-command-card home-command-card-badges" data-home-route="badges">
+                            <span class="home-nav-eyebrow">Commendations</span>
+                            <strong id="home-command-badges-value" class="home-nav-value">0</strong>
+                            <span class="home-nav-title">Hall of Heroes</span>
+                            <span class="home-nav-copy">Browse decorated raiders, campaign standouts, and honored champions.</span>
+                            <span class="home-nav-cta">Open honors board ➔</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="home-pulse-section">
+                    <div class="home-section-heading">
+                        <span class="home-section-kicker">Guild Pulse</span>
+                        <h3 class="home-section-title">Live status from the latest scan</h3>
+                        <p class="home-section-subtitle">A quick officer read on guild size, activity, readiness, and current endgame strength.</p>
+                    </div>
+
+                    <div class="home-pulse-grid">
+                        <button type="button" class="home-nav-card home-pulse-card" data-home-route="total">
+                            <span class="home-pulse-label">Total Roster</span>
+                            <strong id="home-pulse-total" class="home-pulse-value">0</strong>
+                            <span id="trend-total" class="home-pulse-trend">-</span>
+                            <div class="home-spark-wrap">
+                                <canvas id="spark-total" class="home-spark"></canvas>
+                            </div>
+                            <span class="home-pulse-meta">Compared with the previous daily snapshot.</span>
+                        </button>
+
+                        <button type="button" class="home-nav-card home-pulse-card" data-home-route="active">
+                            <span class="home-pulse-label">Active in 14 Days</span>
+                            <strong id="home-pulse-active" class="home-pulse-value">0</strong>
+                            <span id="trend-active" class="home-pulse-trend">-</span>
+                            <div class="home-spark-wrap">
+                                <canvas id="spark-active" class="home-spark"></canvas>
+                            </div>
+                            <span class="home-pulse-meta">Recent movement, logins, loot, and other signs of life.</span>
+                        </button>
+
+                        <button type="button" class="home-nav-card home-pulse-card" data-home-route="raidready">
+                            <span class="home-pulse-label">Raid Ready</span>
+                            <strong id="home-pulse-raidready" class="home-pulse-value">0</strong>
+                            <span class="home-pulse-trend home-pulse-trend-static">Roster prepared for content tonight.</span>
+                            <span class="home-pulse-meta">Best quick read for deployment strength and roster confidence.</span>
+                        </button>
+
+                        <button type="button" class="home-nav-card home-pulse-card" data-home-route="ladder-pve">
+                            <span class="home-pulse-label">Avg Level 70 iLvl</span>
+                            <strong id="home-kpi-ilvl" class="home-pulse-value">0</strong>
+                            <span class="home-pulse-trend home-pulse-trend-static">Direct shortcut to the PvE ladder.</span>
+                            <span class="home-pulse-meta">A simple signal for how much power your capped roster carries.</span>
+                        </button>
+                    </div>
+                </section>
 
                 <div class="home-dashboard-grid">
-
-                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; width: 100%; max-width: 1100px; margin-bottom: 30px;">
-                    <div class="heatmap-wrapper" style="flex: 1; width: 100%; max-width: 100%; margin: 0; overflow: hidden;">
-                        <h3 class="heatmap-title">🔥 Guild Activity (Last 7 Days) <span style="color:#aaa; font-size: 11px;">Updates Daily</span></h3>
-                        <div style="position: relative; height: 180px; width: 100%; max-width: 100%; margin-bottom: 20px;">
-                            <canvas id="activityChart" style="width: 100% !important; height: 100% !important"></canvas>
+                    <section class="home-war-effort-section">
+                        <div class="home-section-heading home-section-heading-compact">
+                            <span class="home-section-kicker">Guild War Effort</span>
+                            <h3 class="home-section-title">Campaign objectives worth tracking this week</h3>
+                            <p class="home-section-subtitle">Keep the homepage focused on contribution pressure, guild momentum, and the targets your roster is actively pushing toward.</p>
                         </div>
-                        <div id="heatmap-grid" class="heatmap-grid" style="display: flex; width: 100%; max-width: 100%; justify-content: space-between;"></div>
-                    </div>
-                </div>
 
-                <div id="guild-xp-container" style="display:none; width: 100%; max-width: 1000px; margin: 0 auto 40px auto; background: linear-gradient(135deg, rgba(20, 15, 25, 0.6) 0%, rgba(10, 8, 15, 0.8) 100%); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); border: 1px solid rgba(255, 209, 0, 0.15); border-top: 1px solid rgba(255, 209, 0, 0.4); border-radius: 20px; padding: 35px; box-shadow: 0 15px 40px rgba(0,0,0,0.8), inset 0 0 30px rgba(255,209,0,0.05); animation: fadeInUp 0.5s forwards;">
-                    <h3 style="font-family: 'Cinzel'; color: #ffd100; text-align: center; margin-top: 0; margin-bottom: 30px; text-shadow: 0 4px 15px rgba(255, 209, 0, 0.3); letter-spacing: 2px; font-size: 24px;">⚔️ Weekly Guild Challenges ⚔️</h3>
+                        <div class="home-war-effort-stage">
+                            <section id="guild-xp-container" class="weekly-challenges-container" hidden>
+                                <div class="weekly-challenges-head">
+                                    <div>
+                                        <h3 class="weekly-challenges-title">⚔️ Guild Campaign Objectives ⚔️</h3>
+                                        <p class="weekly-challenges-subtitle">A stronger weekly command board for leveling pushes, battleground pressure, trophy pulls, and the race to level 70.</p>
+                                    </div>
+                                    <div class="weekly-challenges-countdown-pill">
+                                        <span class="weekly-challenges-countdown-label">Reset in</span>
+                                        <span id="countdown-timer-text-inline" class="weekly-challenges-countdown-value">--d --h --m --s</span>
+                                    </div>
+                                </div>
+
+                                <div class="weekly-challenges-flex-container">
+                                    <article class="war-effort-home-card war-effort-home-card-xp">
+                                        <div class="challenge-header challenge-header-xp">
+                                            <span class="war-effort-home-card-kicker">🛡️ Hero's Journey</span>
+                                            <span id="guild-xp-tooltip-trigger" class="war-effort-link challenge-link">Open campaign board ➔</span>
+                                        </div>
+                                        <h4 class="war-effort-home-card-title">Leveling momentum across the guild</h4>
+                                        <p id="guild-xp-summary" class="war-effort-home-card-summary">The week has just begun. Rally the leveling core and claim the first progress.</p>
+                                        <div class="challenge-bar-bg war-effort-home-track">
+                                            <div id="guild-xp-fill" class="progress-bar-glow challenge-fill"></div>
+                                            <div class="challenge-glare"></div>
+                                            <div class="challenge-tick tick-25"></div>
+                                            <div class="challenge-tick tick-50"></div>
+                                            <div class="challenge-tick tick-75"></div>
+                                            <div id="guild-xp-text" class="challenge-text">0 / 750 Levels Gained</div>
+                                        </div>
+                                        <div class="war-effort-home-card-footer">
+                                            <span id="guild-xp-leader" class="war-effort-home-card-leader">Awaiting the first leveling push.</span>
+                                        </div>
+                                    </article>
+
+                                    <article class="war-effort-home-card war-effort-home-card-hk">
+                                        <div class="challenge-header challenge-header-hk">
+                                            <span class="war-effort-home-card-kicker">🩸 Blood of the Enemy</span>
+                                            <span id="guild-hk-tooltip-trigger" class="war-effort-link challenge-link">Open campaign board ➔</span>
+                                        </div>
+                                        <h4 class="war-effort-home-card-title">Battleground pressure and HK momentum</h4>
+                                        <p id="guild-hk-summary" class="war-effort-home-card-summary">No blood has been spilled yet this cycle. Open the ledger with the first honorable kills.</p>
+                                        <div class="challenge-bar-bg war-effort-home-track">
+                                            <div id="guild-hk-fill" class="progress-bar-glow challenge-fill"></div>
+                                            <div class="challenge-glare"></div>
+                                            <div class="challenge-tick tick-25"></div>
+                                            <div class="challenge-tick tick-50"></div>
+                                            <div class="challenge-tick tick-75"></div>
+                                            <div id="guild-hk-text" class="challenge-text">0 / 1000 HKs Gained</div>
+                                        </div>
+                                        <div class="war-effort-home-card-footer">
+                                            <span id="guild-hk-leader" class="war-effort-home-card-leader">Awaiting the first HK surge.</span>
+                                        </div>
+                                    </article>
+                                    
+                                    <article class="war-effort-home-card war-effort-home-card-loot">
+                                        <div class="challenge-header challenge-header-loot">
+                                            <span class="war-effort-home-card-kicker">🐉 Dragon's Hoard</span>
+                                            <span id="guild-loot-tooltip-trigger" class="war-effort-link challenge-link">Open campaign board ➔</span>
+                                        </div>
+                                        <h4 class="war-effort-home-card-title">Epic spoils hauled back this week</h4>
+                                        <p id="guild-loot-summary" class="war-effort-home-card-summary">The vault is still empty. Hit the raid and secure the first epic of the cycle.</p>
+                                        <div class="challenge-bar-bg war-effort-home-track">
+                                            <div id="guild-loot-fill" class="progress-bar-glow challenge-fill"></div>
+                                            <div class="challenge-glare"></div>
+                                            <div class="challenge-tick tick-25"></div>
+                                            <div class="challenge-tick tick-50"></div>
+                                            <div class="challenge-tick tick-75"></div>
+                                            <div id="guild-loot-text" class="challenge-text">0 / 60 Epics Looted</div>
+                                        </div>
+                                        <div class="war-effort-home-card-footer">
+                                            <span id="guild-loot-leader" class="war-effort-home-card-leader">Awaiting the first trophy haul.</span>
+                                        </div>
+                                    </article>
+
+                                    <article class="war-effort-home-card war-effort-home-card-zenith">
+                                        <div class="challenge-header challenge-header-zenith">
+                                            <span class="war-effort-home-card-kicker">⚡ The Zenith Cohort</span>
+                                            <span id="guild-zenith-tooltip-trigger" class="war-effort-link challenge-link">Open campaign board ➔</span>
+                                        </div>
+                                        <h4 class="war-effort-home-card-title">The weekly sprint to level 70</h4>
+                                        <p id="guild-zenith-summary" class="war-effort-home-card-summary">No one has reached the summit yet this week. Be the first to enter the cohort.</p>
+                                        <div class="challenge-bar-bg war-effort-home-track">
+                                            <div id="guild-zenith-fill" class="progress-bar-glow challenge-fill"></div>
+                                            <div class="challenge-glare"></div>
+                                            <div class="challenge-tick tick-25"></div>
+                                            <div class="challenge-tick tick-50"></div>
+                                            <div class="challenge-tick tick-75"></div>
+                                            <div id="guild-zenith-text" class="challenge-text">0 / 10 New Level 70s</div>
+                                        </div>
+                                        <div class="war-effort-home-card-footer">
+                                            <span id="guild-zenith-leader" class="war-effort-home-card-leader">Awaiting the first new level 70.</span>
+                                        </div>
+                                    </article>
+                                </div>
+                                
+                                <button id="btn-view-heroes" class="view-heroes-btn">
+                                    🌟 View Hall of Heroes
+                                </button>
+                                
+                                <div class="experimental-note">
+                                    * Note: Weekly guild challenges are currently experimental and subject to change based on community feedback.
+                                </div>
+                            </section>
+                        </div>
+                    </section>
+
+                    <section id="weekly-mvps-container" class="weekly-mvps-wrapper" hidden>
+                        <div class="home-section-heading home-section-heading-compact">
+                            <span class="home-section-kicker">Guild Commendations</span>
+                            <h3 class="home-section-title">7-day standouts worth spotlighting</h3>
+                            <p class="home-section-subtitle">Recent momentum, biggest improvements, and the characters driving the week forward.</p>
+                        </div>
+
+                        <div class="mvp-cards-container">
+                            <div class="mvp-card mvp-card-pve">
+                                <h4 class="mvp-card-title mvp-card-title-pve">🛡️ Biggest Upgrades (iLvl)</h4>
+                                <div id="mvp-pve-list" class="mvp-list-wrap"></div>
+                            </div>
+                            <div class="mvp-card mvp-card-pvp">
+                                <h4 class="mvp-card-title mvp-card-title-pvp">⚔️ Deadliest (HKs)</h4>
+                                <div id="mvp-pvp-list" class="mvp-list-wrap"></div>
+                            </div>
+                        </div>
+                    </section>
                     
-                    <div style="display: flex; flex-direction: column; gap: 20px;">
-                        
-                        <div>
-                            <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; font-family: 'Cinzel'; font-size: 15px; font-weight: bold; color: #ffd100; text-shadow: 0 2px 8px rgba(255, 209, 0, 0.4); letter-spacing: 1px;">
-                                <span>🛡️ Hero's Journey (XP Gained)</span>
-                                <span id="guild-xp-tooltip-trigger" class="war-effort-link" style="color: #bbb; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; border-bottom: 1px dotted rgba(255,255,255,0.3); cursor: pointer; text-shadow: none; transition: color 0.3s; letter-spacing: 0;">View Contributors ➔</span>
-                            </div>
-                            <div style="position: relative; width: 100%; height: 24px; background: rgba(5, 5, 8, 0.9); border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.05); border-top: 2px solid rgba(0, 0, 0, 0.8); overflow: hidden; box-shadow: inset 0 5px 15px rgba(0,0,0,0.9), 0 2px 5px rgba(255,255,255,0.02);">
-                                <div id="guild-xp-fill" class="progress-bar-glow" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; transition: width 1.5s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: inset 0 0 15px rgba(0,0,0,0.5);"></div>
-                                <div style="position:absolute; top:0; left:0; width:100%; height:45%; background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%); z-index: 3; pointer-events: none; border-radius: 10px 10px 0 0;"></div>
-                                <div style="position:absolute; top:0; left:25%; width:2px; height:100%; background:rgba(255,255,255,0.05); box-shadow: 0 0 5px rgba(0,0,0,0.8); z-index: 4;"></div>
-                                <div style="position:absolute; top:0; left:50%; width:2px; height:100%; background:rgba(255,255,255,0.1); box-shadow: 0 0 5px rgba(0,0,0,0.8); z-index: 4;"></div>
-                                <div style="position:absolute; top:0; left:75%; width:2px; height:100%; background:rgba(255,255,255,0.05); box-shadow: 0 0 5px rgba(0,0,0,0.8); z-index: 4;"></div>
-                                <div id="guild-xp-text" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #fff; font-family: 'Cinzel'; font-weight: bold; font-size: 13px; text-shadow: 0 2px 5px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.8); z-index: 5; letter-spacing: 1px;">0 / 750 Levels Gained</div>
-                            </div>
+                    <section class="home-ladders-section">
+                        <div class="home-section-heading home-section-heading-compact">
+                            <span class="home-section-kicker">War Council Reports</span>
+                            <h3 class="home-section-title">Curated ladder intelligence</h3>
+                            <p class="home-section-subtitle">A quick read on the guild's front-runners before you dive into the full ladders.</p>
                         </div>
 
-                        <div>
-                            <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; font-family: 'Cinzel'; font-size: 15px; font-weight: bold; color: #ff4400; text-shadow: 0 2px 8px rgba(255, 68, 0, 0.4); letter-spacing: 1px;">
-                                <span>🩸 Blood of the Enemy (HKs)</span>
-                                <span id="guild-hk-tooltip-trigger" class="war-effort-link" style="color: #bbb; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; border-bottom: 1px dotted rgba(255,255,255,0.3); cursor: pointer; text-shadow: none; transition: color 0.3s; letter-spacing: 0;">View Contributors ➔</span>
+                        <div id="leaderboards-wrapper" class="leaderboards-wrapper">
+                            <div id="pve-leaderboard-container" class="leaderboard-panel" hidden>
+                                <h3 class="leaderboard-title lb-title-pve">🛡️ PvE War Council Report 🛡️</h3>
+                                <div id="pve-leaderboard" class="leaderboard-list"></div>
+                                <button id="btn-view-pve" class="view-all-btn btn-pve">View Full PvE Ladder ➔</button>
                             </div>
-                            <div style="position: relative; width: 100%; height: 24px; background: rgba(5, 5, 8, 0.9); border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.05); border-top: 2px solid rgba(0, 0, 0, 0.8); overflow: hidden; box-shadow: inset 0 5px 15px rgba(0,0,0,0.9), 0 2px 5px rgba(255,255,255,0.02);">
-                                <div id="guild-hk-fill" class="progress-bar-glow" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; transition: width 1.5s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: inset 0 0 15px rgba(0,0,0,0.5);"></div>
-                                <div style="position:absolute; top:0; left:0; width:100%; height:45%; background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%); z-index: 3; pointer-events: none; border-radius: 10px 10px 0 0;"></div>
-                                <div style="position:absolute; top:0; left:25%; width:2px; height:100%; background:rgba(255,255,255,0.05); box-shadow: 0 0 5px rgba(0,0,0,0.8); z-index: 4;"></div>
-                                <div style="position:absolute; top:0; left:50%; width:2px; height:100%; background:rgba(255,255,255,0.1); box-shadow: 0 0 5px rgba(0,0,0,0.8); z-index: 4;"></div>
-                                <div style="position:absolute; top:0; left:75%; width:2px; height:100%; background:rgba(255,255,255,0.05); box-shadow: 0 0 5px rgba(0,0,0,0.8); z-index: 4;"></div>
-                                <div id="guild-hk-text" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #fff; font-family: 'Cinzel'; font-weight: bold; font-size: 13px; text-shadow: 0 2px 5px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.8); z-index: 5; letter-spacing: 1px;">0 / 500 HKs Gained</div>
+                            <div id="pvp-leaderboard-container" class="leaderboard-panel" hidden>
+                                <h3 class="leaderboard-title lb-title-pvp">⚔️ PvP War Council Report ⚔️</h3>
+                                <div id="pvp-leaderboard" class="leaderboard-list"></div>
+                                <button id="btn-view-pvp" class="view-all-btn btn-pvp">View Full PvP Ladder ➔</button>
                             </div>
                         </div>
-                        
-                        <div>
-                            <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; font-family: 'Cinzel'; font-size: 15px; font-weight: bold; color: #a335ee; text-shadow: 0 2px 8px rgba(163, 53, 238, 0.4); letter-spacing: 1px;">
-                                <span>🐉 Dragon's Hoard (Epic Loot)</span>
-                                <span id="guild-loot-tooltip-trigger" class="war-effort-link" style="color: #bbb; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; border-bottom: 1px dotted rgba(255,255,255,0.3); cursor: pointer; text-shadow: none; transition: color 0.3s; letter-spacing: 0;">View Contributors ➔</span>
-                            </div>
-                            <div style="position: relative; width: 100%; height: 24px; background: rgba(5, 5, 8, 0.9); border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.05); border-top: 2px solid rgba(0, 0, 0, 0.8); overflow: hidden; box-shadow: inset 0 5px 15px rgba(0,0,0,0.9), 0 2px 5px rgba(255,255,255,0.02);">
-                                <div id="guild-loot-fill" class="progress-bar-glow" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; transition: width 1.5s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: inset 0 0 15px rgba(0,0,0,0.5);"></div>
-                                <div style="position:absolute; top:0; left:0; width:100%; height:45%; background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%); z-index: 3; pointer-events: none; border-radius: 10px 10px 0 0;"></div>
-                                <div style="position:absolute; top:0; left:25%; width:2px; height:100%; background:rgba(255,255,255,0.05); box-shadow: 0 0 5px rgba(0,0,0,0.8); z-index: 4;"></div>
-                                <div style="position:absolute; top:0; left:50%; width:2px; height:100%; background:rgba(255,255,255,0.1); box-shadow: 0 0 5px rgba(0,0,0,0.8); z-index: 4;"></div>
-                                <div style="position:absolute; top:0; left:75%; width:2px; height:100%; background:rgba(255,255,255,0.05); box-shadow: 0 0 5px rgba(0,0,0,0.8); z-index: 4;"></div>
-                                <div id="guild-loot-text" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #fff; font-family: 'Cinzel'; font-weight: bold; font-size: 13px; text-shadow: 0 2px 5px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.8); z-index: 5; letter-spacing: 1px;">0 / 60 Epics Looted</div>
-                            </div>
+                    </section>
+
+                    <section class="home-secondary-section">
+                        <div class="home-section-heading home-section-heading-compact">
+                            <span class="home-section-kicker">Guild Intelligence</span>
+                            <h3 class="home-section-title">Go deeper when the homepage summary is not enough</h3>
+                            <p class="home-section-subtitle">Use analytics for broader guild patterns and architecture when you want to inspect how the armory works.</p>
                         </div>
 
-                        <div>
-                            <div style="display: flex; justify-content: space-between; align-items: flex-end; flex-wrap: wrap; gap: 5px; margin-bottom: 8px; font-family: 'Cinzel'; font-size: 15px; font-weight: bold; color: #3FC7EB; text-shadow: 0 2px 8px rgba(63, 199, 235, 0.4); letter-spacing: 1px;">
-                                <span>⚡ The Zenith Cohort (Max Level Pushes)</span>
-                                <span id="guild-zenith-tooltip-trigger" class="war-effort-link" style="color: #bbb; font-family: 'Inter', sans-serif; font-size: 11px; font-weight: 600; border-bottom: 1px dotted rgba(255,255,255,0.3); cursor: pointer; text-shadow: none; transition: color 0.3s; letter-spacing: 0;">View Contributors ➔</span>
-                            </div>
-                            <div style="position: relative; width: 100%; height: 24px; background: rgba(5, 5, 8, 0.9); border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.05); border-top: 2px solid rgba(0, 0, 0, 0.8); overflow: hidden; box-shadow: inset 0 5px 15px rgba(0,0,0,0.9), 0 2px 5px rgba(255,255,255,0.02);">
-                                <div id="guild-zenith-fill" class="progress-bar-glow" style="position: absolute; top: 0; left: 0; height: 100%; width: 0%; transition: width 1.5s cubic-bezier(0.25, 0.8, 0.25, 1); box-shadow: inset 0 0 15px rgba(0,0,0,0.5);"></div>
-                                <div style="position:absolute; top:0; left:0; width:100%; height:45%; background: linear-gradient(180deg, rgba(255,255,255,0.15) 0%, transparent 100%); z-index: 3; pointer-events: none; border-radius: 10px 10px 0 0;"></div>
-                                <div style="position:absolute; top:0; left:25%; width:2px; height:100%; background:rgba(255,255,255,0.05); box-shadow: 0 0 5px rgba(0,0,0,0.8); z-index: 4;"></div>
-                                <div style="position:absolute; top:0; left:50%; width:2px; height:100%; background:rgba(255,255,255,0.1); box-shadow: 0 0 5px rgba(0,0,0,0.8); z-index: 4;"></div>
-                                <div style="position:absolute; top:0; left:75%; width:2px; height:100%; background:rgba(255,255,255,0.05); box-shadow: 0 0 5px rgba(0,0,0,0.8); z-index: 4;"></div>
-                                <div id="guild-zenith-text" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #fff; font-family: 'Cinzel'; font-weight: bold; font-size: 13px; text-shadow: 0 2px 5px rgba(0,0,0,0.9), 0 0 10px rgba(0,0,0,0.8); z-index: 5; letter-spacing: 1px;">0 / 10 New Level 70s</div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <button onclick="window.location.hash='badges'" class="view-heroes-btn">
-                        🌟 View Hall of Heroes
-                    </button>
-                    
-                    <div style="text-align: center; margin-top: 25px; font-size: 12px; color: #888; font-style: italic; border-top: 1px solid rgba(255,255,255,0.05); padding-top: 15px; letter-spacing: 0.5px;">
-                        * Note: Weekly guild challenges are currently experimental and subject to change based on community feedback.
-                    </div>
-                </div>
+                        <div class="home-secondary-grid">
+                            <button type="button" class="home-nav-card home-destination-card" data-home-route="analytics">
+                                <span class="home-nav-eyebrow">Numbers and Trends</span>
+                                <span class="home-nav-title">Guild Analytics</span>
+                                <span class="home-nav-copy">Dive into charts for roles, activity, levels, item level spread, race, and class distribution.</span>
+                                <span class="home-nav-cta">Open analytics ➔</span>
+                            </button>
 
-                <div id="weekly-mvps-container" style="display:none; width: 100%; max-width: 1000px; margin: 0 auto 30px auto; animation: fadeInUp 0.5s forwards;">
-                    <h3 style="font-family: 'Cinzel'; color: #ffd100; text-align: center; margin-bottom: 20px; text-shadow: 0 2px 4px #000; letter-spacing: 1px;">🏆 7-Day Guild MVPs 🏆</h3>
-                    <div style="display: flex; flex-wrap: wrap; gap: 20px; justify-content: center;">
-                        <div style="flex: 1; min-width: 280px; background: rgba(0,0,0,0.5); border: 1px solid #ff8000; border-radius: 8px; padding: 15px; box-shadow: inset 0 0 15px rgba(255,128,0,0.1);">
-                            <h4 style="color: #ff8000; text-align: center; font-family: 'Cinzel'; margin-top: 0; margin-bottom: 15px;">🛡️ Biggest Upgrades (iLvl)</h4>
-                            <div id="mvp-pve-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                            <button type="button" class="home-nav-card home-destination-card" data-home-route="architecture">
+                                <span class="home-nav-eyebrow">Tech Codex</span>
+                                <span class="home-nav-title">System Architecture</span>
+                                <span class="home-nav-copy">Review the Python, Turso, GitHub Actions, JSON, and static-site pipeline behind the armory.</span>
+                                <span class="home-nav-cta">Open architecture ➔</span>
+                            </button>
                         </div>
-                        <div style="flex: 1; min-width: 280px; background: rgba(0,0,0,0.5); border: 1px solid #ff4400; border-radius: 8px; padding: 15px; box-shadow: inset 0 0 15px rgba(255,68,0,0.1);">
-                            <h4 style="color: #ff4400; text-align: center; font-family: 'Cinzel'; margin-top: 0; margin-bottom: 15px;">⚔️ Deadliest (HKs)</h4>
-                            <div id="mvp-pvp-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div id="leaderboards-wrapper" style="display:flex; flex-wrap: wrap; gap: 20px; width: 100%; max-width: 1000px; margin: 40px auto 20px auto; justify-content: center;">
-                    <div id="pve-leaderboard-container" style="display:none; flex: 1; min-width: 320px; background: rgba(0,0,0,0.5); padding: 20px; border-radius: 8px; border: 1px solid #333; box-shadow: inset 0 0 10px rgba(0,0,0,0.8);">
-                        <h3 style="font-family: 'Cinzel'; color: #ff8000; text-align: center; margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; text-shadow: 0 2px 4px #000;">🛡️ Top 25 Item Level 🛡️</h3>
-                        <div id="pve-leaderboard" style="display: flex; flex-direction: column; gap: 8px;"></div>
-                        <button onclick="window.location.hash='ladder-pve'" class="view-all-btn" style="border-color: #ff8000; color: #ff8000;">View Full PvE Ladder ➔</button>
-                    </div>
-                    <div id="pvp-leaderboard-container" style="display:none; flex: 1; min-width: 320px; background: rgba(0,0,0,0.5); padding: 20px; border-radius: 8px; border: 1px solid #333; box-shadow: inset 0 0 10px rgba(0,0,0,0.8);">
-                        <h3 style="font-family: 'Cinzel'; color: #ff4400; text-align: center; margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 15px; text-shadow: 0 2px 4px #000;">⚔️ Top 25 Honorable Kills ⚔️</h3>
-                        <div id="pvp-leaderboard" style="display: flex; flex-direction: column; gap: 8px;"></div>
-                        <button onclick="window.location.hash='ladder-pvp'" class="view-all-btn" style="border-color: #ff4400; color: #ff4400;">View Full PvP Ladder ➔</button>
-                    </div>
+                    </section>
                 </div>
                 
                 </div> </div> 
-            <div id="analytics-view" style="display: none; animation: fadeInUp 0.5s forwards;">
-                <h2 style="color: #ffd100; font-family: 'Cinzel', serif; text-align: center; text-shadow: 0 2px 4px #000; margin-bottom: 20px; font-size: 32px;">Guild Analytics</h2>
-                
-                <div class="stat-box-container" style="max-width: 1100px; margin: 0 auto 40px auto; padding-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05);">
-                    <div class="stat-box clickable" onclick="window.location.hash='ladder-pve'" style="border-color: #ff8000; box-shadow: inset 0 0 15px rgba(255,128,0,0.1);" title="View Full PvE Ladder">
-                        <span id="kpi-avg-ilvl" class="stat-value" style="color: #ff8000;">0</span>
-                        <span class="stat-label">Avg Level 70 iLvl</span>
-                    </div>
-                    <div class="stat-box clickable" onclick="window.scrollTo({top: document.body.scrollHeight, behavior: 'smooth'});" style="border-color: #a335ee; box-shadow: inset 0 0 15px rgba(163,53,238,0.1);" title="Scroll to Activity Chart">
-                        <span id="kpi-epic-loot" class="stat-value" style="color: #a335ee;">0</span>
-                        <span class="stat-label">Epics Looted (7d)</span>
-                    </div>
-                    <div class="stat-box clickable" onclick="window.location.hash='ladder-pvp'" style="border-color: #ff4400; box-shadow: inset 0 0 15px rgba(255,68,0,0.1);" title="View Full PvP Ladder">
-                        <span id="kpi-total-hks" class="stat-value" style="color: #ff4400;">0</span>
-                        <span class="stat-label">Total Guild HKs</span>
-                    </div>
-                </div>
-                
-                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; width: 100%; max-width: 1100px; margin: 0 auto 30px auto;">
-                    <div class="heatmap-wrapper" style="flex: 1; min-width: 300px; max-width: 480px; margin: 0; display: flex; flex-direction: column;">
-                        <h3 class="heatmap-title" style="justify-content: center;">🛡️ Raid Roles <span style="color:#aaa; font-size: 11px; margin-left:6px;">Known Specs</span></h3>
-                        <div style="position: relative; flex: 1; width: 100%; display: flex; justify-content: center; align-items: center; min-height: 250px;">
-                            <canvas id="roleDonutChart"></canvas>
+            <div id="analytics-view" class="analytics-view-container">
+                <section class="analytics-hero-section">
+                    <div class="analytics-hero-shell">
+                        <div class="analytics-hero-copy">
+                            <span class="analytics-overline">Guild Intelligence</span>
+                            <h2 class="analytics-hero-title">Outland Campaign Analytics</h2>
+                            <p class="analytics-hero-desc">
+                                A command board for roster health, battle readiness, class depth, and weekly momentum.
+                                Use this page when the homepage pulse is not enough and you need the full officer view.
+                            </p>
                         </div>
+
+                        <div class="analytics-hero-band">
+                            <div class="analytics-hero-band-item">
+                                <span class="analytics-hero-band-kicker">What this board answers</span>
+                                <span class="analytics-hero-band-value">Who is ready, what is growing, and where the roster is thin.</span>
+                            </div>
+                            <div class="analytics-hero-band-item">
+                                <span class="analytics-hero-band-kicker">Interaction</span>
+                                <span class="analytics-hero-band-value">Every chart, pressure card, and spotlight can route you straight into the relevant roster view.</span>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="analytics-summary-section">
+                    <div class="home-section-heading home-section-heading-compact analytics-heading">
+                        <span class="home-section-kicker">Guild Health Summary</span>
+                        <h3 class="home-section-title">The quickest read on current readiness</h3>
+                        <p class="home-section-subtitle">A compact officer summary before diving into the deeper intelligence boards.</p>
                     </div>
 
-                    <div class="heatmap-wrapper" style="flex: 2; min-width: 320px; max-width: 650px; margin: 0;">
-                        <h3 class="heatmap-title">🔥 Guild Activity (Last 7 Days)</h3>
-                        <div style="position: relative; height: 250px; width: 100%;">
-                            <canvas id="analyticsActivityChart"></canvas>
+                    <div class="stat-box-container analytics-kpi-wrapper">
+                        <div class="stat-box clickable stat-box-kpi-pve" id="kpi-box-pve" title="View Full PvE Ladder">
+                            <span id="kpi-avg-ilvl" class="stat-value kpi-val-pve">0</span>
+                            <span class="stat-label">Avg Level 70 iLvl</span>
+                        </div>
+                        <div class="stat-box clickable stat-box-kpi-loot" id="kpi-box-ready" title="Open Raid Ready">
+                            <span id="kpi-raid-ready" class="stat-value kpi-val-loot">0</span>
+                            <span class="stat-label">Raid Ready</span>
+                        </div>
+                        <div class="stat-box clickable stat-box-kpi-pvp" id="kpi-box-pvp" title="View Full PvP Ladder">
+                            <span id="kpi-total-hks" class="stat-value kpi-val-pvp">0</span>
+                            <span class="stat-label">Total Guild HKs</span>
                         </div>
                     </div>
-                </div>
+                </section>
 
-                <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 20px; width: 100%; max-width: 1100px; margin: 0 auto;">
-                    
-                    <div class="heatmap-wrapper" style="flex: 1; min-width: 400px; max-width: 500px; display: flex; flex-direction: column;">
-                        <h3 class="heatmap-title" style="justify-content: center;">📈 Level Distribution <span style="color:#aaa; font-size: 11px; margin-left: 6px;">Entire Roster</span></h3>
-                        <div style="position: relative; flex: 1; width: 100%; min-height: 250px;">
-                            <canvas id="levelDistChart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="heatmap-wrapper" style="flex: 1; min-width: 400px; max-width: 500px; display: flex; flex-direction: column;">
-                        <h3 class="heatmap-title" style="justify-content: center;">⚔️ Max Level iLvl Spread <span style="color:#aaa; font-size: 11px; margin-left: 6px;">Lvl 70s Only</span></h3>
-                        <div style="position: relative; flex: 1; width: 100%; min-height: 250px;">
-                            <canvas id="ilvlDistChart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="heatmap-wrapper" style="flex: 1; min-width: 400px; max-width: 500px; display: flex; flex-direction: column;">
-                        <h3 class="heatmap-title" style="justify-content: center;">🧬 Race Distribution <span style="color:#aaa; font-size: 11px; margin-left: 6px;">Scanned Roster</span></h3>
-                        <div style="position: relative; flex: 1; width: 100%; min-height: 250px;">
-                            <canvas id="raceDistChart"></canvas>
-                        </div>
+                <section class="analytics-intel-section analytics-intel-section-pressure">
+                    <div class="home-section-heading home-section-heading-compact analytics-heading">
+                        <span class="home-section-kicker">Deployment Pressure</span>
+                        <h3 class="home-section-title">Where the roster feels fortified and where it still feels thin</h3>
+                        <p class="home-section-subtitle">These role cards are designed for quick officer reads. Click any one to jump straight into the matching filtered roster.</p>
                     </div>
 
-                    <div class="heatmap-wrapper" style="flex: 1; min-width: 400px; max-width: 500px; display: flex; flex-direction: column;">
-                        <h3 class="heatmap-title" style="justify-content: center;">📊 Class Distribution <span style="color:#aaa; font-size: 11px; margin-left: 6px;">Scanned Roster</span></h3>
-                        <div style="position: relative; flex: 1; width: 100%; min-height: 250px;">
-                            <canvas id="analyticsClassChart"></canvas>
+                    <div class="analytics-pressure-grid">
+                        <button type="button" id="analytics-pressure-tank" class="analytics-pressure-card analytics-pressure-card-tank" data-home-route="filter-role-tank">
+                            <span class="analytics-pressure-kicker">Shield Wall</span>
+                            <strong class="analytics-pressure-value">0</strong>
+                            <span class="analytics-pressure-title">Tank Depth</span>
+                            <span class="analytics-pressure-meta">Checking the current front line.</span>
+                            <span class="analytics-pressure-state">Assessing readiness</span>
+                            <span class="analytics-pressure-cta">Inspect tanks ➔</span>
+                        </button>
+
+                        <button type="button" id="analytics-pressure-healer" class="analytics-pressure-card analytics-pressure-card-healer" data-home-route="filter-role-healer">
+                            <span class="analytics-pressure-kicker">Sanctified Reserve</span>
+                            <strong class="analytics-pressure-value">0</strong>
+                            <span class="analytics-pressure-title">Healer Depth</span>
+                            <span class="analytics-pressure-meta">Checking sustain and recovery coverage.</span>
+                            <span class="analytics-pressure-state">Assessing readiness</span>
+                            <span class="analytics-pressure-cta">Inspect healers ➔</span>
+                        </button>
+
+                        <button type="button" id="analytics-pressure-melee" class="analytics-pressure-card analytics-pressure-card-melee" data-home-route="filter-role-melee-dps">
+                            <span class="analytics-pressure-kicker">Blade Line</span>
+                            <strong class="analytics-pressure-value">0</strong>
+                            <span class="analytics-pressure-title">Melee Pressure</span>
+                            <span class="analytics-pressure-meta">Checking frontline striking power.</span>
+                            <span class="analytics-pressure-state">Assessing readiness</span>
+                            <span class="analytics-pressure-cta">Inspect melee ➔</span>
+                        </button>
+
+                        <button type="button" id="analytics-pressure-ranged" class="analytics-pressure-card analytics-pressure-card-ranged" data-home-route="filter-role-ranged-dps">
+                            <span class="analytics-pressure-kicker">Arcane Volley</span>
+                            <strong class="analytics-pressure-value">0</strong>
+                            <span class="analytics-pressure-title">Ranged Pressure</span>
+                            <span class="analytics-pressure-meta">Checking caster and ranged support depth.</span>
+                            <span class="analytics-pressure-state">Assessing readiness</span>
+                            <span class="analytics-pressure-cta">Inspect ranged ➔</span>
+                        </button>
+                    </div>
+
+                    <div class="analytics-pressure-notes">
+                        <button type="button" class="analytics-pressure-note" data-home-route="filter-level-70">
+                            <span class="analytics-pressure-note-kicker">Endgame Census</span>
+                            <strong id="analytics-pressure-fresh70" class="analytics-pressure-note-value">0</strong>
+                            <span class="analytics-pressure-note-copy">Level 70 characters currently recorded in the guild.</span>
+                        </button>
+
+                        <button type="button" class="analytics-pressure-note" data-home-route="raidready">
+                            <span class="analytics-pressure-note-kicker">Deployment Strength</span>
+                            <strong id="analytics-pressure-ready" class="analytics-pressure-note-value">0</strong>
+                            <span class="analytics-pressure-note-copy">Raid ready characters that can answer the call right now.</span>
+                        </button>
+
+                        <button type="button" class="analytics-pressure-note" data-home-route="active">
+                            <span class="analytics-pressure-note-kicker">Signs of Life</span>
+                            <strong id="analytics-pressure-active" class="analytics-pressure-note-value">0</strong>
+                            <span class="analytics-pressure-note-copy">Characters active in the last 14 days.</span>
+                        </button>
+
+                        <button type="button" class="analytics-pressure-note" data-home-route="filter-level-60-69">
+                            <span class="analytics-pressure-note-kicker">Leveling Campaign</span>
+                            <strong id="analytics-pressure-campaign" class="analytics-pressure-note-value">0</strong>
+                            <span class="analytics-pressure-note-copy">Recent level-ups logged across the last seven days.</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section id="analytics-activity-section" class="analytics-intel-section analytics-intel-section-tempo">
+                    <div class="home-section-heading home-section-heading-compact analytics-heading">
+                        <span class="home-section-kicker">Campaign Tempo</span>
+                        <h3 class="home-section-title">How the guild moved during the last seven days</h3>
+                        <p class="home-section-subtitle">Loot, level-ups, total roster size, and active roster movement in one command view.</p>
+                    </div>
+
+                    <div class="analytics-primary-grid">
+                        <div class="heatmap-wrapper analytics-card analytics-card-wide">
+                            <div class="analytics-card-head">
+                                <h3 class="heatmap-title">🔥 Guild Activity (Last 7 Days)</h3>
+                                <span class="analytics-card-hint">Tracks loot, level-ups, total roster, and active roster</span>
+                            </div>
+                            <div class="chart-canvas-wrapper">
+                                <canvas id="analyticsActivityChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="heatmap-wrapper analytics-card analytics-card-side">
+                            <div class="analytics-card-head">
+                                <h3 class="heatmap-title chart-title-center">🛡️ Raid Roles <span class="chart-title-sub">Known Specs</span></h3>
+                                <span class="analytics-card-hint">Click a slice to filter matching heroes</span>
+                            </div>
+                            <div class="chart-canvas-wrapper flex-center">
+                                <canvas id="roleDonutChart"></canvas>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </section>
+
+                <section class="analytics-intel-section analytics-intel-section-composition">
+                    <div class="home-section-heading home-section-heading-compact analytics-heading">
+                        <span class="home-section-kicker">Warband Composition</span>
+                        <h3 class="home-section-title">What the roster is made of</h3>
+                        <p class="home-section-subtitle">Use this section to inspect depth, class spread, and faction flavor across the scanned guild.</p>
+                    </div>
+
+                    <div class="analytics-card-grid analytics-card-grid-three">
+                        <div class="heatmap-wrapper analytics-card analytics-card-composition">
+                            <div class="analytics-card-head">
+                                <h3 class="heatmap-title chart-title-center">📊 Class Distribution <span class="chart-title-sub">Scanned Roster</span></h3>
+                                <span class="analytics-card-hint">Click a class to inspect those characters</span>
+                            </div>
+                            <div class="chart-canvas-wrapper">
+                                <canvas id="analyticsClassChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="heatmap-wrapper analytics-card analytics-card-composition">
+                            <div class="analytics-card-head">
+                                <h3 class="heatmap-title chart-title-center">🧬 Race Distribution <span class="chart-title-sub">Scanned Roster</span></h3>
+                                <span class="analytics-card-hint">Lower priority flavor data with roster drill-down</span>
+                            </div>
+                            <div class="chart-canvas-wrapper">
+                                <canvas id="raceDistChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="analytics-intel-section analytics-intel-section-readiness">
+                    <div class="home-section-heading home-section-heading-compact analytics-heading">
+                        <span class="home-section-kicker">Progression Readiness</span>
+                        <h3 class="home-section-title">How close the guild is to endgame strength</h3>
+                        <p class="home-section-subtitle">These charts separate leveling progress from max-level gear readiness.</p>
+                    </div>
+
+                    <div class="analytics-card-grid analytics-card-grid-two">
+                        <div class="heatmap-wrapper analytics-card analytics-card-readiness">
+                            <div class="analytics-card-head">
+                                <h3 class="heatmap-title chart-title-center">📈 Level Distribution <span class="chart-title-sub">Entire Roster</span></h3>
+                                <span class="analytics-card-hint">Click a bracket to inspect that level range</span>
+                            </div>
+                            <div class="chart-canvas-wrapper">
+                                <canvas id="levelDistChart"></canvas>
+                            </div>
+                        </div>
+
+                        <div class="heatmap-wrapper analytics-card analytics-card-readiness">
+                            <div class="analytics-card-head">
+                                <h3 class="heatmap-title chart-title-center">⚔️ Max Level iLvl Spread <span class="chart-title-sub">Lvl 70s Only</span></h3>
+                                <span class="analytics-card-hint">Click a bracket to inspect geared level 70 characters</span>
+                            </div>
+                            <div class="chart-canvas-wrapper">
+                                <canvas id="ilvlDistChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <section class="analytics-intel-section analytics-intel-section-deployment">
+                    <div class="home-section-heading home-section-heading-compact analytics-heading">
+                        <span class="home-section-kicker">Endgame Deployment</span>
+                        <h3 class="home-section-title">The strongest current options by raid role</h3>
+                        <p class="home-section-subtitle">A faster officer read on who currently anchors each role at endgame. Every card routes straight into the hero dossier.</p>
+                    </div>
+
+                    <div class="analytics-readiness-grid">
+                        <button type="button" id="analytics-readiness-tank" class="analytics-readiness-card analytics-readiness-card-tank" data-home-route="filter-role-tank">
+                            <span class="analytics-readiness-kicker">Shield Captain</span>
+                            <div class="analytics-readiness-media">
+                                <div class="analytics-readiness-portrait-wrap">
+                                    <img class="analytics-readiness-portrait" src="https://wow.zamimg.com/images/wow/icons/large/classicon_warrior.jpg" alt="">
+                                </div>
+                                <div class="analytics-readiness-copy">
+                                    <strong class="analytics-readiness-name">Awaiting tank anchor</strong>
+                                    <span class="analytics-readiness-value">No geared tank logged</span>
+                                    <span class="analytics-readiness-meta">This slot updates from the highest item level level 70 tank currently in the roster.</span>
+                                </div>
+                            </div>
+                            <span class="analytics-readiness-cta">Inspect tank dossier ➔</span>
+                        </button>
+
+                        <button type="button" id="analytics-readiness-healer" class="analytics-readiness-card analytics-readiness-card-healer" data-home-route="filter-role-healer">
+                            <span class="analytics-readiness-kicker">Sanctified Anchor</span>
+                            <div class="analytics-readiness-media">
+                                <div class="analytics-readiness-portrait-wrap">
+                                    <img class="analytics-readiness-portrait" src="https://wow.zamimg.com/images/wow/icons/large/classicon_priest.jpg" alt="">
+                                </div>
+                                <div class="analytics-readiness-copy">
+                                    <strong class="analytics-readiness-name">Awaiting healing anchor</strong>
+                                    <span class="analytics-readiness-value">No geared healer logged</span>
+                                    <span class="analytics-readiness-meta">This slot updates from the highest item level level 70 healer currently in the roster.</span>
+                                </div>
+                            </div>
+                            <span class="analytics-readiness-cta">Inspect healer dossier ➔</span>
+                        </button>
+
+                        <button type="button" id="analytics-readiness-ranged" class="analytics-readiness-card analytics-readiness-card-ranged" data-home-route="filter-role-ranged-dps">
+                            <span class="analytics-readiness-kicker">Arcane Spearhead</span>
+                            <div class="analytics-readiness-media">
+                                <div class="analytics-readiness-portrait-wrap">
+                                    <img class="analytics-readiness-portrait" src="https://wow.zamimg.com/images/wow/icons/large/classicon_mage.jpg" alt="">
+                                </div>
+                                <div class="analytics-readiness-copy">
+                                    <strong class="analytics-readiness-name">Awaiting ranged anchor</strong>
+                                    <span class="analytics-readiness-value">No geared ranged logged</span>
+                                    <span class="analytics-readiness-meta">This slot updates from the highest item level level 70 ranged damage dealer currently in the roster.</span>
+                                </div>
+                            </div>
+                            <span class="analytics-readiness-cta">Inspect ranged dossier ➔</span>
+                        </button>
+
+                        <button type="button" id="analytics-readiness-melee" class="analytics-readiness-card analytics-readiness-card-melee" data-home-route="filter-role-melee-dps">
+                            <span class="analytics-readiness-kicker">Blade Vanguard</span>
+                            <div class="analytics-readiness-media">
+                                <div class="analytics-readiness-portrait-wrap">
+                                    <img class="analytics-readiness-portrait" src="https://wow.zamimg.com/images/wow/icons/large/classicon_rogue.jpg" alt="">
+                                </div>
+                                <div class="analytics-readiness-copy">
+                                    <strong class="analytics-readiness-name">Awaiting melee anchor</strong>
+                                    <span class="analytics-readiness-value">No geared melee logged</span>
+                                    <span class="analytics-readiness-meta">This slot updates from the highest item level level 70 melee damage dealer currently in the roster.</span>
+                                </div>
+                            </div>
+                            <span class="analytics-readiness-cta">Inspect melee dossier ➔</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="analytics-intel-section analytics-intel-section-surge">
+                    <div class="home-section-heading home-section-heading-compact analytics-heading">
+                        <span class="home-section-kicker">Momentum Watch</span>
+                        <h3 class="home-section-title">The strongest current movers in the guild</h3>
+                        <p class="home-section-subtitle">These spotlight cards make the page feel more alive and give officers a fast route into the characters driving current momentum.</p>
+                    </div>
+
+                    <div class="analytics-spotlight-grid">
+                        <button type="button" id="analytics-spotlight-pve" class="analytics-spotlight-card analytics-spotlight-card-pve" data-home-route="ladder-pve">
+                            <span class="analytics-spotlight-kicker">PvE Surge Leader</span>
+                            <div class="analytics-spotlight-media">
+                                <div class="analytics-spotlight-portrait-wrap">
+                                    <img class="analytics-spotlight-portrait" src="https://wow.zamimg.com/images/wow/icons/large/classicon_warrior.jpg" alt="">
+                                </div>
+                                <div class="analytics-spotlight-copy">
+                                    <strong class="analytics-spotlight-name">Awaiting upgrades</strong>
+                                    <span class="analytics-spotlight-value">No fresh gains</span>
+                                    <span class="analytics-spotlight-meta">This slot wakes up when item level progress returns to the roster.</span>
+                                </div>
+                            </div>
+                            <span class="analytics-spotlight-cta">Open PvE ladder ➔</span>
+                        </button>
+
+                        <button type="button" id="analytics-spotlight-pvp" class="analytics-spotlight-card analytics-spotlight-card-pvp" data-home-route="ladder-pvp">
+                            <span class="analytics-spotlight-kicker">PvP Surge Leader</span>
+                            <div class="analytics-spotlight-media">
+                                <div class="analytics-spotlight-portrait-wrap">
+                                    <img class="analytics-spotlight-portrait" src="https://wow.zamimg.com/images/wow/icons/large/classicon_warrior.jpg" alt="">
+                                </div>
+                                <div class="analytics-spotlight-copy">
+                                    <strong class="analytics-spotlight-name">Awaiting bloodshed</strong>
+                                    <span class="analytics-spotlight-value">No fresh HK climb</span>
+                                    <span class="analytics-spotlight-meta">This slot fills when battlegrounds and arena action start moving again.</span>
+                                </div>
+                            </div>
+                            <span class="analytics-spotlight-cta">Open PvP ladder ➔</span>
+                        </button>
+
+                        <button type="button" id="analytics-spotlight-new70" class="analytics-spotlight-card analytics-spotlight-card-new70" data-home-route="filter-level-70">
+                            <span class="analytics-spotlight-kicker">Newest Level 70</span>
+                            <div class="analytics-spotlight-media">
+                                <div class="analytics-spotlight-portrait-wrap">
+                                    <img class="analytics-spotlight-portrait" src="https://wow.zamimg.com/images/wow/icons/large/classicon_mage.jpg" alt="">
+                                </div>
+                                <div class="analytics-spotlight-copy">
+                                    <strong class="analytics-spotlight-name">No new ascensions</strong>
+                                    <span class="analytics-spotlight-value">Roster holding steady</span>
+                                    <span class="analytics-spotlight-meta">The next fresh 70 will appear here as soon as one is recorded.</span>
+                                </div>
+                            </div>
+                            <span class="analytics-spotlight-cta">Inspect all level 70s ➔</span>
+                        </button>
+
+                        <button type="button" id="analytics-spotlight-leveling" class="analytics-spotlight-card analytics-spotlight-card-leveling" data-home-route="filter-level-60-69">
+                            <span class="analytics-spotlight-kicker">Closest To 70</span>
+                            <div class="analytics-spotlight-media">
+                                <div class="analytics-spotlight-portrait-wrap">
+                                    <img class="analytics-spotlight-portrait" src="https://wow.zamimg.com/images/wow/icons/large/classicon_hunter.jpg" alt="">
+                                </div>
+                                <div class="analytics-spotlight-copy">
+                                    <strong class="analytics-spotlight-name">Campaign front-runner</strong>
+                                    <span class="analytics-spotlight-value">Watching the 60-69 bracket</span>
+                                    <span class="analytics-spotlight-meta">The leading leveling character will be surfaced here automatically.</span>
+                                </div>
+                            </div>
+                            <span class="analytics-spotlight-cta">Inspect 60-69 bracket ➔</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="analytics-intel-section analytics-intel-section-chronicle">
+                    <div class="home-section-heading home-section-heading-compact analytics-heading">
+                        <span class="home-section-kicker">Campaign Chronicle</span>
+                        <h3 class="home-section-title">Recent honors and standout moments worth remembering</h3>
+                        <p class="home-section-subtitle">This strip gives the page a short-form recent history with direct routes into the names behind it.</p>
+                    </div>
+
+                    <div class="analytics-chronicle-grid">
+                        <button type="button" id="analytics-chronicle-pve" class="analytics-chronicle-card analytics-chronicle-card-pve" data-home-route="badges">
+                            <span class="analytics-chronicle-kicker">Reigning PvE Champion</span>
+                            <strong class="analytics-chronicle-title">Awaiting champion</strong>
+                            <span class="analytics-chronicle-value">No crown holder surfaced</span>
+                            <span class="analytics-chronicle-meta">This card will display the active PvE champion from the honors ledger.</span>
+                            <span class="analytics-chronicle-cta">Open honors board ➔</span>
+                        </button>
+
+                        <button type="button" id="analytics-chronicle-pvp" class="analytics-chronicle-card analytics-chronicle-card-pvp" data-home-route="badges">
+                            <span class="analytics-chronicle-kicker">Reigning PvP Champion</span>
+                            <strong class="analytics-chronicle-title">Awaiting champion</strong>
+                            <span class="analytics-chronicle-value">No crown holder surfaced</span>
+                            <span class="analytics-chronicle-meta">This card will display the active PvP champion from the honors ledger.</span>
+                            <span class="analytics-chronicle-cta">Open honors board ➔</span>
+                        </button>
+
+                        <button type="button" id="analytics-chronicle-fresh70" class="analytics-chronicle-card analytics-chronicle-card-fresh70" data-home-route="filter-level-70">
+                            <span class="analytics-chronicle-kicker">Fresh 70 Watch</span>
+                            <strong class="analytics-chronicle-title">No new ascensions</strong>
+                            <span class="analytics-chronicle-value">No level 70 surge this week</span>
+                            <span class="analytics-chronicle-meta">The latest max-level ascension will be surfaced here automatically.</span>
+                            <span class="analytics-chronicle-cta">Inspect level 70s ➔</span>
+                        </button>
+
+                        <button type="button" id="analytics-chronicle-loot" class="analytics-chronicle-card analytics-chronicle-card-loot" data-home-route="badges">
+                            <span class="analytics-chronicle-kicker">Epic Loot Chronicle</span>
+                            <strong class="analytics-chronicle-title">Awaiting fresh spoils</strong>
+                            <span class="analytics-chronicle-value">No epic surge recorded</span>
+                            <span class="analytics-chronicle-meta">Recent epic and legendary loot pressure is summarized here for the current seven day window.</span>
+                            <span class="analytics-chronicle-cta">Review campaign pulse ➔</span>
+                        </button>
+                    </div>
+                </section>
+
+                <section class="analytics-intel-section analytics-intel-section-routes">
+                    <div class="home-section-heading home-section-heading-compact analytics-heading">
+                        <span class="home-section-kicker">Quick Routes</span>
+                        <h3 class="home-section-title">Jump from intelligence to action</h3>
+                        <p class="home-section-subtitle">Use the connected views when the board tells you where to go next.</p>
+                    </div>
+
+                    <div class="analytics-quick-routes">
+                        <button type="button" class="home-nav-card analytics-route-card" data-home-route="ladder-pve">
+                            <span class="home-nav-eyebrow">Progression</span>
+                            <span class="home-nav-title">Open PvE Ladder</span>
+                            <span class="home-nav-copy">Inspect the strongest PvE characters behind the average item level signal and recent PvE surge cards.</span>
+                            <span class="home-nav-cta">View ladder ➔</span>
+                        </button>
+
+                        <button type="button" class="home-nav-card analytics-route-card" data-home-route="ladder-pvp">
+                            <span class="home-nav-eyebrow">Blood Ledger</span>
+                            <span class="home-nav-title">Open PvP Ladder</span>
+                            <span class="home-nav-copy">Follow total HK pressure into the full arena and battleground hierarchy.</span>
+                            <span class="home-nav-cta">View ladder ➔</span>
+                        </button>
+
+                        <button type="button" class="home-nav-card analytics-route-card" data-home-route="active">
+                            <span class="home-nav-eyebrow">Recent Signs of Life</span>
+                            <span class="home-nav-title">Open Active Roster</span>
+                            <span class="home-nav-copy">Move from the officer overview into the heroes that have shown life in the last two weeks.</span>
+                            <span class="home-nav-cta">View roster ➔</span>
+                        </button>
+
+                        <button type="button" class="home-nav-card analytics-route-card" data-home-route="raidready">
+                            <span class="home-nav-eyebrow">Tonight's Force</span>
+                            <span class="home-nav-title">Open Raid Ready</span>
+                            <span class="home-nav-copy">Go straight to the deployable roster when readiness charts raise immediate roster questions.</span>
+                            <span class="home-nav-cta">View roster ➔</span>
+                        </button>
+                    </div>
+                </section>
             </div>
 
-            <div id="architecture-view" style="display: none; animation: fadeInUp 0.5s forwards; width: 100%; max-width: 1200px; margin: 0 auto; padding: 20px;">
-                <h2 style="color: #ffd100; font-family: 'Cinzel', serif; text-align: center; text-shadow: 0 2px 4px #000; margin-bottom: 10px; font-size: 32px;">System Architecture</h2>
+            <div id="architecture-view" class="arch-view-wrapper">
+                <h2 class="view-main-title arch-title">System Architecture</h2>
                 
-                <p style="text-align: center; color: #2ecc71; font-family: 'Cinzel', serif; font-weight: bold; font-size: 18px; margin-bottom: 15px; letter-spacing: 1px; text-shadow: 0 1px 3px rgba(0,0,0,0.8);">
-                    ⚡ 100% FREE & SERVERLESS ⚡
-                </p>
+                <p class="arch-subtitle">⚡ 100% FREE & SERVERLESS ⚡</p>
                 
-                <p style="text-align: center; color: #bbb; max-width: 800px; margin: 0 auto 40px auto; font-size: 16px; line-height: 1.6;">
+                <p class="arch-description">
                     Azeroth's Most Wanted Armory operates on a fully automated, zero-cost tech stack. By combining edge databases, static site generation, and GitHub Actions, the dashboard processes thousands of data points a day without a traditional backend or any recurring hosting fees.
                 </p>
                 
@@ -363,7 +1473,7 @@
                         <div class="arch-logo-pill">
                             <img src="asset/software_logo/python.png" alt="Python">
                         </div>
-                        <div class="arch-phase" style="color: #3498db; border-color: #3498db; background: rgba(52, 152, 219, 0.1);">STEP 1: EXTRACTION</div>
+                        <div class="arch-phase arch-phase-extraction">STEP 1: EXTRACTION</div>
                         <h3>Asynchronous Pull</h3>
                         <p>Python utilizes <strong>AsyncIO</strong> and <strong>Aiohttp</strong> to concurrently fetch live character profiles from the Blizzard REST API, processing vast amounts of data in seconds.</p>
                     </div>
@@ -380,7 +1490,7 @@
                             <img src="asset/software_logo/turso.png" alt="Turso">
                             <img src="asset/software_logo/sqlite.png" alt="SQLite">
                         </div>
-                        <div class="arch-phase" style="color: #1abc9c; border-color: #1abc9c; background: rgba(26, 188, 156, 0.1);">STEP 2: STORAGE</div>
+                        <div class="arch-phase arch-phase-storage">STEP 2: STORAGE</div>
                         <h3>Edge Database</h3>
                         <p>Processed data is pushed in bulk transactions to a Turso edge database (libSQL/SQLite). This allows for infinite, free storage of historical guild trends and loot timelines.</p>
                     </div>
@@ -397,7 +1507,7 @@
                             <img src="asset/software_logo/github.png" alt="GitHub">
                             <img src="asset/software_logo/cron.png" alt="Cron">
                         </div>
-                        <div class="arch-phase" style="color: #9b59b6; border-color: #9b59b6; background: rgba(155, 89, 182, 0.1);">STEP 3: AUTOMATION</div>
+                        <div class="arch-phase arch-phase-automation">STEP 3: AUTOMATION</div>
                         <h3>CI/CD Pipeline</h3>
                         <p>GitHub Actions acts as our server. A strict <strong>Cron</strong> schedule triggers the pipeline to update the database and rebuild the website without human intervention.</p>
                     </div>
@@ -414,7 +1524,7 @@
                             <img src="asset/software_logo/jinga.png" alt="Jinja2">
                             <img src="asset/software_logo/html5.png" alt="HTML5">
                         </div>
-                        <div class="arch-phase" style="color: #e67e22; border-color: #e67e22; background: rgba(230, 126, 34, 0.1);">STEP 4: COMPILATION</div>
+                        <div class="arch-phase arch-phase-compilation">STEP 4: COMPILATION</div>
                         <h3>Static Generation</h3>
                         <p><strong>Jinja2</strong> templates inject the latest database queries into raw HTML. The result is a lightning-fast, ultra-secure static frontend powered by HTML5 and modern CSS.</p>
                     </div>
@@ -430,7 +1540,7 @@
                         <div class="arch-logo-pill">
                             <img src="asset/software_logo/json.png" alt="JSON">
                         </div>
-                        <div class="arch-phase" style="color: #f1c40f; border-color: #f1c40f; background: rgba(241, 196, 15, 0.1);">STEP 5: VISUALIZATION</div>
+                        <div class="arch-phase arch-phase-visualization">STEP 5: VISUALIZATION</div>
                         <h3>Client-Side Rendering</h3>
                         <p>Heavy payloads are pre-compiled into static <strong>JSON</strong> files. The frontend consumes this data natively, using <strong>Chart.js</strong> to render analytics with zero database latency.</p>
                     </div>
@@ -439,35 +1549,254 @@
 
             <div id="concise-view">
                 <h2 id="concise-view-title">Guild Overview</h2>
+                <div id="concise-shell-host" class="concise-shell-host"></div>
                 
-                <div id="concise-content-wrapper" style="display: flex; flex-wrap: wrap; gap: 25px; width: 100%; max-width: 1100px; margin: 0 auto; align-items: flex-start;">
+                <div id="concise-content-wrapper" class="concise-wrapper">
                     
-                    <div id="concise-left-col" style="flex: 1; min-width: 300px; max-width: 350px; display: flex; flex-direction: column; gap: 20px;">
-                        <div id="concise-donut-container" class="heatmap-wrapper" style="width: 100%; max-width: 100%; margin: 0; display: none; flex-direction: column;">
+                    <div id="concise-left-col" class="concise-sidebar">
+                        <div id="concise-donut-container" class="heatmap-wrapper concise-donut-box">
                         </div>
 
-                        <div id="concise-badges-wrapper" style="width: 100%; display: flex; flex-direction: column; justify-content: center;">
-                            <div id="concise-class-badges" class="class-stat-container" style="display:none; width: 100%; justify-content: center; margin-bottom: 0;"></div>
+                        <div id="concise-badges-wrapper" class="concise-badges-box">
+                            <div id="concise-class-badges" class="class-stat-container concise-class-stats"></div>
+                            <div id="concise-spec-container" class="concise-spec-container-default" hidden></div>
                         </div>
                     </div>
 
-                    <div id="concise-center-col" style="flex: 2; min-width: 300px; width: 100%;">
+                    <div id="concise-center-col" class="concise-main-col">
                         <div id="concise-char-list"></div>
+                        <div id="concise-load-more-container" class="load-more-container" hidden>
+                            <button id="concise-load-more-btn" type="button" class="tl-load-more-btn" hidden>Load 25 More Players</button>
+                        </div>
                     </div>
                     
                 </div>
             </div>
+    
+    <template id="tpl-full-card-badge">
+        <span class="badge char-badge full-card-badge">
+            <span class="full-card-badge-content"></span>
+        </span>
+    </template>
+
+    <template id="tpl-full-card-badge-icon">
+        <img src="" class="full-card-badge-icon" alt="">
+    </template>
+
+    <template id="tpl-full-card-gear-slot">
+        <div class="item-slot gear-slot-wrapper">
+            <div class="gear-slot-icon-wrapper">
+                <img src="" class="gear-slot-icon" alt="">
+                <div class="enchant-badge" hidden>E</div>
+            </div>
+            <div class="gear-slot-info">
+                <span class="gear-slot-kicker"></span>
+                <a href="#" class="gear-slot-link" target="_blank"></a>
+                <div class="gear-slot-meta">
+                    <span class="gear-slot-quality"></span>
+                    <div class="missing-enchant-text" hidden>⚠️ Missing Enchant</div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-full-card-empty-slot">
+        <div class="item-slot empty-slot">
+            <img src="" class="empty-slot-icon" alt="">
+            <div class="gear-slot-info">
+                <span class="gear-slot-kicker"></span>
+                <span class="empty-slot-text">No item equipped</span>
+                <div class="gear-slot-meta">
+                    <span class="gear-slot-quality">Awaiting wargear</span>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <template id="tpl-full-card-gear-contribution-row">
+        <div class="stat-row">
+            <span class="stat-lbl"></span>
+            <span class="stat-val">
+                <span class="gear-base-stat"></span>
+                <span class="gear-gain-stat"></span>
+            </span>
+        </div>
+    </template>
+
+    <template id="tpl-full-card-weapon-header">
+        <div class="weapon-stats-header"></div>
+    </template>
+
+    <template id="tpl-full-card-stat-divider">
+        <div class="stat-divider"></div>
+    </template>
+
+    <template id="tpl-full-card-stat-row">
+        <div class="stat-row">
+            <span class="stat-lbl"></span>
+            <span class="stat-val"></span>
+        </div>
+    </template>
+
+    <template id="tpl-full-card-shell">
+        <div class="char-card">
+            <div class="char-card-header">
+                <div class="char-card-hero-copy">
+                    <span class="char-card-kicker"></span>
+                    <h2 class="char-card-name"></h2>
+                    <p class="char-card-subtitle"></p>
+                </div>
+
+                <div class="char-card-summary-grid">
+                    <div class="char-card-summary-tile">
+                        <span class="char-card-summary-label">Role</span>
+                        <strong class="char-card-summary-value char-card-role-value"></strong>
+                    </div>
+                    <div class="char-card-summary-tile">
+                        <span class="char-card-summary-label">Equipped iLvl</span>
+                        <strong class="char-card-summary-value char-card-ilvl-value"></strong>
+                    </div>
+                    <div class="char-card-summary-tile">
+                        <span class="char-card-summary-label">Recorded Honors</span>
+                        <strong class="char-card-summary-value char-card-honors-value"></strong>
+                    </div>
+                    <div class="char-card-summary-tile">
+                        <span class="char-card-summary-label">Honorable Kills</span>
+                        <strong class="char-card-summary-value char-card-hks-value"></strong>
+                    </div>
+                </div>
+
+                <div class="char-card-honors">
+                    <span class="char-card-section-label">Commendations</span>
+                    <div class="char-card-honors-grid"></div>
+                </div>
+
+                <div class="char-card-meta">
+                    <span class="char-card-section-label">Service Record</span>
+                    <div class="char-badges-container"></div>
+                </div>
+
+                <div class="xp-bar-wrapper">
+                    <div class="xp-bar-rested"></div>
+                    <div class="xp-bar-earned"></div>
+                    <div class="xp-bar-label"></div>
+                </div>
+            </div>
+
+            <div class="card-content-split">
+                <div class="card-left-col">
+                    <div class="char-card-portrait-wrapper">
+                        <div class="char-card-portrait-frame">
+                            <img src="" class="char-card-portrait" alt="">
+                        </div>
+                        <div class="char-card-identity-ribbon">
+                            <span class="char-card-panel-kicker">Field Identity</span>
+                            <strong class="char-card-identity-title"></strong>
+                            <span class="char-card-identity-meta"></span>
+                        </div>
+                    </div>
+
+                    <div class="info-box char-card-stats-box">
+                        <div class="char-card-stats-header">
+                            <div class="char-card-panel-heading">
+                                <span class="char-card-panel-kicker">Combat Ledger</span>
+                                <h3 class="stat-card-title char-card-stats-title"></h3>
+                            </div>
+                            <button class="toggle-stats-btn" title="Toggle Stats Page">▶</button>
+                        </div>
+
+                        <div class="stat-page-1 stat-page-panel">
+                            <div class="resource-bar full-card-health-bar">
+                                <div class="bar-fill full-card-health-fill"></div>
+                                <span class="bar-text full-card-health-text"></span>
+                            </div>
+
+                            <div class="resource-bar full-card-power-bar">
+                                <div class="bar-fill full-card-power-fill"></div>
+                                <span class="bar-text full-card-power-text"></span>
+                            </div>
+
+                            <div class="stat-spacer"></div>
+
+                            <div class="char-card-stat-section-head">Primary Attributes</div>
+                            <div class="char-card-stat-section-copy">Core attributes recorded from the latest armory scan.</div>
+
+                            <div class="stat-base-row"><span class="stat-base-lbl">⚔️ Strength</span><span class="stat-base-val val-str full-card-stat-str"></span></div>
+                            <div class="stat-base-row"><span class="stat-base-lbl">🏹 Agility</span><span class="stat-base-val val-agi full-card-stat-agi"></span></div>
+                            <div class="stat-base-row"><span class="stat-base-lbl">🛡️ Stamina</span><span class="stat-base-val val-sta full-card-stat-sta"></span></div>
+                            <div class="stat-base-row"><span class="stat-base-lbl">🧠 Intellect</span><span class="stat-base-val val-int full-card-stat-int"></span></div>
+                            <div class="stat-base-row"><span class="stat-base-lbl">✨ Spirit</span><span class="stat-base-val val-spi full-card-stat-spi"></span></div>
+
+                            <div class="char-card-stat-section-head char-card-stat-section-head-secondary">Combat Readings</div>
+                            <div class="char-card-stat-section-copy">Critical combat values, mitigation, and throughput from the active loadout.</div>
+                            <div class="full-card-advanced-stats"></div>
+                        </div>
+
+                        <div class="stat-page-2 stat-page-panel stat-page-animated is-hidden">
+                            <div class="char-card-stat-section-head">Armament Breakdown</div>
+                            <div class="char-card-stat-section-copy">Weapon profile, attack cadence, and gains from equipped wargear.</div>
+                            <div class="full-card-weapon-stats"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card-right-col">
+                    <div class="info-box char-card-spotlight">
+                        <span class="char-card-spotlight-kicker">Battlefield Reputation</span>
+                        <h3 class="char-card-spotlight-title"></h3>
+                        <p class="char-card-spotlight-copy"></p>
+
+                        <div class="char-card-spotlight-facts">
+                            <div class="char-card-spotlight-fact">
+                                <span class="char-card-spotlight-fact-label">Signature Honor</span>
+                                <strong class="char-card-spotlight-fact-value char-card-spotlight-honor"></strong>
+                            </div>
+                            <div class="char-card-spotlight-fact">
+                                <span class="char-card-spotlight-fact-label">Readiness</span>
+                                <strong class="char-card-spotlight-fact-value char-card-spotlight-status"></strong>
+                            </div>
+                            <div class="char-card-spotlight-fact">
+                                <span class="char-card-spotlight-fact-label">Armory State</span>
+                                <strong class="char-card-spotlight-fact-value char-card-spotlight-gear"></strong>
+                            </div>
+                        </div>
+
+                        <div class="char-card-spotlight-meta"></div>
+                    </div>
+
+                    <div class="info-box char-card-gear-shell">
+                        <div class="char-card-gear-header">
+                            <span class="char-card-panel-kicker">Armory Loadout</span>
+                            <h3 class="char-card-gear-title">Battle Wargear</h3>
+                            <p class="char-card-gear-copy"></p>
+                        </div>
+
+                        <div class="gear-grid-container full-card-gear-grid"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </template>
 
             <div id="full-card-container" class="full-card-container"></div>
         </div> 
 
         <div id="timeline" class="timeline-container">
-            <h2 id="timeline-title" class="timeline-title">📜 Guild Recent Activity</h2>
+            <div class="timeline-shell-header">
+                <div class="timeline-shell-copy">
+                    <span id="timeline-kicker" class="timeline-kicker">Guild Chronicle</span>
+                    <h2 id="timeline-title" class="timeline-title">📜 Guild Recent Activity</h2>
+                    <p id="timeline-subtitle" class="timeline-subtitle">Loot, level gains, and honors from the latest guild scans.</p>
+                </div>
+                <div id="timeline-meta" class="timeline-meta">All guild activity</div>
+            </div>
+
+            <div id="monuments-container" class="monuments-grid"></div>
             <div class="timeline-filters">
                 <div class="filter-group">
                     <button class="tl-btn" data-type="all">All</button>
-                    <button class="tl-btn active" style="color: #0070dd; border-color: rgba(0, 112, 221, 0.5);" data-type="rare_plus">Rare+</button>
-                    <button class="tl-btn" style="color: #a335ee; border-color: rgba(163, 53, 238, 0.5);" data-type="epic">Epics+</button>
+                    <button class="tl-btn tl-btn-rare active" data-type="rare_plus">Rare+</button>
+                    <button class="tl-btn tl-btn-epic" data-type="epic">Epics+</button>
                     <button class="tl-btn" data-type="level_up">Levels</button>
                 </div>
                 <div class="filter-group">
@@ -480,24 +1809,26 @@
                 </div>
             </div>
             
+            <div id="tl-no-results" class="tl-empty-msg" hidden>No activity found for these filters yet... keep raiding!</div>
+
             <div class="timeline-feed" id="timeline-feed-container">
                 </div>
 
-            <div style="text-align: center; margin-top: 20px; margin-bottom: 40px;">
-                <button id="load-more-btn" style="padding: 10px 20px; cursor: pointer; display: none; background: rgba(0,0,0,0.8); color: #ffd100; border: 1px solid #ffd100; border-radius: 4px; font-family: 'Cinzel', serif; transition: all 0.3s ease;">Load More Activity</button>
+            <div class="load-more-container">
+                <button id="load-more-btn" class="tl-load-more-btn" hidden>Load More Activity</button>
             </div>
         </div>
 
     </div> 
     
-    <div class="dashboard-footer" style="text-align: center; padding: 40px 20px; color: #666; font-size: 13px; width: 100%; border-top: 1px solid #222; margin-top: 40px; clear: both; background: rgba(10, 10, 10, 0.8);">
-        <div class="footer-tech-stack" style="font-family: 'Cinzel', serif; color: #aaa; font-size: 14px; margin-bottom: 12px; letter-spacing: 1px;">
-            <span style="color: #ffd100;">⚡ Edge Architecture:</span> GitHub Actions CI/CD &bull; Turso SQLite &bull; Python AsyncIO
+    <div class="dashboard-footer">
+        <div class="footer-tech-stack">
+            <span class="tech-stack-highlight">⚡ Edge Architecture:</span> GitHub Actions CI/CD &bull; Turso SQLite &bull; Python AsyncIO
         </div>
-        <div class="footer-update-info" style="margin-bottom: 25px; font-size: 13px; color: #888;">
-            Database Last Synced: <span id="update-time" style="color: #ffd100; font-weight: bold; margin-left: 5px;"></span>
+        <div class="footer-update-info">
+            Database Last Synced: <span id="update-time" class="update-time-highlight"></span>
         </div>
-        <div class="footer-disclaimer" style="max-width: 800px; margin: 0 auto; font-size: 11px; line-height: 1.6; color: #444; font-style: italic;">
+        <div class="footer-disclaimer">
             World of Warcraft, Warcraft and Blizzard Entertainment are trademarks or registered trademarks of Blizzard Entertainment, Inc. in the U.S. and/or other countries.<br>
             Azeroth's Most Wanted Armory is a community project and is not affiliated with, endorsed, or sponsored by Blizzard Entertainment.
         </div>
