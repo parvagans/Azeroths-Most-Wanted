@@ -211,36 +211,37 @@ function getHallOfHeroesConfig(characters, isRawRoster = false) {
 
     if (snapshots.length === 0) return null;
 
-    const totalHonors = snapshots.reduce((sum, snapshot) => sum + snapshot.totalHonors, 0);
     const weeklyBadgeTotal = snapshots.reduce((sum, snapshot) => sum + snapshot.weeklyBadgeCount, 0);
+    const totalChampionCrowns = snapshots.reduce((sum, snapshot) => sum + snapshot.championCount, 0);
+    const totalMedalWall = snapshots.reduce((sum, snapshot) => sum + snapshot.pveMedals + snapshot.pvpMedals, 0);
     const reigningCount = snapshots.filter(snapshot => snapshot.hasReigning).length;
     const filterCount = predicate => snapshots.filter(predicate).length;
 
     return {
-        overline: 'Guild Honors Archive',
-        title: 'Hall of Heroes',
-        description: 'A ceremonial command board for the guild members who have earned distinction across weekly war efforts, champion crowns, ladder finishes, and long campaign service.',
-        ribbonLabel: 'Guild Decree',
-        ruleText: 'Use the honors below to call up each class of hero and inspect the decorated roster beneath it.',
+        overline: 'Hall of Heroes',
+        title: 'Guild Honors Archive',
+        description: "The guild's honors chamber for weekly marks, champion crowns, ladder medals, and campaign distinction gathered into one decorated roll.",
+        ribbonLabel: 'Archive Rule',
+        ruleText: 'Use the honors below to filter each family of distinction and inspect the decorated roster beneath it.',
         theme: 'badges',
         stats: [
-            { value: snapshots.length.toLocaleString(), label: 'Decorated Heroes' },
-            { value: totalHonors.toLocaleString(), label: 'Total Honors Earned' },
-            { value: weeklyBadgeTotal.toLocaleString(), label: 'Weekly Marks Recorded' },
-            { value: reigningCount.toLocaleString(), label: 'Reigning Champions' }
+            { value: snapshots.length.toLocaleString(), label: 'Decorated Heroes', filterKey: 'honor', filterValue: 'all' },
+            { value: weeklyBadgeTotal.toLocaleString(), label: 'Weekly Marks Recorded', filterKey: 'honor', filterValue: 'weekly' },
+            { value: totalChampionCrowns.toLocaleString(), label: 'Champion Crowns', filterKey: 'honor', filterValue: 'mvp' },
+            { value: totalMedalWall.toLocaleString(), label: 'Medal Wall', filterKey: 'honor', filterValue: 'ladder' }
         ],
         bandItems: [
-            { kicker: 'Honor Roll', value: 'All Heroes', meta: `${snapshots.length.toLocaleString()} decorated names on record`, filterKey: 'honor', filterValue: 'all' },
-            { kicker: 'Weekly War Effort', value: "Hero's Journey", meta: `${filterCount(snapshot => snapshot.hasXp).toLocaleString()} heroes marked by leveling glory`, filterKey: 'honor', filterValue: 'xp' },
-            { kicker: 'Weekly War Effort', value: 'Blood of the Enemy', meta: `${filterCount(snapshot => snapshot.hasHks).toLocaleString()} heroes blooded in PvP`, filterKey: 'honor', filterValue: 'hks' },
-            { kicker: 'Weekly War Effort', value: "Dragon's Hoard", meta: `${filterCount(snapshot => snapshot.hasLoot).toLocaleString()} heroes stamped by epic spoils`, filterKey: 'honor', filterValue: 'loot' },
-            { kicker: 'Weekly War Effort', value: 'The Zenith Cohort', meta: `${filterCount(snapshot => snapshot.hasZenith).toLocaleString()} heroes who reached the summit`, filterKey: 'honor', filterValue: 'zenith' },
-            { kicker: 'Champion Honors', value: 'Weekly MVPs', meta: `${filterCount(snapshot => snapshot.hasMvp).toLocaleString()} heroes crowned by weekly MVP awards`, filterKey: 'honor', filterValue: 'mvp' },
-            { kicker: 'Champion Honors', value: 'Reigning Champions', meta: `${reigningCount.toLocaleString()} current title holders`, filterKey: 'honor', filterValue: 'reigning' },
-            { kicker: 'Ladder Honors', value: 'PvE Medalists', meta: `${filterCount(snapshot => snapshot.hasPveMedal).toLocaleString()} raiders with podium finishes`, filterKey: 'honor', filterValue: 'ladder_pve' },
-            { kicker: 'Ladder Honors', value: 'PvP Medalists', meta: `${filterCount(snapshot => snapshot.hasPvpMedal).toLocaleString()} duelists with podium finishes`, filterKey: 'honor', filterValue: 'ladder_pvp' },
-            { kicker: 'Service Honors', value: 'Vanguards', meta: `${filterCount(snapshot => snapshot.hasVanguard).toLocaleString()} heroes who seized early command`, filterKey: 'honor', filterValue: 'vanguard' },
-            { kicker: 'Service Honors', value: 'Campaign Veterans', meta: `${filterCount(snapshot => snapshot.hasCampaign).toLocaleString()} heroes decorated for campaign service`, filterKey: 'honor', filterValue: 'campaign' }
+            { kicker: 'Archive Roll', value: 'All Heroes', meta: `${snapshots.length.toLocaleString()} decorated names are recorded in the archive.`, filterKey: 'honor', filterValue: 'all' },
+            { kicker: 'War Effort', value: "Hero's Journey", meta: `${filterCount(snapshot => snapshot.hasXp).toLocaleString()} heroes carry leveling marks from the weekly push.`, filterKey: 'honor', filterValue: 'xp' },
+            { kicker: 'War Effort', value: 'Blood of the Enemy', meta: `${filterCount(snapshot => snapshot.hasHks).toLocaleString()} heroes are marked for PvP bloodshed this cycle.`, filterKey: 'honor', filterValue: 'hks' },
+            { kicker: 'War Effort', value: "Dragon's Hoard", meta: `${filterCount(snapshot => snapshot.hasLoot).toLocaleString()} heroes are stamped by epic spoils.`, filterKey: 'honor', filterValue: 'loot' },
+            { kicker: 'War Effort', value: 'The Zenith Cohort', meta: `${filterCount(snapshot => snapshot.hasZenith).toLocaleString()} heroes reached the summit and entered the cohort.`, filterKey: 'honor', filterValue: 'zenith' },
+            { kicker: 'Champion Crowns', value: 'Weekly MVPs', meta: `${filterCount(snapshot => snapshot.hasMvp).toLocaleString()} heroes have been crowned by weekly MVP honors.`, filterKey: 'honor', filterValue: 'mvp' },
+            { kicker: 'Champion Crowns', value: 'Reigning Champions', meta: `${reigningCount.toLocaleString()} current title holders still sit on the throne.`, filterKey: 'honor', filterValue: 'reigning' },
+            { kicker: 'Ladder Medals', value: 'PvE Medalists', meta: `${filterCount(snapshot => snapshot.hasPveMedal).toLocaleString()} raiders hold PvE podium medals.`, filterKey: 'honor', filterValue: 'ladder_pve' },
+            { kicker: 'Ladder Medals', value: 'PvP Medalists', meta: `${filterCount(snapshot => snapshot.hasPvpMedal).toLocaleString()} duelists hold PvP podium medals.`, filterKey: 'honor', filterValue: 'ladder_pvp' },
+            { kicker: 'Service Honors', value: 'Vanguards', meta: `${filterCount(snapshot => snapshot.hasVanguard).toLocaleString()} heroes seized early command and locked the line.`, filterKey: 'honor', filterValue: 'vanguard' },
+            { kicker: 'Service Honors', value: 'Campaign Veterans', meta: `${filterCount(snapshot => snapshot.hasCampaign).toLocaleString()} heroes carry campaign distinction in the archive.`, filterKey: 'honor', filterValue: 'campaign' }
         ]
     };
 }
@@ -270,7 +271,7 @@ function buildHallOfHeroesShell(characters, isRawRoster = false) {
     if (ruleText) ruleText.textContent = config.ruleText;
 
     config.stats.forEach(stat => {
-        const node = buildCommandHeroStatNode(stat.value, stat.label);
+        const node = buildCommandHeroStatNode(stat.value, stat.label, stat);
         if (node && statsGrid) statsGrid.appendChild(node);
     });
 

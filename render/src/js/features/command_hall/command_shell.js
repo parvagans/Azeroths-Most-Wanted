@@ -1,15 +1,23 @@
 // Command shell render helpers prepended during final JS assembly.
 
-function buildCommandHeroStatNode(value, label) {
+function buildCommandHeroStatNode(value, label, { filterKey = '', filterValue = '' } = {}) {
     const template = document.getElementById('tpl-command-view-stat');
     if (!template) return null;
 
     const clone = template.content.cloneNode(true);
+    const statEl = clone.querySelector('.command-hero-stat');
     const valueEl = clone.querySelector('.command-hero-stat-value');
     const labelEl = clone.querySelector('.command-hero-stat-label');
 
     if (valueEl) valueEl.textContent = value;
     if (labelEl) labelEl.textContent = label;
+    if (statEl && filterKey && filterValue) {
+        statEl.classList.add('command-hero-stat-filter');
+        statEl.setAttribute('data-filter-key', filterKey);
+        statEl.setAttribute('data-filter-value', filterValue);
+        statEl.setAttribute('tabindex', '0');
+        statEl.setAttribute('role', 'button');
+    }
 
     return clone.firstElementChild || null;
 }
@@ -51,6 +59,9 @@ function getCommandViewConfig(hashUrl, characters, isRawRoster = false, dashboar
         const lastLogin = profile.last_login_timestamp || 0;
         return lastLogin > 0 && (now - lastLogin) <= sevenDaysMs;
     }).length;
+    const activeReadyCountMains = mainProfiles.filter(profile =>
+        (profile.level || 0) === 70 && (profile.equipped_item_level || 0) >= 110
+    ).length;
 
     const roleCounts = profiles.reduce((acc, profile) => {
         const cClass = getProfileClassName(profile);
@@ -94,44 +105,44 @@ function getCommandViewConfig(hashUrl, characters, isRawRoster = false, dashboar
 
     if (hashUrl === 'alt-heroes') {
         return {
-            overline: 'Guild Alt Roster',
-            title: 'Alt Heroes',
-            description: 'A dedicated roster for the guild’s alternate heroes. Use this board to celebrate the reserve warband, keep track of active support characters, and scan the alt bench without muddying mains-facing guild-health views.',
-            ruleText: 'Includes only characters whose guild rank is exactly "Alt". Tooltips and full character cards follow the same contracts used everywhere else on the site.',
+            overline: 'Alt Heroes',
+            title: 'Reserve Warband Registry',
+            description: 'A reserve-roster board for backup roles, raid-ready bench depth, and the leveling alts still pushing toward endgame.',
+            ruleText: 'Includes only characters whose guild rank is exactly "Alt". Use this board to read the reserve bench without changing mains-facing metrics elsewhere on the site.',
             theme: 'alt-heroes',
             stats: [
                 { value: profiles.length.toLocaleString(), label: 'Total Alts' },
                 { value: active14Days.toLocaleString(), label: 'Active in 14d' },
-                { value: level70s.length.toLocaleString(), label: 'Level 70 Alts' },
-                { value: raidReadyCount.toLocaleString(), label: 'Raid-Ready Alts' }
+                { value: raidReadyCount.toLocaleString(), label: 'Raid-Ready Alts' },
+                { value: avgLvl70Ilvl.toLocaleString(), label: 'Avg Lvl 70 iLvl' }
             ],
             bandItems: [
-                { kicker: 'Seen in 7 Days', value: active7Days.toLocaleString(), meta: 'Alt heroes showing very recent signs of life across the roster', filterKey: 'activityWindow', filterValue: '7d' },
                 { kicker: 'Tank-Capable', value: roleCounts.Tank.toLocaleString(), meta: 'Alt characters currently mapped to front-line coverage', filterKey: 'role', filterValue: 'Tank' },
                 { kicker: 'Healer-Capable', value: roleCounts.Healer.toLocaleString(), meta: 'Alt healers available for backup recovery and off-night support', filterKey: 'role', filterValue: 'Healer' },
-                { kicker: 'Leveling Alts', value: levelingCount.toLocaleString(), meta: `${level70s.length.toLocaleString()} alt heroes have already reached the level cap`, filterKey: 'levelBracket', filterValue: 'lt70' }
+                { kicker: 'Leveling Alts', value: levelingCount.toLocaleString(), meta: `${level70s.length.toLocaleString()} alt heroes have already reached the level cap.`, filterKey: 'levelBracket', filterValue: 'lt70' },
+                { kicker: 'Level 70 Alts', value: level70s.length.toLocaleString(), meta: `${raidReadyCount.toLocaleString()} of those alts already meet the current raid-ready gate.`, filterKey: 'levelBracket', filterValue: '70' }
             ]
         };
     }
 
     if (hashUrl === 'total') {
         return {
-            overline: 'Guild Census Ledger',
-            title: "The Roll of Azeroth's Most Wanted",
-            description: 'A complete census of the guild. Use this board to understand roster depth, class spread, and who has reached the level cap without the extra noise of awards and ladder theatrics.',
-            ruleText: 'Includes the full scanned guild roster. Shell totals separate mains from all characters without hiding either count.',
+            overline: 'The Grand Muster Roll',
+            title: 'Guild Census & Reinforcement Ledger',
+            description: 'A full census of the guild warband, separating the mainline from the wider bench while showing where level-cap depth, class pressure, and reinforcements actually stand.',
+            ruleText: 'Includes the full scanned guild roster. Use this board to read the mainline beside the wider bench without hiding either count.',
             theme: 'total',
             stats: [
                 { value: totalCountAll.toLocaleString(), label: 'All Characters' },
                 { value: totalCountMains.toLocaleString(), label: 'Mains' },
-                { value: level70s.length.toLocaleString(), label: 'Level 70s (All)' },
-                { value: avgLvl70IlvlMains.toLocaleString(), label: 'Avg Lvl 70 iLvl (Mains)' }
+                { value: level70s.length.toLocaleString(), label: 'Level 70s', filterKey: 'levelBracket', filterValue: '70' },
+                { value: mainLevelingCount.toLocaleString(), label: 'Leveling Core', filterKey: 'levelBracket', filterValue: 'lt70' }
             ],
             bandItems: [
-                { kicker: 'Tank Depth', value: roleCounts.Tank.toLocaleString(), meta: 'All-character tank coverage in the scanned roster', filterKey: 'role', filterValue: 'Tank' },
-                { kicker: 'Healer Depth', value: roleCounts.Healer.toLocaleString(), meta: 'All-character healer coverage in the scanned roster', filterKey: 'role', filterValue: 'Healer' },
-                { kicker: 'Leveling Core', value: levelingCount.toLocaleString(), meta: `${mainLevelingCount.toLocaleString()} mains still climbing toward level 70`, filterKey: 'levelBracket', filterValue: 'lt70' },
-                { kicker: 'Most Common Class', value: dominantClassEntry[0], meta: `${dominantClassEntry[1]} all-character listings currently define this census`, filterKey: dominantClassEntry[0] !== 'Unknown' ? 'class' : '', filterValue: dominantClassEntry[0] !== 'Unknown' ? dominantClassEntry[0] : '' }
+                { kicker: 'Dominant Role', value: dominantRoleEntry[0], meta: `${dominantRoleEntry[1].toLocaleString()} all-character listings currently stack into this role most often.`, filterKey: dominantRoleEntry[0] !== 'Unknown' ? 'role' : '', filterValue: dominantRoleEntry[0] !== 'Unknown' ? dominantRoleEntry[0] : '' },
+                { kicker: 'Most Common Class', value: dominantClassEntry[0], meta: `${dominantClassEntry[1].toLocaleString()} all-character listings currently define the most common class in the census.`, filterKey: dominantClassEntry[0] !== 'Unknown' ? 'class' : '', filterValue: dominantClassEntry[0] !== 'Unknown' ? dominantClassEntry[0] : '' },
+                { kicker: 'Most Common Race', value: dominantRaceEntry[0], meta: `${dominantRaceEntry[1].toLocaleString()} roster entries currently share this race.`, filterKey: '', filterValue: '' },
+                { kicker: 'Armament Read', value: avgLvl70IlvlMains.toLocaleString(), meta: `Average level 70 item level across ${mainLevel70s.length.toLocaleString()} mains at the cap.` }
             ]
         };
     }
@@ -143,44 +154,44 @@ function getCommandViewConfig(hashUrl, characters, isRawRoster = false, dashboar
             : 0;
 
         return {
-            overline: 'Warband Muster Roll',
-            title: 'The Fires Still Burning',
-            description: 'A present-tense view of the members still showing signs of life in the last two weeks. This page should answer who is realistically available and how battle-ready the active core looks right now.',
-            ruleText: 'Includes heroes seen within the last 14 days. Shell totals show mains first while preserving all-character context.',
+            overline: 'The Live Muster',
+            title: 'Operational Readiness Watch',
+            description: 'A present-tense board for who is still moving, who is still gearing, and whether the active mains core actually looks ready for the next raid week.',
+            ruleText: 'Includes heroes seen within the last 14 days. This board keeps the active mains core primary while preserving the full active slice.',
             theme: 'active',
             stats: [
                 { value: activeCountMains.toLocaleString(), label: 'Active Mains' },
                 { value: activeCountAll.toLocaleString(), label: 'Active All' },
-                { value: formatDualCount(active7DaysMains, active7Days), label: 'Seen in 7d (Mains / All)' },
-                { value: avgActiveIlvl.toLocaleString(), label: 'Avg Active iLvl (Mains)' }
+                { value: formatDualCount(active7DaysMains, active7Days), label: 'Seen in 7d (Mains / All)', filterKey: 'activityWindow', filterValue: '7d' },
+                { value: formatDualCount(activeReadyCountMains, raidReadyCount), label: 'Ready in Active Slice (Mains / All)' }
             ],
             bandItems: [
-                { kicker: 'Seen in 7 Days', value: active7DaysMains.toLocaleString(), meta: `${active7Days.toLocaleString()} all-character names have shown very recent activity`, filterKey: 'activityWindow', filterValue: '7d' },
-                { kicker: 'Active Tanks', value: mainRoleCounts.Tank.toLocaleString(), meta: `${roleCounts.Tank.toLocaleString()} all-character tanks remain visible in the active roster`, filterKey: 'role', filterValue: 'Tank' },
-                { kicker: 'Active Healers', value: mainRoleCounts.Healer.toLocaleString(), meta: `${roleCounts.Healer.toLocaleString()} all-character healers remain visible in the active roster`, filterKey: 'role', filterValue: 'Healer' },
-                { kicker: 'Leveling Core', value: mainLevelingCount.toLocaleString(), meta: `${levelingCount.toLocaleString()} all-character names in this active slice are still below 70`, filterKey: 'levelBracket', filterValue: 'lt70' }
+                { kicker: 'Active Tanks', value: mainRoleCounts.Tank.toLocaleString(), meta: `${roleCounts.Tank.toLocaleString()} all-character tanks remain visible in the active slice.`, filterKey: 'role', filterValue: 'Tank' },
+                { kicker: 'Active Healers', value: mainRoleCounts.Healer.toLocaleString(), meta: `${roleCounts.Healer.toLocaleString()} all-character healers remain visible in the active slice.`, filterKey: 'role', filterValue: 'Healer' },
+                { kicker: 'Active Level 70s', value: mainLevel70s.length.toLocaleString(), meta: `${level70s.length.toLocaleString()} all-character level 70 heroes remain in the active slice.`, filterKey: 'levelBracket', filterValue: '70' },
+                { kicker: 'Avg Active iLvl (Mains)', value: avgActiveIlvl.toLocaleString(), meta: 'Average item level across active mains already at level 70.' }
             ]
         };
     }
 
     if (hashUrl === 'raidready') {
         return {
-            overline: 'Vanguard Deployment Board',
-            title: 'Raid-Ready Vanguard',
-            description: 'A tactical board for officers and raiders. This view strips the roster down to characters who can step into progression content now, with the role mix and readiness counts visible at a glance.',
-            ruleText: 'Includes level 70 heroes with equipped item level 110 or higher. Shell totals show mains first while preserving all-character deployment context.',
+            overline: 'The Ready Room',
+            title: 'Deployment Board',
+            description: 'A tactical board for who can zone in now, where the healing and tank backbone really sits, and how deep the ready roster goes beyond the first pull.',
+            ruleText: 'Includes level 70 heroes with equipped item level 110 or higher. This board keeps ready mains primary while preserving full deployment depth.',
             theme: 'raidready',
             stats: [
                 { value: raidReadyCountMains.toLocaleString(), label: 'Ready Mains' },
                 { value: raidReadyCountAll.toLocaleString(), label: 'Ready All' },
-                { value: formatDualCount(mainRoleCounts.Tank, roleCounts.Tank), label: 'Tanks (Mains / All)' },
-                { value: avgLvl70IlvlMains.toLocaleString(), label: 'Average iLvl (Mains)' }
+                { value: formatDualCount(mainRoleCounts.Tank, roleCounts.Tank), label: 'Tanks (Mains / All)', filterKey: 'role', filterValue: 'Tank' },
+                { value: formatDualCount(mainRoleCounts.Healer, roleCounts.Healer), label: 'Healers (Mains / All)', filterKey: 'role', filterValue: 'Healer' }
             ],
             bandItems: [
-                { kicker: 'Tanks Ready', value: mainRoleCounts.Tank.toLocaleString(), meta: `${roleCounts.Tank.toLocaleString()} all-character tanks are visible in the full ready roster`, filterKey: 'role', filterValue: 'Tank' },
-                { kicker: 'Healers Ready', value: mainRoleCounts.Healer.toLocaleString(), meta: `${roleCounts.Healer.toLocaleString()} all-character healers remain deployable right now`, filterKey: 'role', filterValue: 'Healer' },
-                { kicker: 'Ranged Ready', value: mainRoleCounts['Ranged DPS'].toLocaleString(), meta: `${roleCounts['Ranged DPS'].toLocaleString()} all-character ranged damage dealers are in this ready slice`, filterKey: 'role', filterValue: 'Ranged DPS' },
-                { kicker: 'Melee Ready', value: mainRoleCounts['Melee DPS'].toLocaleString(), meta: `${roleCounts['Melee DPS'].toLocaleString()} all-character melee damage dealers are in this ready slice`, filterKey: 'role', filterValue: 'Melee DPS' }
+                { kicker: 'Ranged Ready', value: mainRoleCounts['Ranged DPS'].toLocaleString(), meta: `${roleCounts['Ranged DPS'].toLocaleString()} all-character ranged damage dealers are in the ready roster.`, filterKey: 'role', filterValue: 'Ranged DPS' },
+                { kicker: 'Melee Ready', value: mainRoleCounts['Melee DPS'].toLocaleString(), meta: `${roleCounts['Melee DPS'].toLocaleString()} all-character melee damage dealers are in the ready roster.`, filterKey: 'role', filterValue: 'Melee DPS' },
+                { kicker: 'Seen in 7 Days', value: formatDualCount(active7DaysMains, active7Days), meta: 'Recently seen ready heroes still showing signs of life inside the deployment slice.', filterKey: 'activityWindow', filterValue: '7d' },
+                { kicker: 'Average iLvl (Mains)', value: avgLvl70IlvlMains.toLocaleString(), meta: `${raidReadyCountMains.toLocaleString()} mains currently meet the deployment threshold.` }
             ]
         };
     }
@@ -360,7 +371,7 @@ function buildCommandViewShell(hashUrl, characters, isRawRoster = false, dashboa
     if (ruleText) ruleText.textContent = config.ruleText;
 
     config.stats.forEach(stat => {
-        const node = buildCommandHeroStatNode(stat.value, stat.label);
+        const node = buildCommandHeroStatNode(stat.value, stat.label, stat);
         if (node && statsGrid) statsGrid.appendChild(node);
     });
 

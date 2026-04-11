@@ -119,3 +119,32 @@ function buildHeroBandItemNode({ kicker, value, meta = '', char = null, filterKe
 
     return clone.firstElementChild || null;
 }
+
+function configureIncrementalRevealButton({
+    container,
+    button,
+    visibleCount,
+    totalCount,
+    batchSize = 25,
+    itemLabel = 'Players',
+    onReveal
+}) {
+    if (!container || !button) return;
+
+    const hasMoreItems = visibleCount < totalCount;
+    container.hidden = !hasMoreItems;
+    button.hidden = !hasMoreItems;
+
+    if (!hasMoreItems) {
+        button.onclick = null;
+        return;
+    }
+
+    const remainingCount = Math.max(0, totalCount - visibleCount);
+    const nextLoadCount = Math.min(batchSize, remainingCount);
+
+    button.textContent = `Load ${nextLoadCount} More ${itemLabel}`;
+    button.onclick = () => {
+        if (typeof onReveal === 'function') onReveal();
+    };
+}
