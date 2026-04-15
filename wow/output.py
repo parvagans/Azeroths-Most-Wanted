@@ -14,7 +14,10 @@ def write_timeline_output(dashboard_feed):
 
 
 def write_api_status_output(ok, code=None, message="", source="guild_roster"):
-    os.makedirs("asset", exist_ok=True)
+    project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+    asset_dir = os.path.join(project_root, "asset")
+    os.makedirs(asset_dir, exist_ok=True)
+
     payload = {
         "ok": bool(ok),
         "code": code,
@@ -22,8 +25,12 @@ def write_api_status_output(ok, code=None, message="", source="guild_roster"):
         "message": message,
         "updated_at": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
     }
-    with open("asset/api_status.json", "w", encoding="utf-8") as f:
+
+    api_status_path = os.path.join(asset_dir, "api_status.json")
+    with open(api_status_path, "w", encoding="utf-8") as f:
         json.dump(payload, f, ensure_ascii=False)
+
+    print(f"🩺 API status written to: {api_status_path}")
 
 
 async def finalize_dashboard_output(session, roster_data, realm_data, dashboard_feed, raw_guild_roster, prev_mvps):
