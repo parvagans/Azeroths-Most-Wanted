@@ -7566,7 +7566,7 @@ body.nav-menu-open {
 }
 
 .home-section-heading-compact {
-  margin-bottom: 22px;
+  margin-bottom: 16px;
 }
 
 .home-section-title {
@@ -10138,6 +10138,10 @@ body[data-route-family="character"] .timeline-container.timeline-character-dossi
 @media (max-width: 680px) {
   .home-section-heading {
     margin-bottom: 20px;
+  }
+
+  .home-section-heading-compact {
+    margin-bottom: 18px;
   }
 
   .home-nav-card .home-nav-copy,
