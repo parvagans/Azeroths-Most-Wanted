@@ -90,16 +90,14 @@ if ($NoServe) {
     return
 }
 
-Start-Process -WindowStyle Hidden -FilePath $pythonExe -ArgumentList @(
-    "-m",
-    "http.server",
-    $port,
-    "--bind",
-    "127.0.0.1",
-    "--directory",
-    $previewRoot
-) -WorkingDirectory $previewRoot | Out-Null
-
 Write-Host "Preview directory: $previewRoot"
 Write-Host "Preview URL: http://127.0.0.1:$port/index.html"
-Write-Host "Keep this shell open while you preview. The server is running in the background."
+Write-Host "Press Ctrl+C to stop the preview server."
+Write-Host ""
+Write-Host "Starting foreground server..."
+
+try {
+    & $pythonExe -m http.server $port --bind 127.0.0.1 --directory $previewRoot
+} finally {
+    Write-Host "Preview server stopped."
+}

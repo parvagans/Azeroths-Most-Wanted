@@ -66,6 +66,16 @@ One-command PowerShell validation:
 .\tools\validate-local.ps1
 ```
 
+Local source preview:
+
+```powershell
+.\tools\preview-local.ps1
+```
+
+The preview server runs in the foreground so `Ctrl+C` stops it cleanly. If you only want to build the temp preview without serving it, use `.\tools\preview-local.ps1 -NoServe`.
+
+If you have an older orphaned preview server from the previous background mode, you can clean it up with `.\tools\stop-local-preview.ps1`.
+
 Manual fallback commands from `D:\projects\Azeroths-Most-Wanted` in PowerShell:
 
 ```powershell
@@ -87,3 +97,12 @@ Required environment variables for the live pipeline:
 GitHub Actions runs the same offline validation before the credentialed pipeline step.
 
 Text files are LF-normalized in the repo to keep Windows and Unix diffs stable.
+
+## GoatCounter custom domain
+
+The analytics vanity domain is separate from the main GitHub Pages site.
+
+- DNS record to create outside the repo: `stats CNAME nullbit5.goatcounter.com.`
+- Custom domain to enter in GoatCounter: `stats.azeroths-most-wanted.eu.org`
+- Do not switch the tracking code to the vanity domain until DNS and GoatCounter verification are complete.
+- GoatCounter vanity domains are for display and do not bypass adblockers.
