@@ -10412,6 +10412,24 @@ body[data-app-ready="true"] #main-dashboard {
   .weekly-mvps-wrapper {
     margin-bottom: 24px;
   }
+
+  .nav-utility-cluster {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .custom-select,
+  .search-box {
+    width: 100%;
+  }
+
+  .custom-select {
+    min-height: 42px;
+  }
+
+  .search-box {
+    height: 42px;
+  }
 }
 
 @media (max-width: 640px) {
