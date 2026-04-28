@@ -5236,6 +5236,7 @@ body.nav-menu-open {
     padding: 12px 14px;
   }
   .concise-row-inner {
+    display: grid;
     grid-template-columns: 1fr;
     row-gap: 10px;
   }
