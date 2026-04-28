@@ -5,29 +5,82 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-function Get-AvailablePort {
+function Test-PortUsable {
     param(
-        [int]$Preferred = 8000
+        [int]$Port
     )
 
     $listener = $null
     try {
-        $listener = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, $Preferred)
+        $listener = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, $Port)
         $listener.Start()
-        return $Preferred
+        $listener.Stop()
+        return $true
     } catch {
         if ($listener) {
-            $listener.Stop()
+            try { $listener.Stop() } catch {}
+        }
+        return $false
+    }
+}
+
+function Test-PythonPortUsable {
+    param(
+        [string]$PythonExe,
+        [int]$Port
+    )
+
+    $probe = @'
+import socket
+import sys
+
+port = int(sys.argv[1])
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+try:
+    sock.bind(("127.0.0.1", port))
+except OSError:
+    raise SystemExit(1)
+finally:
+    sock.close()
+'@
+
+    $probe | & $PythonExe - $Port | Out-Null
+    return ($LASTEXITCODE -eq 0)
+}
+
+function Get-AvailablePort {
+    param(
+        [int]$Preferred = 8000,
+        [int]$MaxAttempts = 16
+    )
+
+    if ((Test-PortUsable -Port $Preferred) -and (Test-PythonPortUsable -PythonExe $pythonExe -Port $Preferred)) {
+        return $Preferred
+    }
+
+    return Get-RandomPreviewPort -MaxAttempts $MaxAttempts
+}
+
+function Get-RandomPreviewPort {
+    param(
+        [int]$MaxAttempts = 16
+    )
+
+    for ($attempt = 0; $attempt -lt $MaxAttempts; $attempt++) {
+        $fallback = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, 0)
+        try {
+            $fallback.Start()
+            $candidate = [int]$fallback.LocalEndpoint.Port
+        } finally {
+            $fallback.Stop()
+        }
+
+        if ((Test-PortUsable -Port $candidate) -and (Test-PythonPortUsable -PythonExe $pythonExe -Port $candidate)) {
+            return $candidate
         }
     }
 
-    $fallback = [System.Net.Sockets.TcpListener]::new([System.Net.IPAddress]::Loopback, 0)
-    try {
-        $fallback.Start()
-        return [int]$fallback.LocalEndpoint.Port
-    } finally {
-        $fallback.Stop()
-    }
+    throw "Unable to find a usable localhost port for the preview server."
 }
 
 $scriptDir = Split-Path -Parent $MyInvocation.MyCommand.Path
@@ -90,14 +143,50 @@ if ($NoServe) {
     return
 }
 
-Write-Host "Preview directory: $previewRoot"
-Write-Host "Preview URL: http://127.0.0.1:$port/index.html"
-Write-Host "Press Ctrl+C to stop the preview server."
-Write-Host ""
-Write-Host "Starting foreground server..."
+$serveScript = @'
+import functools
+import http.server
+import os
+import pathlib
+import sys
 
-try {
-    & $pythonExe -m http.server $port --bind 127.0.0.1 --directory $previewRoot
-} finally {
-    Write-Host "Preview server stopped."
+preview_dir = pathlib.Path(sys.argv[1])
+port = int(sys.argv[2])
+
+handler = functools.partial(http.server.SimpleHTTPRequestHandler, directory=str(preview_dir))
+
+try:
+    server = http.server.ThreadingHTTPServer(("127.0.0.1", port), handler)
+except OSError as exc:
+    print(f"Unable to start preview server on 127.0.0.1:{port}: {exc}", file=sys.stderr)
+    raise SystemExit(1)
+
+print(f"Preview directory: {preview_dir}")
+print(f"Preview URL: http://127.0.0.1:{port}/index.html")
+print("Press Ctrl+C to stop the preview server.")
+
+try:
+    server.serve_forever()
+except KeyboardInterrupt:
+    pass
+finally:
+    server.server_close()
+'@
+
+$attempts = 0
+$lastFailure = $null
+while ($attempts -lt 4) {
+    $attempts++
+    Write-Host "Starting foreground server (attempt $attempts)..."
+    $serveScript | & $pythonExe - $previewRoot $port
+    if ($LASTEXITCODE -eq 0) {
+        Write-Host "Preview server stopped."
+        return
+    }
+
+    $lastFailure = $LASTEXITCODE
+    Write-Host "Preview server failed to start on port $port. Retrying with another port..."
+    $port = Get-RandomPreviewPort
 }
+
+throw "Unable to start the preview server after multiple port attempts. Try rerunning the script or using -NoServe. Last exit code: $lastFailure"
