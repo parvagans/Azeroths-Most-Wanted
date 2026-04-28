@@ -219,6 +219,12 @@
   z-index: 10006;
   position: relative;
 }
+.mobile-menu-toggle:focus-visible {
+  outline: none !important;
+  box-shadow:
+    var(--amw-surface-focus-ring),
+    0 8px 18px rgba(0, 0, 0, 0.24);
+}
 .mobile-menu-toggle span {
   width: 28px;
   height: 3px;
@@ -5033,6 +5039,10 @@ body.nav-menu-open {
     display: inline-flex;
     grid-column: 1 / 2;
     grid-row: 1 / 2;
+    width: 44px;
+    height: 44px;
+    padding: 10px;
+    border-radius: 12px;
   }
   .nav-scrim {
     display: block;
@@ -10428,11 +10438,11 @@ body[data-app-ready="true"] #main-dashboard {
   }
 
   .custom-select {
-    min-height: 42px;
+    min-height: 44px;
   }
 
   .search-box {
-    height: 42px;
+    height: 44px;
   }
 }
 
