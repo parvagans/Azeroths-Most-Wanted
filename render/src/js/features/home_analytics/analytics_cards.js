@@ -1,4 +1,4 @@
-// Home and analytics card render helpers prepended during final JS assembly.
+﻿// Home and analytics card render helpers prepended during final JS assembly.
 
 function formatHashName(name) {
     return (name || '').toLowerCase();
@@ -98,34 +98,6 @@ function applySpotlightCard(id, config) {
     setHomeRoute(card, route);
 }
 
-function applyChronicleCard(id, config) {
-    const card = document.getElementById(id);
-    if (!card) return;
-
-    const {
-        kicker = '',
-        title = 'Awaiting entry',
-        value = 'No chronicle entry recorded',
-        meta = 'This card will populate when relevant data is available.',
-        route = '',
-        cta = 'Inspect âž”'
-    } = config || {};
-
-    const kickerEl = card.querySelector('.analytics-chronicle-kicker');
-    const titleEl = card.querySelector('.analytics-chronicle-title');
-    const valueEl = card.querySelector('.analytics-chronicle-value');
-    const metaEl = card.querySelector('.analytics-chronicle-meta');
-    const ctaEl = card.querySelector('.analytics-chronicle-cta');
-
-    if (kickerEl) kickerEl.textContent = kicker;
-    if (titleEl) titleEl.textContent = title;
-    if (valueEl) valueEl.textContent = value;
-    if (metaEl) metaEl.textContent = meta;
-    if (ctaEl) ctaEl.textContent = cta;
-
-    setHomeRoute(card, route);
-}
-
 function getPressureState(count, role) {
     if (role === 'Tank') {
         if (count <= 2) return { state: 'Thin shield wall', meta: 'Priority role for dependable raid structure and dungeon leadership.' };
@@ -149,3 +121,4 @@ function getPressureState(count, role) {
     if (count <= 10) return { state: 'Battle-ready line', meta: 'Melee presence is healthy for most progression and farm nights.' };
     return { state: 'Frontline overflowing', meta: 'Melee pressure is abundant across the current warband.' };
 }
+

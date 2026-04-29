@@ -1,4 +1,4 @@
-const CLASS_COLORS = {
+﻿const CLASS_COLORS = {
     "Druid": "#FF7C0A", "Hunter": "#ABD473", "Mage": "#3FC7EB", 
     "Paladin": "#F48CBA", "Priest": "#FFFFFF", "Rogue": "#FFF468",
     "Shaman": "#0070DE", "Warlock": "#8788EE", "Warrior": "#C69B6D",
@@ -4535,7 +4535,11 @@ window.addEventListener('DOMContentLoaded', async () => {
             navbar.classList.remove('navbar-theme-home');
             navbar.classList.add('navbar-theme-app');
         }
-        if (timeline) timeline.classList.add('view-hidden');
+        if (timeline) {
+            timeline.classList.add('view-hidden');
+            timeline.classList.remove('timeline-home-board', 'timeline-character-dossier', 'concise-timeline-awards-layout');
+        }
+        window.currentFilteredChars = null;
 
         const nowMs = Date.now();
         const sevenDaysMs = 7 * 24 * 60 * 60 * 1000;
@@ -4854,84 +4858,6 @@ window.addEventListener('DOMContentLoaded', async () => {
             cta: 'Inspect 60-69 bracket ➔'
         });
 
-        const reigningPveEntry = findRosterEntryByName(rosterData, prevMvps.pve && prevMvps.pve.name ? prevMvps.pve.name : '');
-        const reigningPvpEntry = findRosterEntryByName(rosterData, prevMvps.pvp && prevMvps.pvp.name ? prevMvps.pvp.name : '');
-
-        const recentEpicEvents = timelineData
-            .filter(e => e.type === 'item' && (e.item_quality === 'EPIC' || e.item_quality === 'LEGENDARY'))
-            .filter(e => {
-                const ts = new Date((e.timestamp || '').replace('Z', '+00:00')).getTime();
-                return !Number.isNaN(ts) && (nowMs - ts) <= sevenDaysMs;
-            })
-            .sort((a, b) => new Date((b.timestamp || '').replace('Z', '+00:00')).getTime() - new Date((a.timestamp || '').replace('Z', '+00:00')).getTime());
-
-        const latestEpicEvent = recentEpicEvents[0] || null;
-        const latestEpicName = latestEpicEvent && latestEpicEvent.character_name ? latestEpicEvent.character_name : '';
-
-        applyChronicleCard('analytics-chronicle-pve', reigningPveEntry ? {
-            kicker: 'Reigning PvE Champion',
-            title: reigningPveEntry.profile.name,
-            value: 'Current weekly crown holder',
-            meta: 'The active PvE champion surfaced from the honors ledger and linked back into the roster.',
-            route: formatHashName(reigningPveEntry.profile.name),
-            cta: 'Open champion dossier ➔'
-        } : {
-            kicker: 'Reigning PvE Champion',
-            title: 'Awaiting champion',
-            value: 'No crown holder surfaced',
-            meta: 'This card will display the active PvE champion from the honors ledger.',
-            route: 'badges',
-            cta: 'Open honors board ➔'
-        });
-
-        applyChronicleCard('analytics-chronicle-pvp', reigningPvpEntry ? {
-            kicker: 'Reigning PvP Champion',
-            title: reigningPvpEntry.profile.name,
-            value: 'Current weekly crown holder',
-            meta: 'The active PvP champion surfaced from the honors ledger and linked back into the roster.',
-            route: formatHashName(reigningPvpEntry.profile.name),
-            cta: 'Open champion dossier ➔'
-        } : {
-            kicker: 'Reigning PvP Champion',
-            title: 'Awaiting champion',
-            value: 'No crown holder surfaced',
-            meta: 'This card will display the active PvP champion from the honors ledger.',
-            route: 'badges',
-            cta: 'Open honors board ➔'
-        });
-
-        applyChronicleCard('analytics-chronicle-fresh70', newest70Char ? {
-            kicker: 'Fresh 70 Watch',
-            title: newest70Char.profile.name,
-            value: newest70Event && newest70Event.timestamp ? `Ascended ${new Date((newest70Event.timestamp || '').replace('Z', '+00:00')).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}` : 'Freshly ascended',
-            meta: 'Most recent level 70 breakthrough recorded during the current seven day campaign window.',
-            route: formatHashName(newest70Char.profile.name),
-            cta: 'Inspect fresh 70 ➔'
-        } : {
-            kicker: 'Fresh 70 Watch',
-            title: 'No new ascensions',
-            value: 'No level 70 surge this week',
-            meta: 'The latest max-level ascension will be surfaced here automatically.',
-            route: 'filter-level-70',
-            cta: 'Inspect level 70s ➔'
-        });
-
-        applyChronicleCard('analytics-chronicle-loot', latestEpicEvent ? {
-            kicker: 'Epic Loot Chronicle',
-            title: latestEpicName || 'Recent spoils logged',
-            value: `${recentEpicEvents.length.toLocaleString()} epic or legendary drops in 7d`,
-            meta: 'The current seven day campaign window has fresh high-end loot pressure worth tracking.',
-            route: latestEpicName ? formatHashName(latestEpicName) : 'badges',
-            cta: latestEpicName ? 'Inspect latest looter ➔' : 'Review honors ➔'
-        } : {
-            kicker: 'Epic Loot Chronicle',
-            title: 'Awaiting fresh spoils',
-            value: 'No epic surge recorded',
-            meta: 'Recent epic and legendary loot pressure is summarized here for the current seven day window.',
-            route: 'badges',
-            cta: 'Review campaign pulse ➔'
-        });
-
         const roleChartCard = document.getElementById('roleDonutChart')?.closest('.analytics-card');
         const roleChartSub = roleChartCard ? roleChartCard.querySelector('.chart-title-sub') : null;
         const roleChartHint = roleChartCard ? roleChartCard.querySelector('.analytics-card-hint') : null;
@@ -5182,18 +5108,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
         if (typeof window.renderGuildXPBar === 'function') window.renderGuildXPBar();
 
-        if (timeline) {
-            timeline.classList.remove('view-hidden');
-            timeline.classList.add('timeline-home-board');
-            setTimelineShellHeader({
-                kicker: 'Campaign Chronicle',
-                title: '📜 Recent Campaign Activity',
-                subtitle: 'Recent history from the latest guild scans. Current snapshot cards sit above this feed.',
-                meta: 'Guild-wide timeline'
-            });
-            window.currentFilteredChars = null;
-            applyTimelineFilters();
-        }
+        if (timeline) timeline.classList.add('view-hidden');
 
         if (heatmapData && heatmapData.length >= 2) {
             const today = heatmapData[heatmapData.length - 1];
@@ -7617,3 +7532,4 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     window.addEventListener('hashchange', route);
 });
+
