@@ -60,6 +60,23 @@ function formatHomeMovementEventType(eventType) {
     }
 }
 
+function formatHomeChangeItemType(changeType) {
+    switch ((changeType || '').toLowerCase()) {
+        case 'movement':
+            return 'Movement';
+        case 'level_up':
+            return 'Activity';
+        case 'item':
+            return 'Activity';
+        case 'badge':
+            return 'Awards';
+        case 'trend':
+            return 'Trend';
+        default:
+            return 'Update';
+    }
+}
+
 function renderHomeApiStatus(apiStatus = {}) {
     const banner = document.getElementById('home-api-status-banner');
     const titleEl = document.getElementById('home-api-status-title');
@@ -80,6 +97,49 @@ function renderHomeApiStatus(apiStatus = {}) {
     titleEl.textContent = `Blizzard API outage detected${codeText}`;
     messageEl.textContent = updatedText ? `${baseMessage} Last check: ${updatedText}.` : baseMessage;
     banner.hidden = false;
+}
+
+function renderHomeLatestChangesCard(dashboardConfig = {}) {
+    const latestChanges = dashboardConfig.latest_changes || {};
+    const titleEl = document.getElementById('home-latest-changes-title');
+    const summaryEl = document.getElementById('home-latest-changes-summary');
+    const listEl = document.getElementById('home-latest-changes-list');
+
+    if (!titleEl || !summaryEl || !listEl) return;
+
+    const items = Array.isArray(latestChanges.items) ? latestChanges.items : [];
+    const emptyText = latestChanges.empty_text || 'No notable changes recorded yet.';
+
+    titleEl.textContent = latestChanges.title || 'What changed recently';
+    summaryEl.textContent = latestChanges.empty || items.length === 0
+        ? emptyText
+        : 'Movement first, then recent activity and trend deltas.';
+
+    listEl.innerHTML = '';
+    if (latestChanges.empty || items.length === 0) {
+        listEl.hidden = true;
+        return;
+    }
+
+    items.slice(0, 5).forEach(item => {
+        const li = document.createElement('li');
+        li.className = 'home-latest-changes-item';
+        li.setAttribute('data-tone', (item.tone || 'neutral').toLowerCase());
+        li.setAttribute('data-change-type', (item.type || 'update').toLowerCase());
+
+        const label = document.createElement('span');
+        label.className = 'home-latest-changes-label';
+        label.textContent = item.label || 'Update';
+
+        const typeLabel = document.createElement('span');
+        typeLabel.className = 'home-latest-changes-type';
+        typeLabel.textContent = formatHomeChangeItemType(item.type);
+
+        li.append(label, typeLabel);
+        listEl.appendChild(li);
+    });
+
+    listEl.hidden = false;
 }
 
 function renderHomeMovementCard(dashboardConfig = {}) {
@@ -194,4 +254,5 @@ function populateHomeOverview(dashboardConfig = {}) {
     setHomeCardText('home-kpi-ilvl', '.home-pulse-meta', 'Mains-only read for capped roster power.');
 
     renderHomeMovementCard(dashboardConfig);
+    renderHomeLatestChangesCard(dashboardConfig);
 }

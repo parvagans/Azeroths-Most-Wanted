@@ -30,6 +30,20 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
                 "current_status": "departed",
             },
         ]
+        dashboard_feed = [
+            {
+                "timestamp": "2026-04-29T11:45:00Z",
+                "character_name": "Charlie",
+                "type": "level_up",
+                "level": 70,
+            },
+            {
+                "timestamp": "2026-04-29T11:44:00Z",
+                "character_name": "Delta",
+                "type": "item",
+                "item_name": "Shiny Axe",
+            },
+        ]
 
         def fetch_side_effect(session, query):
             if "guild_membership_events" in query:
@@ -45,7 +59,7 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
                 mock.MagicMock(),
                 roster_data=[{"profile": {"name": "Alpha", "level": 70, "equipped_item_level": 120}}],
                 realm_data={"global_metrics": {}, "global_trends": {}},
-                dashboard_feed=[],
+                dashboard_feed=dashboard_feed,
                 raw_guild_roster=[{"name": "Alpha", "level": 70}],
                 prev_mvps={},
             )
@@ -60,6 +74,15 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(
             [event["character_name"] for event in membership_movement["recent"]],
             ["Alpha", "Bravo"],
+        )
+        self.assertIn("latest_changes", mock_generate_html.call_args.kwargs)
+        latest_changes = mock_generate_html.call_args.kwargs["latest_changes"]
+        self.assertEqual(latest_changes["title"], "Latest Changes")
+        self.assertFalse(latest_changes["empty"])
+        self.assertEqual(latest_changes["items"][0]["type"], "movement")
+        self.assertEqual(
+            [item["type"] for item in latest_changes["items"][:3]],
+            ["movement", "level_up", "item"],
         )
 
     def test_generate_html_dashboard_serializes_membership_movement_payload(self):
@@ -107,6 +130,18 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
                     }
                 ],
             }
+            latest_changes = {
+                "title": "Latest Changes",
+                "items": [
+                    {
+                        "type": "movement",
+                        "label": "1 member recorded as the movement baseline",
+                        "tone": "neutral",
+                    }
+                ],
+                "empty": False,
+                "empty_text": "No notable changes recorded yet.",
+            }
 
             generate_html_dashboard(
                 roster_data=roster_data,
@@ -117,6 +152,7 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
                 prev_mvps={},
                 campaign_archive={},
                 membership_movement=membership_movement,
+                latest_changes=latest_changes,
             )
 
             index_html = Path("index.html")
@@ -135,6 +171,9 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
                 dashboard_config["membership_movement"]["recent"][0]["character_name"],
                 "SmokeTest",
             )
+            self.assertIn("latest_changes", dashboard_config)
+            self.assertEqual(dashboard_config["latest_changes"]["title"], "Latest Changes")
+            self.assertEqual(dashboard_config["latest_changes"]["items"][0]["type"], "movement")
         finally:
             os.chdir(original_cwd)
             temp_dir.cleanup()
@@ -150,6 +189,18 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("renderHomeMovementCard", js_text)
         self.assertIn("movement baseline", js_text)
         self.assertIn("Future joins, departures, and rejoins will appear here.", js_text)
+
+    def test_template_includes_latest_changes_card_markup_and_hook(self):
+        template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")
+        js_text = Path("render/src/js/features/home_analytics/home_overview.js").read_text(encoding="utf-8")
+
+        self.assertIn('id="home-latest-changes-card"', template_text)
+        self.assertIn('id="home-latest-changes-list"', template_text)
+        self.assertIn('Latest Changes', template_text)
+        self.assertIn('What changed recently', template_text)
+        self.assertIn('renderHomeLatestChangesCard', js_text)
+        self.assertIn('No notable changes recorded yet.', js_text)
+        self.assertIn('Movement first, then recent activity and trend deltas.', js_text)
 
     def test_source_template_includes_favicon_and_github_links(self):
         template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")

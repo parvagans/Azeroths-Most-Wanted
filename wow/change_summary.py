@@ -37,10 +37,11 @@ def _extract_membership_movement_item(membership_movement: Any) -> list[dict[str
         return []
 
     if membership_movement.get("bootstrap"):
+        member_word = "member" if total == 1 else "members"
         return [
             {
                 "type": "movement",
-                "label": f"{total} members recorded as the movement baseline",
+                "label": f"{total} {member_word} recorded as the movement baseline",
                 "tone": "neutral",
             }
         ]
@@ -152,7 +153,7 @@ def _extract_trend_item(trend_data: Any) -> list[dict[str, Any]]:
                 {
                     "type": "trend",
                     "label": f"Daily trend vs previous snapshot: {', '.join(parts[:3])}",
-                    "tone": "neutral",
+                    "tone": "trend",
                 }
             ]
 

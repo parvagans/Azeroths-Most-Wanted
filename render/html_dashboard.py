@@ -6,7 +6,7 @@ from jinja2 import Environment, FileSystemLoader
 
 from wow.alts import is_alt_record
 
-def generate_html_dashboard(roster_data, realm_data=None, timeline_data=None, raw_guild_roster=None, roster_history=None, prev_mvps=None, campaign_archive=None, membership_movement=None):
+def generate_html_dashboard(roster_data, realm_data=None, timeline_data=None, raw_guild_roster=None, roster_history=None, prev_mvps=None, campaign_archive=None, membership_movement=None, latest_changes=None):
     """
     Generates the interactive, high-performance HTML dashboard utilizing Jinja2 templates.
     """
@@ -20,6 +20,8 @@ def generate_html_dashboard(roster_data, realm_data=None, timeline_data=None, ra
         campaign_archive = {}
     if not membership_movement:
         membership_movement = {}
+    if not latest_changes:
+        latest_changes = {}
 
     # Safely filter out any characters whose profile failed to load from the API
     roster_data = [char for char in roster_data if char and isinstance(char.get("profile"), dict)]
@@ -218,6 +220,7 @@ def generate_html_dashboard(roster_data, realm_data=None, timeline_data=None, ra
         "prev_mvps": prev_mvps,
         "campaign_archive": campaign_archive,
         "membership_movement": membership_movement,
+        "latest_changes": latest_changes,
     }
     safe_config = json.dumps(dashboard_config)
 

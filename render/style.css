@@ -8115,7 +8115,29 @@ body.nav-menu-open {
     inset 0 0 22px rgba(120, 86, 33, 0.04);
 }
 
+.home-latest-changes-card {
+  max-width: 1240px;
+  margin: 14px auto 0;
+  padding: 16px 20px 18px;
+  border: 1px solid rgba(112, 94, 164, 0.12);
+  border-radius: 18px;
+  background:
+    radial-gradient(circle at top left, rgba(95, 170, 255, 0.05), transparent 34%),
+    linear-gradient(180deg, rgba(11, 12, 17, 0.98) 0%, rgba(7, 8, 12, 0.99) 100%);
+  box-shadow:
+    0 16px 34px rgba(0, 0, 0, 0.46),
+    inset 0 0 18px rgba(95, 170, 255, 0.03);
+}
+
 .home-movement-list {
+  list-style: none;
+  margin: 14px 0 0;
+  padding: 0;
+  display: grid;
+  gap: 8px;
+}
+
+.home-latest-changes-list {
   list-style: none;
   margin: 14px 0 0;
   padding: 0;
@@ -8134,7 +8156,25 @@ body.nav-menu-open {
   background: rgba(255, 255, 255, 0.03);
 }
 
+.home-latest-changes-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 9px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.055);
+  background: rgba(255, 255, 255, 0.025);
+}
+
 .home-movement-name {
+  color: #fff3c0;
+  font-weight: 700;
+  line-height: 1.35;
+  min-width: 0;
+}
+
+.home-latest-changes-label {
   color: #fff3c0;
   font-weight: 700;
   line-height: 1.35;
@@ -8155,6 +8195,27 @@ body.nav-menu-open {
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+}
+
+.home-latest-changes-type {
+  color: rgba(198, 190, 167, 0.84);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.home-latest-changes-item[data-tone="positive"] .home-latest-changes-type {
+  color: rgba(96, 214, 164, 0.9);
+}
+
+.home-latest-changes-item[data-tone="neutral"] .home-latest-changes-type {
+  color: rgba(198, 190, 167, 0.84);
+}
+
+.home-latest-changes-item[data-tone="trend"] .home-latest-changes-type {
+  color: rgba(160, 205, 255, 0.92);
 }
 
 .home-movement-item[data-event-type="departed"] .home-movement-event {
@@ -8233,6 +8294,10 @@ body.nav-menu-open {
   .home-pulse-card {
     padding: 18px 18px 16px;
   }
+
+  .home-latest-changes-card {
+    padding: 16px 18px 18px;
+  }
 }
 
 @media (max-width: 600px) {
@@ -8255,6 +8320,11 @@ body.nav-menu-open {
 
   .home-pulse-meta {
     max-width: none;
+  }
+
+  .home-latest-changes-item {
+    align-items: flex-start;
+    flex-direction: column;
   }
 }
 
