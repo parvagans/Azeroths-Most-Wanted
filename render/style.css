@@ -7872,7 +7872,13 @@ body.nav-menu-open {
 }
 
 .home-command-card {
-  min-height: 230px;
+  display: flex;
+  flex-direction: column;
+  min-height: 210px;
+}
+
+.home-command-card .home-nav-value {
+  display: none;
 }
 
 .home-command-card-total {
@@ -7937,9 +7943,9 @@ body.nav-menu-open {
 }
 
 .home-nav-cta {
+  margin-top: auto;
   display: inline-flex;
   align-items: center;
-  margin-top: 16px;
   color: #ffd100;
   font-size: 12px;
   font-weight: 700;

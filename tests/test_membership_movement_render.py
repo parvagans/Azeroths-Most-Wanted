@@ -151,6 +151,23 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("movement baseline", js_text)
         self.assertIn("Future joins, departures, and rejoins will appear here.", js_text)
 
+    def test_home_command_tiles_are_navigation_tiles_not_duplicate_metrics(self):
+        template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")
+        js_text = Path("render/src/js/features/home_analytics/home_overview.js").read_text(encoding="utf-8")
+        css_text = Path("render/style.css").read_text(encoding="utf-8")
+
+        self.assertIn("Roster Overview", template_text)
+        self.assertIn("Raid Readiness", template_text)
+        self.assertIn(".home-command-card .home-nav-value", css_text)
+        self.assertNotIn("setHomeText('home-command-total-value'", js_text)
+        self.assertNotIn("setHomeText('home-command-active-value'", js_text)
+        self.assertNotIn("setHomeText('home-command-raidready-value'", js_text)
+        self.assertNotIn("setHomeText('home-command-badges-value'", js_text)
+        self.assertNotIn("setHomeCardText('home-command-total-value', '.home-nav-copy'", js_text)
+        self.assertNotIn("setHomeCardText('home-command-active-value', '.home-nav-copy'", js_text)
+        self.assertNotIn("setHomeCardText('home-command-raidready-value', '.home-nav-copy'", js_text)
+        self.assertNotIn("setHomeCardText('home-command-badges-value', '.home-nav-copy'", js_text)
+
 
 if __name__ == "__main__":
     unittest.main()

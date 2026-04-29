@@ -1,25 +1,5 @@
 // Home overview helpers prepended during final JS assembly.
 
-function getDecoratedRosterCount() {
-    return rosterData.filter(c => {
-        const p = c.profile;
-        if (!p) return false;
-
-        const vCount = safeParseArray(p.vanguard_badges || c.vanguard_badges).length;
-        const cCount = safeParseArray(p.campaign_badges || c.campaign_badges).length;
-        const pveMvp = parseInt(p.pve_champ_count || c.pve_champ_count) || 0;
-        const pvpMvp = parseInt(p.pvp_champ_count || c.pvp_champ_count) || 0;
-        const pveG = parseInt(p.pve_gold || c.pve_gold) || 0;
-        const pvpG = parseInt(p.pvp_gold || c.pvp_gold) || 0;
-        const pveS = parseInt(p.pve_silver || c.pve_silver) || 0;
-        const pvpS = parseInt(p.pvp_silver || c.pvp_silver) || 0;
-        const pveB = parseInt(p.pve_bronze || c.pve_bronze) || 0;
-        const pvpB = parseInt(p.pvp_bronze || c.pvp_bronze) || 0;
-
-        return (vCount + cCount + pveMvp + pvpMvp + pveG + pvpG + pveS + pvpS + pveB + pvpB) > 0;
-    }).length;
-}
-
 function setHomeText(id, value) {
     const el = document.getElementById(id);
     if (el) el.textContent = value;
@@ -200,17 +180,6 @@ function populateHomeOverview(dashboardConfig = {}) {
     const raidReadyAllCount = getNumericConfigValue(dashboardConfig, 'raid_ready_count', raidReadyAllFallback);
     const raidReadyMainCount = getNumericConfigValue(dashboardConfig, 'raid_ready_count_mains', raidReadyMainFallback);
     const avgLvl70Ilvl = getNumericConfigValue(dashboardConfig, 'avg_ilvl_70_mains', avgLvl70IlvlFallback);
-    const decoratedCount = getDecoratedRosterCount();
-
-    setHomeText('home-command-total-value', totalAllCount.toLocaleString());
-    setHomeText('home-command-active-value', activeMainCount.toLocaleString());
-    setHomeText('home-command-raidready-value', raidReadyMainCount.toLocaleString());
-    setHomeText('home-command-badges-value', decoratedCount.toLocaleString());
-
-    setHomeCardText('home-command-total-value', '.home-nav-copy', `Mains: ${totalMainCount.toLocaleString()} / All chars: ${totalAllCount.toLocaleString()} across the scanned guild roster.`);
-    setHomeCardText('home-command-active-value', '.home-nav-copy', `Mains: ${activeMainCount.toLocaleString()} / All chars: ${activeAllCount.toLocaleString()} seen within 14 days.`);
-    setHomeCardText('home-command-raidready-value', '.home-nav-copy', `Mains: ${raidReadyMainCount.toLocaleString()} / All chars: ${raidReadyAllCount.toLocaleString()} at level 70 and iLvl 110+.`);
-
     setHomeText('home-pulse-total', totalAllCount.toLocaleString());
     setHomeText('home-pulse-active', activeMainCount.toLocaleString());
     setHomeText('home-pulse-raidready', raidReadyMainCount.toLocaleString());
