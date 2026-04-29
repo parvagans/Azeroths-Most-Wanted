@@ -7973,13 +7973,13 @@ body.nav-menu-open {
 }
 
 .dashboard-footer {
-  margin-top: 56px;
-  padding: 28px 18px 44px;
+  margin-top: 44px;
+  padding: 18px 18px 26px;
   border-top: 1px solid rgba(184, 145, 71, 0.12);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   text-align: center;
   color: rgba(214, 205, 178, 0.82);
 }
@@ -7988,8 +7988,15 @@ body.nav-menu-open {
 .footer-update-info,
 .footer-source-info,
 .footer-contact-info {
-  font-size: 13px;
-  line-height: 1.55;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.footer-disclaimer {
+  max-width: 980px;
+  color: rgba(214, 205, 178, 0.66);
+  font-size: 11px;
+  line-height: 1.45;
 }
 
 .footer-source-info a,
@@ -10958,6 +10965,26 @@ body[data-app-ready="true"] #main-dashboard {
 
   .home-movement-card {
     padding: 16px;
+  }
+
+  .dashboard-footer {
+    margin-top: 36px;
+    padding: 16px 16px 22px;
+    gap: 7px;
+  }
+
+  .footer-tech-stack,
+  .footer-update-info,
+  .footer-source-info,
+  .footer-contact-info {
+    font-size: 11px;
+    line-height: 1.4;
+  }
+
+  .footer-disclaimer {
+    max-width: none;
+    font-size: 10px;
+    line-height: 1.4;
   }
 
   .home-movement-item {
