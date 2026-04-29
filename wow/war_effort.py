@@ -3,6 +3,12 @@ import os
 from datetime import datetime, timedelta, timezone
 
 
+XP_THRESHOLD = 500
+HK_THRESHOLD = 1000
+LOOT_THRESHOLD = 40
+ZENITH_THRESHOLD = 5
+
+
 def build_weekly_reset_context(berlin_tz):
     now_berlin = datetime.now(berlin_tz)
     days_since_tuesday = (now_berlin.weekday() - 1) % 7
@@ -191,7 +197,7 @@ def collect_xp_progress(dashboard_feed, last_reset_iso, active_roster_set):
                 xp_counts[clean_name] = xp_counts.get(clean_name, 0) + 1
 
     ranked_xp_names = [k for k, _ in sorted(xp_counts.items(), key=lambda item: item[1], reverse=True)]
-    return xp_counts, ranked_xp_names, len(xp_events) >= 750
+    return xp_counts, ranked_xp_names, len(xp_events) >= XP_THRESHOLD
 
 
 def collect_hk_progress(roster_data, active_roster_set):
@@ -209,7 +215,7 @@ def collect_hk_progress(roster_data, active_roster_set):
                 hk_counts[clean_name] = trend
 
     ranked_hk_names = [k for k, _ in sorted(hk_counts.items(), key=lambda item: item[1], reverse=True)]
-    return hk_counts, total_hks, ranked_hk_names, total_hks >= 1000
+    return hk_counts, total_hks, ranked_hk_names, total_hks >= HK_THRESHOLD
 
 
 def collect_loot_progress(dashboard_feed, last_reset_iso, active_roster_set):
@@ -229,7 +235,7 @@ def collect_loot_progress(dashboard_feed, last_reset_iso, active_roster_set):
                 loot_counts[clean_name] = loot_counts.get(clean_name, 0) + 1
 
     ranked_loot_names = [k for k, _ in sorted(loot_counts.items(), key=lambda item: item[1], reverse=True)]
-    return loot_counts, ranked_loot_names, len(loot_events) >= 60
+    return loot_counts, ranked_loot_names, len(loot_events) >= LOOT_THRESHOLD
 
 
 def collect_zenith_progress(dashboard_feed, last_reset_iso, active_roster_set):
@@ -250,7 +256,7 @@ def collect_zenith_progress(dashboard_feed, last_reset_iso, active_roster_set):
                 unique_70s.append(clean_name)
 
     ranked_zenith_names = list(unique_70s)
-    return unique_70s, ranked_zenith_names, len(unique_70s) >= 10
+    return unique_70s, ranked_zenith_names, len(unique_70s) >= ZENITH_THRESHOLD
 
 
 def update_xp_lock(we_data, ranked_xp_names, xp_threshold_met, active_roster_set, now_iso):
@@ -263,7 +269,7 @@ def update_xp_lock(we_data, ranked_xp_names, xp_threshold_met, active_roster_set
                 "vanguards": top3,
                 "monument": {
                     "title": "🛡️ Hero's Journey",
-                    "desc": f"<span style='color:#ffd100; font-weight:bold;'>{mvp}</span> hit the 750th level!",
+                    "desc": f"<span style='color:#ffd100; font-weight:bold;'>{mvp}</span> hit the {XP_THRESHOLD}th level!",
                     "timestamp": now_iso,
                 },
             }
@@ -286,7 +292,7 @@ def update_hk_lock(we_data, ranked_hk_names, hk_threshold_met, active_roster_set
                 "vanguards": top3,
                 "monument": {
                     "title": "🩸 Blood of the Enemy",
-                    "desc": f"<span style='color:#ff4400; font-weight:bold;'>{mvp}</span> led the 1000 HK charge!",
+                    "desc": f"<span style='color:#ff4400; font-weight:bold;'>{mvp}</span> led the {HK_THRESHOLD} HK charge!",
                     "timestamp": now_iso,
                 },
             }
@@ -309,7 +315,7 @@ def update_loot_lock(we_data, ranked_loot_names, loot_threshold_met, active_rost
                 "vanguards": top3,
                 "monument": {
                     "title": "🐉 Dragon's Hoard",
-                    "desc": f"<span style='color:#a335ee; font-weight:bold;'>{mvp}</span> looted the 60th Epic!",
+                    "desc": f"<span style='color:#a335ee; font-weight:bold;'>{mvp}</span> looted the {LOOT_THRESHOLD}th Epic!",
                     "timestamp": now_iso,
                 },
             }
@@ -332,7 +338,7 @@ def update_zenith_lock(we_data, ranked_zenith_names, unique_70s, zenith_threshol
                 "vanguards": top3,
                 "monument": {
                     "title": "⚡ The Zenith Cohort",
-                    "desc": f"<span style='color:#3FC7EB; font-weight:bold;'>{tenth_man}</span> was the 10th Level 70!",
+                    "desc": f"<span style='color:#3FC7EB; font-weight:bold;'>{tenth_man}</span> was the {ZENITH_THRESHOLD}th Level 70!",
                     "timestamp": now_iso,
                 },
             }

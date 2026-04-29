@@ -1,5 +1,12 @@
 // War-effort shell and config helpers prepended during final JS assembly.
 
+const WAR_EFFORT_THRESHOLDS = Object.freeze({
+    xp: 500,
+    hk: 1000,
+    loot: 40,
+    zenith: 5
+});
+
 function buildWarEffortHeroStatNode(value, label) {
     const template = document.getElementById('tpl-war-effort-hero-stat');
     if (!template) return null;
@@ -27,7 +34,7 @@ function getWarEffortConfig(type) {
             unitLabel: 'Levels',
             ctaValue: 'Be the first to add levels this week.',
             ctaMeta: 'Turn a blank slate into forward motion and start the march toward the weekly objective.',
-            target: 750
+            target: WAR_EFFORT_THRESHOLDS.xp
         },
         hk: {
             theme: 'hk',
@@ -40,7 +47,7 @@ function getWarEffortConfig(type) {
             unitLabel: 'HKs',
             ctaValue: 'Claim the first HKs of the week.',
             ctaMeta: 'Open the battleground war board and give the guild its first surge of PvP momentum.',
-            target: 1000
+            target: WAR_EFFORT_THRESHOLDS.hk
         },
         loot: {
             theme: 'loot',
@@ -53,7 +60,7 @@ function getWarEffortConfig(type) {
             unitLabel: 'Epics',
             ctaValue: 'Loot the first epic of the week.',
             ctaMeta: 'Start the trophy wall with one clean pull and one prize worth remembering.',
-            target: 60
+            target: WAR_EFFORT_THRESHOLDS.loot
         },
         zenith: {
             theme: 'zenith',
@@ -66,7 +73,7 @@ function getWarEffortConfig(type) {
             unitLabel: 'New 70s',
             ctaValue: 'Be the first new level 70.',
             ctaMeta: 'Turn the race board live and claim the first summit position before anyone else.',
-            target: 10
+            target: WAR_EFFORT_THRESHOLDS.zenith
         }
     };
 
