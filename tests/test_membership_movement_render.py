@@ -151,6 +151,17 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("movement baseline", js_text)
         self.assertIn("Future joins, departures, and rejoins will appear here.", js_text)
 
+    def test_source_template_includes_favicon_and_github_links(self):
+        template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")
+
+        self.assertIn('rel="icon" type="image/svg+xml" href="asset/amw.svg"', template_text)
+        self.assertIn('https://github.com/parvagans/Azeroths-Most-Wanted', template_text)
+        self.assertIn('mailto:nullbit5@protonmail.com', template_text)
+        self.assertIn('class="nav-btn nav-btn-source"', template_text)
+        self.assertIn('Contact</a>', template_text)
+        self.assertIn('class="footer-source-info"', template_text)
+        self.assertIn('class="footer-contact-info"', template_text)
+
     def test_home_command_tiles_are_navigation_tiles_not_duplicate_metrics(self):
         template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")
         js_text = Path("render/src/js/features/home_analytics/home_overview.js").read_text(encoding="utf-8")
