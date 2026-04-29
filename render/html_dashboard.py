@@ -30,8 +30,14 @@ def generate_html_dashboard(roster_data, realm_data=None, timeline_data=None, ra
     realm_data = realm_data or {}
     global_metrics = realm_data.get("global_metrics") or {}
     global_trends = realm_data.get("global_trends") or {}
+    berlin_tz = ZoneInfo("Europe/Berlin")
 
     last_updated_iso = datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+    try:
+        last_updated_display = datetime.fromisoformat(last_updated_iso.replace("Z", "+00:00")).astimezone(berlin_tz).strftime("%d.%m.%Y %H:%M")
+        last_updated_display = f"{last_updated_display} Uhr (CET/CEST)"
+    except Exception:
+        last_updated_display = last_updated_iso
     sorted_stats_roster = sorted(roster_data, key=lambda x: (
         x.get("profile", {}).get("level", 0),
         x.get("profile", {}).get("equipped_item_level", 0)
@@ -93,8 +99,6 @@ def generate_html_dashboard(roster_data, realm_data=None, timeline_data=None, ra
     raid_ready_count_mains = global_metrics.get("raid_ready_count_mains", raid_ready_count_mains)
     avg_ilvl_70 = global_metrics.get("avg_ilvl_70", fallback_avg_ilvl_70)
     avg_ilvl_70_mains = global_metrics.get("avg_ilvl_70_mains", fallback_avg_ilvl_70_mains)
-
-    berlin_tz = ZoneInfo("Europe/Berlin")
 
     activity_counts = {}
     for event in timeline_data:
@@ -239,6 +243,7 @@ def generate_html_dashboard(roster_data, realm_data=None, timeline_data=None, ra
         avg_level=avg_level,
         safe_config=safe_config,
         safe_heatmap_data=safe_heatmap_data,
+        last_updated_display=last_updated_display,
         js_content=js_content
     )
     
