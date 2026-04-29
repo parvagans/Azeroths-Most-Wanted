@@ -18,10 +18,10 @@ class ChangeSummaryTests(unittest.TestCase):
     def test_bootstrap_membership_movement_is_treated_as_baseline(self):
         summary = build_change_summary(
             membership_movement={
-                "joined": 200,
+                "joined": 625,
                 "departed": 0,
                 "rejoined": 0,
-                "total": 200,
+                "total": 625,
                 "bootstrap": True,
             },
             timeline_events=[],
@@ -32,7 +32,7 @@ class ChangeSummaryTests(unittest.TestCase):
         self.assertEqual(summary["items"][0]["type"], "movement")
         self.assertEqual(
             summary["items"][0]["label"],
-            "200 members recorded as the movement baseline",
+            "625 members recorded as the movement baseline",
         )
         self.assertEqual(summary["items"][0]["tone"], "neutral")
 

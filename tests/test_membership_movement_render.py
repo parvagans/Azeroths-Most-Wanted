@@ -85,6 +85,62 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
             ["movement", "level_up", "item"],
         )
 
+    async def test_finalize_dashboard_output_uses_full_latest_scan_for_baseline_counts(self):
+        recent_rows = [
+            {
+                "scan_id": "scan-99",
+                "character_name": f"Hero {index:03d}",
+                "event_type": "joined",
+                "detected_at": "2026-04-29T12:00:00Z",
+                "previous_status": None,
+                "current_status": "active",
+            }
+            for index in range(1, 626)
+        ]
+        dashboard_feed = []
+
+        def fetch_side_effect(session, query):
+            if "guild_membership_events" in query:
+                return recent_rows
+            return []
+
+        with (
+            mock.patch("wow.output.fetch_turso", side_effect=fetch_side_effect) as mock_fetch,
+            mock.patch("wow.output.write_timeline_output"),
+            mock.patch("wow.output.generate_html_dashboard") as mock_generate_html,
+        ):
+            await finalize_dashboard_output(
+                mock.MagicMock(),
+                roster_data=[{"profile": {"name": "Alpha", "level": 70, "equipped_item_level": 120}}],
+                realm_data={
+                    "global_metrics": {
+                        "total_members": 625,
+                        "active_14_days": 268,
+                        "raid_ready_count": 22,
+                        "avg_ilvl_70": 107,
+                    },
+                    "global_trends": {},
+                },
+                dashboard_feed=dashboard_feed,
+                raw_guild_roster=[{"name": "Alpha", "level": 70}],
+                prev_mvps={},
+            )
+
+        self.assertTrue(mock_fetch.await_count >= 1)
+        self.assertEqual(mock_generate_html.call_count, 1)
+        generated = mock_generate_html.call_args.kwargs
+        membership_movement = generated["membership_movement"]
+        latest_changes = generated["latest_changes"]
+        officer_brief = generated["officer_brief"]
+
+        self.assertEqual(membership_movement["total"], 625)
+        self.assertEqual(membership_movement["joined"], 625)
+        self.assertEqual(len(membership_movement["recent"]), 5)
+        self.assertEqual(latest_changes["items"][0]["label"], "625 members recorded as the movement baseline")
+        self.assertEqual(officer_brief["status"], "Building")
+        self.assertEqual(officer_brief["summary"], "Roster baseline captured; health will sharpen on the next scan.")
+        self.assertNotIn("movement", [item["type"] for item in officer_brief["items"]])
+
     def test_generate_html_dashboard_serializes_membership_movement_payload(self):
         original_cwd = os.getcwd()
         temp_dir = tempfile.TemporaryDirectory()

@@ -203,6 +203,25 @@ def _latest_changes_has_supporting_items(latest_changes: Any) -> bool:
     return False
 
 
+def _latest_changes_has_movement_item(latest_changes: Any) -> bool:
+    if not isinstance(latest_changes, dict):
+        return False
+
+    change_items = latest_changes.get("items")
+    if not isinstance(change_items, list):
+        return False
+
+    for item in change_items:
+        if not isinstance(item, dict):
+            continue
+
+        item_type = str(item.get("type") or "").strip().lower()
+        if item_type == "movement":
+            return True
+
+    return False
+
+
 def _latest_changes_has_watch_signal(latest_changes: Any) -> bool:
     if not isinstance(latest_changes, dict):
         return False
@@ -378,7 +397,11 @@ def build_officer_brief(*, roster_summary=None, membership_movement=None, latest
     roster_metrics = _extract_roster_metrics(roster_summary)
 
     items: list[dict[str, Any]] = []
-    items.extend(_extract_membership_item(membership_movement))
+    movement_items = _extract_membership_item(membership_movement)
+    movement = membership_movement if isinstance(membership_movement, dict) else {}
+    bootstrap = bool(movement.get("bootstrap"))
+    if not (bootstrap and _latest_changes_has_movement_item(latest_changes)):
+        items.extend(movement_items)
     items.extend(_extract_activity_item(roster_metrics))
     items.extend(_extract_readiness_item(roster_metrics))
     trend_items = _extract_trend_item(trend_data)

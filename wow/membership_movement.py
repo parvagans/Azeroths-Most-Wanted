@@ -231,6 +231,21 @@ def build_recent_membership_movement_query(limit=200):
     """
 
 
+def build_latest_membership_movement_query():
+    return """
+        WITH latest_scan AS (
+            SELECT scan_id
+            FROM guild_membership_events
+            ORDER BY detected_at DESC, id DESC
+            LIMIT 1
+        )
+        SELECT scan_id, character_name, event_type, detected_at, previous_status, current_status
+        FROM guild_membership_events
+        WHERE scan_id = (SELECT scan_id FROM latest_scan)
+        ORDER BY detected_at DESC, id DESC
+    """
+
+
 def _coerce_summary_event_row(row: Any) -> dict[str, Any] | None:
     if not isinstance(row, dict):
         return None

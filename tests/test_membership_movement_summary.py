@@ -1,5 +1,6 @@
 import unittest
 
+from wow.membership_movement import build_latest_membership_movement_query
 from wow.membership_movement import build_recent_membership_movement_query
 from wow.membership_movement import summarize_membership_events
 
@@ -11,6 +12,14 @@ class MembershipMovementSummaryTests(unittest.TestCase):
         self.assertIn("guild_membership_events", query)
         self.assertIn("ORDER BY detected_at DESC, id DESC", query)
         self.assertIn("LIMIT 7", query)
+
+    def test_build_latest_membership_movement_query_targets_latest_scan_without_limit(self):
+        query = build_latest_membership_movement_query()
+
+        self.assertIn("WITH latest_scan AS", query)
+        self.assertIn("SELECT scan_id", query)
+        self.assertIn("WHERE scan_id = (SELECT scan_id FROM latest_scan)", query)
+        self.assertNotIn("LIMIT 200", query)
 
     def test_summarize_membership_events_handles_empty_input(self):
         self.assertEqual(

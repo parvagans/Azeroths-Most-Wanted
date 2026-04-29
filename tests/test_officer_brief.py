@@ -133,21 +133,29 @@ class OfficerBriefTests(unittest.TestCase):
                 "avg_ilvl_70": 103,
             },
             membership_movement={
-                "joined": 200,
+                "joined": 625,
                 "departed": 0,
                 "rejoined": 0,
-                "total": 200,
+                "total": 625,
                 "bootstrap": True,
+            },
+            latest_changes={
+                "title": "Latest Changes",
+                "items": [
+                    {
+                        "type": "movement",
+                        "label": "625 members recorded as the movement baseline",
+                        "tone": "neutral",
+                    }
+                ],
+                "empty": False,
             },
         )
 
         self.assertEqual(summary["status"], "Building")
         self.assertEqual(summary["tone"], "neutral")
-        self.assertEqual(summary["items"][0]["type"], "movement")
-        self.assertEqual(
-            summary["items"][0]["label"],
-            "Roster baseline captured from 200 members",
-        )
+        self.assertNotIn("movement", [item["type"] for item in summary["items"]])
+        self.assertGreaterEqual(len(summary["items"]), 2)
         self.assertIn("baseline", summary["summary"].lower())
         self.assertNotIn("churn", summary["summary"].lower())
 
