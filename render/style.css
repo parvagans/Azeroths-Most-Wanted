@@ -871,7 +871,7 @@ body.nav-menu-open {
 .dashboard-layout.dashboard-layout-home {
   flex-direction: column;
   align-items: center;
-  gap: 48px;
+  gap: 40px;
   width: min(1280px, calc(100% - 40px));
   max-width: 1280px;
 }
@@ -7271,7 +7271,7 @@ body.nav-menu-open {
   align-items: flex-end;
   justify-content: center;
   gap: 8px;
-  margin-top: 40px;
+  margin-top: 32px;
   padding-bottom: 10px;
   width: 100%;
 }
@@ -7589,11 +7589,11 @@ body.nav-menu-open {
 .home-section-heading {
   text-align: center;
   max-width: 760px;
-  margin: 0 auto 18px auto;
+  margin: 0 auto 16px auto;
 }
 
 .home-section-heading-compact {
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 
 .home-section-title {
@@ -7661,7 +7661,7 @@ body.nav-menu-open {
 .home-war-effort-section {
   width: 100%;
   max-width: 1240px;
-  margin: 54px auto 0;
+  margin: 44px auto 0;
 }
 
 .home-war-effort-stage {
@@ -8113,8 +8113,8 @@ body.nav-menu-open {
 
 .home-movement-card {
   max-width: 1240px;
-  margin: 20px auto 0;
-  padding: 18px 20px 20px;
+  margin: 16px auto 0;
+  padding: 17px 20px 18px;
   border: 1px solid rgba(112, 94, 164, 0.14);
   border-radius: 18px;
   background:
@@ -8125,9 +8125,30 @@ body.nav-menu-open {
     inset 0 0 22px rgba(120, 86, 33, 0.04);
 }
 
-.home-latest-changes-card {
+.home-insights-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 20px;
+  width: 100%;
   max-width: 1240px;
-  margin: 14px auto 0;
+  margin: 12px auto 0;
+  align-items: stretch;
+}
+
+.home-insights-row > * {
+  min-width: 0;
+  margin-top: 0 !important;
+  height: 100%;
+}
+
+.home-insights-row .home-latest-changes-card,
+.home-insights-row .home-officer-brief-card {
+  max-width: none;
+  margin: 0;
+}
+
+.home-latest-changes-card {
+  max-width: none;
   padding: 16px 20px 18px;
   border: 1px solid rgba(112, 94, 164, 0.12);
   border-radius: 18px;
@@ -8140,8 +8161,7 @@ body.nav-menu-open {
 }
 
 .home-officer-brief-card {
-  max-width: 1240px;
-  margin: 14px auto 0;
+  max-width: none;
   padding: 16px 20px 18px;
   border: 1px solid rgba(198, 190, 167, 0.12);
   border-radius: 18px;
@@ -8488,7 +8508,7 @@ body.nav-menu-open {
   justify-content: center;
   column-gap: 44px;
   row-gap: 24px;
-  margin: 0 auto 56px auto;
+  margin: 0 auto 44px auto;
   width: 100%;
   max-width: 1280px;
   padding: 18px 18px 20px;
@@ -9989,11 +10009,11 @@ body[data-route="war-effort-hk"] #ember-canvas {
 .weekly-mvps-wrapper,
 .home-ladders-section,
 .home-secondary-section {
-  margin-top: 58px;
+  margin-top: 50px;
 }
 
 .home-command-section {
-  margin-top: 46px;
+  margin-top: 40px;
 }
 
 .analytics-summary-section,
@@ -10832,7 +10852,7 @@ body[data-app-ready="true"] #main-dashboard {
 
 @media (max-width: 920px) {
   .home-dashboard-grid {
-    gap: 38px;
+    gap: 34px;
   }
 
   .home-command-section,
@@ -10851,6 +10871,11 @@ body[data-app-ready="true"] #main-dashboard {
   .analytics-pressure-grid,
   .analytics-chronicle-grid {
     gap: 18px;
+  }
+
+  .home-insights-row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 16px;
   }
 
   .home-movement-card {
@@ -10883,7 +10908,7 @@ body[data-app-ready="true"] #main-dashboard {
 
 @media (max-width: 640px) {
   .home-dashboard-grid {
-    gap: 28px;
+    gap: 24px;
   }
 
   .home-command-section,

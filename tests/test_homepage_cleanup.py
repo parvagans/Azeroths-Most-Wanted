@@ -15,7 +15,12 @@ class HomepageCleanupTests(unittest.TestCase):
         template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")
         script_text = Path("render/script.js").read_text(encoding="utf-8")
         cards_text = Path("render/src/js/features/home_analytics/analytics_cards.js").read_text(encoding="utf-8")
+        css_text = Path("render/style.css").read_text(encoding="utf-8")
 
+        self.assertIn('class="home-insights-row"', template_text)
+        self.assertIn('id="home-latest-changes-card"', template_text)
+        self.assertIn('id="home-officer-brief-card"', template_text)
+        self.assertIn('.home-insights-row {', css_text)
         self.assertNotIn('analytics-intel-section-chronicle', template_text)
         self.assertNotIn('Campaign Chronicle', template_text)
         self.assertNotIn('Recent Campaign Activity', template_text)
