@@ -4595,6 +4595,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         const recentHeatmap = Array.isArray(heatmapData) ? heatmapData.slice(-7) : [];
         const dashboardConfig = typeof getHallOfHeroesDashboardConfig === 'function' ? getHallOfHeroesDashboardConfig() : {};
         const prevMvps = dashboardConfig.prev_mvps || {};
+        const analyticsTrends = dashboardConfig.global_trends || {};
         const mainRoster = filterMainCharacters(rosterData);
         const formatDualCount = (mainCount, allCount) => `${mainCount.toLocaleString()} / ${allCount.toLocaleString()}`;
 
@@ -4632,6 +4633,18 @@ window.addEventListener('DOMContentLoaded', async () => {
             const lvl = c.level || 0;
             return lvl >= 60 && lvl <= 69;
         }).length;
+
+        if (typeof renderAnalyticsSnapshotStrip === 'function') {
+            renderAnalyticsSnapshotStrip({
+                guildRosterValue: display_total_members,
+                guildRosterDelta: analyticsTrends.trend_total,
+                activeMainsValue: mainActiveRosterCount,
+                activeMainsDelta: analyticsTrends.trend_active_mains,
+                raidReadyValue: mainRaidReadyCount,
+                raidReadyDelta: analyticsTrends.trend_ready_mains,
+                avgIlvlValue: mainAvgIlvl
+            });
+        }
 
         const setKpiLabel = (valueId, text) => {
             const valueEl = document.getElementById(valueId);
@@ -6516,7 +6529,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     function initSectionReveals() {
         const targets = document.querySelectorAll(
-            '.home-command-section, .home-pulse-section, .home-war-effort-section, .weekly-mvps-wrapper, .home-ladders-section, .home-secondary-section, .analytics-summary-section, .analytics-intel-section, .leaderboard-panel'
+            '.home-command-section, .home-pulse-section, .home-war-effort-section, .weekly-mvps-wrapper, .home-ladders-section, .home-secondary-section, .analytics-snapshot-section, .analytics-summary-section, .analytics-intel-section, .leaderboard-panel'
         );
 
         if (!targets.length) return;

@@ -1139,6 +1139,44 @@
                     </div>
                 </section>
 
+                <section id="analytics-snapshot-section" class="analytics-snapshot-section">
+                    <div class="home-section-heading home-section-heading-compact analytics-heading">
+                        <span class="home-section-kicker">Snapshot Delta</span>
+                        <h3 class="home-section-title">What changed since the previous scan?</h3>
+                        <p class="home-section-subtitle">A quick comparison of the freshest scan against the previous one. Raw roster counts, mains-only readiness, roster-known levels, and processed detail-eligible intelligence stay separate on purpose.</p>
+                    </div>
+
+                    <div class="analytics-snapshot-grid" aria-label="Analytics snapshot delta">
+                        <article id="analytics-snapshot-guild-roster" class="analytics-snapshot-card">
+                            <span class="analytics-snapshot-label">Guild Roster</span>
+                            <strong class="analytics-snapshot-value">0</strong>
+                            <span class="analytics-snapshot-status">Current snapshot</span>
+                            <span class="analytics-snapshot-scope">Raw guild roster total from the roster endpoint.</span>
+                        </article>
+
+                        <article id="analytics-snapshot-active-mains" class="analytics-snapshot-card">
+                            <span class="analytics-snapshot-label">Active Mains</span>
+                            <strong class="analytics-snapshot-value">0</strong>
+                            <span class="analytics-snapshot-status">Current snapshot</span>
+                            <span class="analytics-snapshot-scope">Mains seen in the configured activity window.</span>
+                        </article>
+
+                        <article id="analytics-snapshot-raid-ready" class="analytics-snapshot-card">
+                            <span class="analytics-snapshot-label">Raid-Ready Mains</span>
+                            <strong class="analytics-snapshot-value">0</strong>
+                            <span class="analytics-snapshot-status">Current snapshot</span>
+                            <span class="analytics-snapshot-scope">Mains meeting the configured readiness threshold.</span>
+                        </article>
+
+                        <article id="analytics-snapshot-ilvl" class="analytics-snapshot-card">
+                            <span class="analytics-snapshot-label">Avg Level 70 iLvl</span>
+                            <strong class="analytics-snapshot-value">0</strong>
+                            <span class="analytics-snapshot-status">No prior scan</span>
+                            <span class="analytics-snapshot-scope">Tracking from this scan. Level 70 mains only.</span>
+                        </article>
+                    </div>
+                </section>
+
                 <section class="analytics-summary-section">
                     <div class="home-section-heading home-section-heading-compact analytics-heading">
                         <span class="home-section-kicker">Guild Health Summary</span>

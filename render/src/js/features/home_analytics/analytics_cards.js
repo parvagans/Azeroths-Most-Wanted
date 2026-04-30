@@ -98,6 +98,60 @@ function applySpotlightCard(id, config) {
     setHomeRoute(card, route);
 }
 
+function formatAnalyticsSnapshotDelta(deltaValue) {
+    const numericDelta = Number(deltaValue);
+    if (!Number.isFinite(numericDelta)) return 'No prior scan';
+    if (numericDelta === 0) return 'No change since previous scan';
+
+    const sign = numericDelta > 0 ? '+' : '-';
+    return `${sign}${Math.abs(numericDelta).toLocaleString()} since previous scan`;
+}
+
+function formatAnalyticsSnapshotValue(value) {
+    const numericValue = Number(value);
+    if (!Number.isFinite(numericValue)) return '—';
+    return numericValue.toLocaleString();
+}
+
+function renderAnalyticsSnapshotCard(cardId, config = {}) {
+    const cardEl = document.getElementById(cardId);
+    if (!cardEl) return;
+
+    const valueEl = cardEl.querySelector('.analytics-snapshot-value');
+    const statusEl = cardEl.querySelector('.analytics-snapshot-status');
+    const scopeEl = cardEl.querySelector('.analytics-snapshot-scope');
+
+    if (valueEl) valueEl.textContent = config.valueText || '—';
+    if (statusEl) statusEl.textContent = config.statusText || 'Current snapshot';
+    if (scopeEl) scopeEl.textContent = config.scopeText || '';
+}
+
+function renderAnalyticsSnapshotStrip(snapshot = {}) {
+    renderAnalyticsSnapshotCard('analytics-snapshot-guild-roster', {
+        valueText: formatAnalyticsSnapshotValue(snapshot.guildRosterValue),
+        statusText: formatAnalyticsSnapshotDelta(snapshot.guildRosterDelta),
+        scopeText: 'Raw guild roster total from the roster endpoint.'
+    });
+
+    renderAnalyticsSnapshotCard('analytics-snapshot-active-mains', {
+        valueText: formatAnalyticsSnapshotValue(snapshot.activeMainsValue),
+        statusText: formatAnalyticsSnapshotDelta(snapshot.activeMainsDelta),
+        scopeText: 'Mains seen in the configured activity window.'
+    });
+
+    renderAnalyticsSnapshotCard('analytics-snapshot-raid-ready', {
+        valueText: formatAnalyticsSnapshotValue(snapshot.raidReadyValue),
+        statusText: formatAnalyticsSnapshotDelta(snapshot.raidReadyDelta),
+        scopeText: 'Mains meeting the configured readiness threshold.'
+    });
+
+    renderAnalyticsSnapshotCard('analytics-snapshot-ilvl', {
+        valueText: formatAnalyticsSnapshotValue(snapshot.avgIlvlValue),
+        statusText: 'No prior scan',
+        scopeText: 'Tracking from this scan. Level 70 mains only.'
+    });
+}
+
 function getPressureState(count, role) {
     if (role === 'Tank') {
         if (count <= 2) return { state: 'Thin shield wall', meta: 'Priority role for dependable raid structure and dungeon leadership.' };
