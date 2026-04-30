@@ -24,6 +24,7 @@ desktop.ini
 # -----------------------------
 *.tmp
 *.log
+.codex-temp/
 
 # -----------------------------
 # IDE & Editor Settings

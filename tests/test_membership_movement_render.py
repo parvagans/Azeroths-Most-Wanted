@@ -316,11 +316,12 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
         template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")
 
         self.assertIn('rel="icon" type="image/svg+xml" href="asset/amw.svg"', template_text)
-        self.assertIn('https://github.com/parvagans/Azeroths-Most-Wanted', template_text)
         self.assertIn('mailto:nullbit5@protonmail.com', template_text)
-        self.assertIn('class="nav-btn nav-btn-source"', template_text)
+        self.assertNotIn('https://github.com/parvagans/Azeroths-Most-Wanted', template_text)
+        self.assertNotIn('class="nav-btn nav-btn-source"', template_text)
+        self.assertIn('class="nav-btn nav-btn-contact"', template_text)
         self.assertIn('Contact</a>', template_text)
-        self.assertIn('class="footer-source-info"', template_text)
+        self.assertNotIn('class="footer-source-info"', template_text)
         self.assertIn('class="footer-contact-info"', template_text)
 
     def test_home_command_tiles_are_navigation_tiles_not_duplicate_metrics(self):

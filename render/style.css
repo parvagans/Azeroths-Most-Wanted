@@ -594,10 +594,10 @@ body.nav-menu-open {
     linear-gradient(180deg, rgba(143, 152, 255, 0.12), rgba(143, 152, 255, 0.04)),
     rgba(10, 10, 12, 0.55);
 }
-.nav-btn-source {
+.nav-btn-contact {
   color: #c8d0da;
 }
-.nav-btn-source:hover {
+.nav-btn-contact:hover {
   border-color: rgba(200, 208, 218, 0.36);
   background:
     linear-gradient(180deg, rgba(200, 208, 218, 0.1), rgba(200, 208, 218, 0.03)),
@@ -4918,7 +4918,6 @@ body.nav-menu-open {
 
 .footer-tech-stack,
 .footer-update-info,
-.footer-source-info,
 .footer-contact-info {
   font-size: 12px;
   line-height: 1.45;
@@ -4931,15 +4930,12 @@ body.nav-menu-open {
   line-height: 1.45;
 }
 
-.footer-source-info a,
 .footer-contact-info a {
   color: #ffd100;
   font-weight: 700;
   text-decoration: none;
 }
 
-.footer-source-info a:hover,
-.footer-source-info a:focus-visible,
 .footer-contact-info a:hover,
 .footer-contact-info a:focus-visible {
   text-decoration: underline;
@@ -7866,7 +7862,6 @@ body[data-app-ready="true"] #main-dashboard {
 
   .footer-tech-stack,
   .footer-update-info,
-  .footer-source-info,
   .footer-contact-info {
     font-size: 11px;
     line-height: 1.4;
