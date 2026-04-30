@@ -243,7 +243,7 @@ function renderHomeMovementCard(dashboardConfig = {}) {
 
     noteEl.hidden = !bootstrap;
     noteEl.textContent = bootstrap
-        ? 'Future joins, departures, and rejoins will appear here.'
+        ? 'Membership baseline tracks guild roster snapshots. Tracked Characters includes scanned mains and alts, so the totals can differ. Future joins, departures, and rejoins will appear after the next comparison scan.'
         : '';
 }
 

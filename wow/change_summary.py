@@ -7,6 +7,7 @@ from typing import Any
 
 CHANGE_SUMMARY_TITLE = "Latest Changes"
 CHANGE_SUMMARY_EMPTY_TEXT = "No notable changes recorded yet."
+CHANGE_SUMMARY_BOOTSTRAP_EMPTY_TEXT = "No activity changes recorded beyond the initial roster capture yet."
 
 TIMELINE_EVENT_ORDER = ("level_up", "item", "badge")
 TIMELINE_EVENT_LABELS = {
@@ -175,9 +176,15 @@ def build_change_summary(*, membership_movement=None, timeline_events=None, tren
 
     trimmed_items = items[:safe_limit] if safe_limit else []
 
+    bootstrap_only = (
+        isinstance(membership_movement, dict)
+        and bool(membership_movement.get("bootstrap"))
+        and not trimmed_items
+    )
+
     return {
         "title": title or CHANGE_SUMMARY_TITLE,
         "items": trimmed_items,
         "empty": not trimmed_items,
-        "empty_text": CHANGE_SUMMARY_EMPTY_TEXT,
+        "empty_text": CHANGE_SUMMARY_BOOTSTRAP_EMPTY_TEXT if bootstrap_only else CHANGE_SUMMARY_EMPTY_TEXT,
     }

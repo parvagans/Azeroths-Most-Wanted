@@ -371,7 +371,7 @@ def _pick_summary_and_status(items: list[dict[str, Any]], roster_metrics: dict[s
 
     if bootstrap and not watch_signals:
         return (
-            "Roster baseline captured; health will sharpen on the next scan.",
+            "Roster baseline captured; roster health will sharpen after more comparison scans.",
             "Building",
             "neutral",
         )

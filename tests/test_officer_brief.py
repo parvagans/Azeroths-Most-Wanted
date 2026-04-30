@@ -173,6 +173,7 @@ class OfficerBriefTests(unittest.TestCase):
         self.assertNotIn("movement", [item["type"] for item in summary["items"]])
         self.assertGreaterEqual(len(summary["items"]), 2)
         self.assertIn("baseline", summary["summary"].lower())
+        self.assertIn("comparison scans", summary["summary"].lower())
         self.assertNotIn("churn", summary["summary"].lower())
 
     def test_trend_signals_remain_conservative_and_deterministic(self):

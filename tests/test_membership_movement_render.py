@@ -138,9 +138,9 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(membership_movement["recent"]), 5)
         self.assertTrue(latest_changes["empty"])
         self.assertEqual(latest_changes["items"], [])
-        self.assertEqual(latest_changes["empty_text"], "No notable changes recorded yet.")
+        self.assertEqual(latest_changes["empty_text"], "No activity changes recorded beyond the initial roster capture yet.")
         self.assertEqual(officer_brief["status"], "Building")
-        self.assertEqual(officer_brief["summary"], "Roster baseline captured; health will sharpen on the next scan.")
+        self.assertEqual(officer_brief["summary"], "Roster baseline captured; roster health will sharpen after more comparison scans.")
         self.assertNotIn("movement", [item["type"] for item in officer_brief["items"]])
 
     def test_generate_html_dashboard_serializes_membership_movement_payload(self):
@@ -246,11 +246,13 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn('Roster Movement', template_text)
         self.assertIn("renderHomeMovementCard", js_text)
         self.assertIn("movement baseline", js_text)
-        self.assertIn("Future joins, departures, and rejoins will appear here.", js_text)
+        self.assertIn("Tracked Characters includes scanned mains and alts, so the totals can differ.", js_text)
+        self.assertIn("Future joins, departures, and rejoins will appear after the next comparison scan.", js_text)
 
     def test_template_includes_latest_changes_card_markup_and_hook(self):
         template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")
         js_text = Path("render/src/js/features/home_analytics/home_overview.js").read_text(encoding="utf-8")
+        helper_text = Path("wow/change_summary.py").read_text(encoding="utf-8")
 
         self.assertIn('id="home-latest-changes-card"', template_text)
         self.assertIn('id="home-latest-changes-list"', template_text)
@@ -259,6 +261,7 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn('renderHomeLatestChangesCard', js_text)
         self.assertIn('No notable changes recorded yet.', js_text)
         self.assertIn('Recent activity and trend shifts worth noting.', js_text)
+        self.assertIn('No activity changes recorded beyond the initial roster capture yet.', helper_text)
 
     def test_guild_pulse_copy_distinguishes_mains_alts_and_all_characters(self):
         template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")
