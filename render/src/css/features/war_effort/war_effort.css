@@ -958,3 +958,62 @@ body[data-route="war-effort-zenith"]::before {
     font-size: 11px;
   }
 }
+
+@media (max-width: 640px) {
+  .home-war-effort-section .weekly-challenges-container {
+    padding: 24px 16px 20px;
+  }
+
+  .weekly-challenges-countdown-pill {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .war-effort-home-card {
+    min-height: 0;
+    padding: 18px 16px;
+  }
+
+  .war-effort-home-card-title {
+    font-size: 19px;
+  }
+
+  .war-effort-home-track {
+    min-height: 48px;
+    height: auto;
+  }
+
+  .war-effort-home-track .challenge-text {
+    padding: 8px 10px;
+    line-height: 1.2;
+    white-space: normal;
+  }
+
+  .war-effort-home-card-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .war-effort-home-card .challenge-link {
+    width: 100%;
+  }
+}
+
+@media (max-width: 412px) {
+  .weekly-challenges-countdown-value {
+    font-size: 16px;
+  }
+
+  .war-effort-home-track {
+    min-height: 54px;
+  }
+
+  .war-effort-home-track .challenge-text {
+    font-size: 11px;
+    letter-spacing: 0.02em;
+  }
+
+  .war-effort-archive-link {
+    width: 100%;
+  }
+}

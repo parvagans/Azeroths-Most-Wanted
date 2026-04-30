@@ -4596,6 +4596,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         const dashboardConfig = typeof getHallOfHeroesDashboardConfig === 'function' ? getHallOfHeroesDashboardConfig() : {};
         const prevMvps = dashboardConfig.prev_mvps || {};
         const analyticsTrends = dashboardConfig.global_trends || {};
+        const analyticsConfigSource = dashboardConfig && Object.keys(dashboardConfig).length > 0 ? dashboardConfig : config;
         const mainRoster = filterMainCharacters(rosterData);
         const formatDualCount = (mainCount, allCount) => `${mainCount.toLocaleString()} / ${allCount.toLocaleString()}`;
 
@@ -4629,6 +4630,11 @@ window.addEventListener('DOMContentLoaded', async () => {
         const mainActiveRosterCount = getNumericConfigValue(config, 'active_14_days_mains', mainActiveRosterFallback);
         const mainRaidReadyCount = getNumericConfigValue(config, 'raid_ready_count_mains', mainRaidReadyRoster.length);
         const mainAvgIlvl = getNumericConfigValue(config, 'avg_ilvl_70_mains', mainLvl70Count > 0 ? Math.round(mainTotalIlvl / mainLvl70Count) : 0);
+        const analyticsGuildRosterTotal = getNumericConfigValue(
+            analyticsConfigSource,
+            'total_members',
+            Array.isArray(rawGuildRoster) && rawGuildRoster.length > 0 ? rawGuildRoster.length : rosterData.length
+        );
         const leveling6069Count = rawGuildRoster.filter(c => {
             const lvl = c.level || 0;
             return lvl >= 60 && lvl <= 69;
@@ -4636,7 +4642,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
         if (typeof renderAnalyticsSnapshotStrip === 'function') {
             renderAnalyticsSnapshotStrip({
-                guildRosterValue: display_total_members,
+                guildRosterValue: analyticsGuildRosterTotal,
                 guildRosterDelta: analyticsTrends.trend_total,
                 activeMainsValue: mainActiveRosterCount,
                 activeMainsDelta: analyticsTrends.trend_active_mains,

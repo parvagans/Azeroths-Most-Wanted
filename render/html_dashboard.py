@@ -176,6 +176,7 @@ def generate_html_dashboard(roster_data, realm_data=None, timeline_data=None, ra
             os.path.join(base_dir, "src", "css", "features", "war_effort", "war_effort.css"),
             os.path.join(base_dir, "src", "css", "features", "analytics", "analytics.css"),
             os.path.join(base_dir, "style.css"),
+            os.path.join(base_dir, "src", "css", "features", "mobile", "mobile.css"),
         ]
         css_chunks = []
         for css_path in css_sources:

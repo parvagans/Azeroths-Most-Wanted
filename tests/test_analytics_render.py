@@ -69,9 +69,13 @@ class AnalyticsRenderTests(unittest.TestCase):
         self.assertIn("const cardEl = document.getElementById(cardId);", analytics_cards)
         self.assertIn("if (!cardEl) return;", analytics_cards)
         self.assertIn("const analyticsTrends = dashboardConfig.global_trends || {};", script_text)
+        self.assertIn("const analyticsConfigSource = dashboardConfig && Object.keys(dashboardConfig).length > 0 ? dashboardConfig : config;", script_text)
+        self.assertIn("const analyticsGuildRosterTotal = getNumericConfigValue(", script_text)
+        self.assertIn("guildRosterValue: analyticsGuildRosterTotal", script_text)
         self.assertIn("renderAnalyticsSnapshotStrip({", script_text)
         self.assertIn("analytics-snapshot-section", script_text)
         self.assertIn(".analytics-snapshot-section, .analytics-summary-section, .analytics-intel-section", script_text)
+        self.assertNotIn("display_total_members", script_text)
 
         self.assertNotIn('.analytics-view-container', style_css)
         self.assertNotIn('.analytics-snapshot-section', style_css)

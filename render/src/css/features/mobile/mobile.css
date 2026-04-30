@@ -1,0 +1,535 @@
+@media (max-width: 1024px) {
+  .navbar {
+    padding: 10px 12px;
+  }
+
+  .dashboard-layout,
+  .dashboard-layout.dashboard-layout-home,
+  .dashboard-layout.dashboard-layout-solo {
+    flex-direction: column;
+    align-items: center;
+    width: min(100%, calc(100% - 20px));
+    margin: 20px auto 24px;
+    min-width: 0;
+    padding: 0 10px;
+  }
+
+  .main-content {
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+    min-width: 0;
+  }
+
+  .timeline-container {
+    width: 100%;
+    max-width: 900px;
+    position: static;
+    max-height: none;
+    overflow-y: visible;
+    margin-top: 30px;
+  }
+
+  .controls-wrapper {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 10px 12px;
+    align-items: center;
+  }
+
+  .mobile-menu-toggle {
+    display: inline-flex;
+    grid-column: 1 / 2;
+    grid-row: 1 / 2;
+    width: 44px;
+    height: 44px;
+    padding: 10px;
+    border-radius: 12px;
+    align-self: flex-start;
+  }
+
+  .nav-scrim {
+    display: block;
+  }
+
+  .nav-links-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100dvh;
+    width: min(360px, 92vw);
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 18px;
+    padding: 12px 16px calc(24px + env(safe-area-inset-bottom, 0px));
+    background:
+      radial-gradient(circle at top, rgba(255, 209, 0, 0.08), transparent 32%),
+      linear-gradient(180deg, rgba(22, 18, 16, 0.98), rgba(9, 9, 11, 0.985));
+    backdrop-filter: blur(16px);
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 18px 0 42px rgba(0, 0, 0, 0.55);
+    transform: translateX(-110%);
+    transition: transform 0.3s ease;
+    visibility: hidden;
+    pointer-events: none;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    z-index: 10005;
+  }
+
+  .nav-links-container.open {
+    transform: translateX(0);
+    visibility: visible;
+    pointer-events: auto;
+  }
+
+  .nav-drawer-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .nav-desktop-links {
+    display: none;
+  }
+
+  .nav-mobile-groups {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .nav-mobile-groups .nav-btn,
+  .nav-mobile-groups .hall-of-heroes-btn,
+  .nav-mobile-groups .nav-btn-home {
+    width: 100%;
+    text-align: left;
+    justify-content: flex-start;
+    border-radius: 14px;
+    padding: 12px 14px;
+  }
+
+  .nav-utility-cluster {
+    margin-left: 0;
+    min-width: 0;
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+
+  .custom-select-wrapper,
+  .search-container,
+  .search-box,
+  .search-box input {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .custom-select {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    padding: 8px 14px;
+    font-size: 14px;
+  }
+}
+
+@media (max-width: 920px) {
+  .home-dashboard-grid {
+    gap: 52px;
+    margin-top: 48px;
+  }
+
+  .home-command-section,
+  .home-pulse-section,
+  .home-war-effort-section,
+  .weekly-mvps-wrapper,
+  .home-ladders-section,
+  .home-secondary-section,
+  .home-roster-intelligence-section,
+  .dashboard-footer {
+    margin-top: 48px;
+  }
+
+  .home-command-deck,
+  .home-pulse-grid,
+  .home-secondary-grid,
+  .home-war-table-grid {
+    gap: 18px;
+  }
+
+  .hero-header-row {
+    grid-template-columns: 1fr;
+    gap: 14px;
+    margin-bottom: 28px;
+    padding: 14px 14px 16px;
+    border-radius: 18px;
+  }
+
+  .hero-logo-col .main-logo {
+    width: min(100%, 260px);
+    max-width: 260px !important;
+  }
+
+  .hero-text-col {
+    align-items: center;
+    text-align: center;
+    max-width: 100%;
+  }
+
+  .hero-text-col .hero-subtitle {
+    max-width: 100%;
+    margin-bottom: 16px;
+  }
+
+  .hero-search-wrapper,
+  .hero-search-box-inner {
+    width: 100%;
+    max-width: none;
+  }
+
+  .home-pulse-card {
+    min-height: 0;
+    padding: 16px 16px 14px;
+  }
+
+  .home-pulse-label {
+    font-size: 13px;
+    margin-bottom: 4px;
+  }
+
+  .home-pulse-context {
+    font-size: 10px;
+    margin-bottom: 8px;
+  }
+
+  .home-pulse-value {
+    font-size: 30px;
+    margin-bottom: 6px;
+  }
+
+  .home-pulse-support {
+    gap: 6px;
+  }
+
+  .home-pulse-support-pill {
+    font-size: 10px;
+    padding: 5px 8px;
+  }
+
+  .home-pulse-meta {
+    max-width: none;
+    font-size: 11px;
+    line-height: 1.45;
+  }
+
+  .home-insights-row {
+    grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .home-movement-card,
+  .home-latest-changes-card,
+  .home-officer-brief-card {
+    padding: 16px;
+  }
+}
+
+@media (max-width: 760px) {
+  .command-hero-shell,
+  .war-effort-shell,
+  .command-shell-campaign-archive,
+  .hall-stage {
+    padding: 20px 16px;
+    border-radius: 18px;
+    gap: 16px;
+  }
+
+  .command-hero-ribbon,
+  .war-effort-hero-ribbon {
+    width: 100%;
+    border-radius: 14px;
+    align-items: flex-start;
+  }
+
+  .command-hero-stats,
+  .command-info-band,
+  .command-shell-badges .command-info-band,
+  .ladder-info-band,
+  .war-effort-hero-stats,
+  .war-effort-info-band {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+  }
+
+  .command-hero-stat,
+  .hero-band-item,
+  .war-effort-shell-progress-card,
+  .war-effort-hero-stat,
+  .hall-stage-card,
+  .leaderboard-panel {
+    min-height: 0;
+    padding: 16px;
+  }
+
+  .command-hero-stat-label,
+  .war-effort-hero-stat-label,
+  .hero-band-kicker,
+  .hero-band-meta,
+  .command-hero-ribbon-text,
+  .war-effort-hero-ribbon-text,
+  .war-effort-hero-ribbon-reset,
+  .hall-stage-card-meta {
+    overflow-wrap: anywhere;
+  }
+}
+
+@media (max-width: 640px) {
+  .home-dashboard-grid {
+    gap: 44px;
+    margin-top: 44px;
+  }
+
+  .home-command-section,
+  .home-pulse-section,
+  .home-war-effort-section,
+  .weekly-mvps-wrapper,
+  .home-ladders-section,
+  .home-secondary-section,
+  .home-roster-intelligence-section {
+    margin-top: 44px;
+    scroll-margin-top: 88px;
+  }
+
+  .home-command-deck,
+  .home-pulse-grid,
+  .home-secondary-grid,
+  .home-war-table-grid,
+  .mvp-cards-container {
+    gap: 14px;
+  }
+
+  .home-nav-card,
+  .leaderboard-panel,
+  .ladder-hero-stat-card,
+  .command-hero-stat,
+  .war-effort-shell-progress-card,
+  .war-effort-hero-stat,
+  .hero-band-item,
+  .hall-stage-card {
+    padding: 16px;
+  }
+
+  .command-hero-stats,
+  .command-info-band,
+  .command-shell-badges .command-info-band,
+  .ladder-info-band,
+  .war-effort-hero-stats,
+  .war-effort-info-band,
+  .hall-stage-spotlight,
+  .hall-stage-wall {
+    grid-template-columns: 1fr;
+  }
+
+  .command-hero-title,
+  .war-effort-hero-title,
+  .hall-stage-title {
+    font-size: clamp(24px, 7vw, 30px);
+  }
+
+  .command-hero-stat-value,
+  .war-effort-hero-stat-value,
+  .hero-band-value {
+    font-size: clamp(20px, 6vw, 24px);
+  }
+
+  .command-hero-desc,
+  .hall-stage-desc {
+    max-width: none;
+  }
+
+  .concise-char-bar {
+    align-items: stretch;
+    gap: 0;
+    padding: 12px 14px;
+  }
+
+  .concise-row-inner {
+    display: grid;
+    grid-template-columns: 1fr;
+    row-gap: 10px;
+  }
+
+  .concise-row-main {
+    width: 100%;
+  }
+
+  .c-main-info {
+    width: 100%;
+    grid-template-columns: 40px minmax(0, 1fr);
+    column-gap: 10px;
+    row-gap: 4px;
+    align-items: start;
+  }
+
+  .c-portrait {
+    width: 40px;
+    height: 40px;
+  }
+
+  .c-name {
+    min-width: 0;
+    font-size: 15px;
+    line-height: 1.25;
+  }
+
+  .c-meta {
+    font-size: 12px;
+    line-height: 1.45;
+  }
+
+  .c-stats-info {
+    width: 100%;
+    gap: 8px 10px;
+    justify-content: flex-start;
+    text-align: left;
+    flex-wrap: wrap;
+  }
+
+  .concise-row-stats-top {
+    width: 100%;
+    justify-content: flex-start;
+    justify-self: stretch;
+    margin-left: 0;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+    padding-top: 10px;
+    text-align: left;
+    white-space: normal;
+    flex-wrap: wrap;
+    gap: 8px 10px;
+  }
+
+  .concise-row-stats-top > span,
+  .concise-stat-line {
+    justify-content: flex-start;
+  }
+
+  .concise-row-stats-bottom {
+    width: 100%;
+    justify-self: stretch;
+  }
+
+  .stat-box-container {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin: 18px 0;
+  }
+
+  .stat-box {
+    min-width: 0;
+    width: 100%;
+    padding: 14px 12px;
+  }
+
+  .stat-value {
+    font-size: 30px;
+    letter-spacing: 1px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    line-height: 1.4;
+    white-space: normal;
+    word-break: normal;
+  }
+
+  .concise-view-context {
+    line-height: 1.45;
+  }
+
+  .concise-back-btn {
+    width: 100%;
+    max-width: 240px;
+  }
+}
+
+@media (max-width: 430px) {
+  .hero-logo-col .main-logo {
+    width: min(100%, 230px);
+    max-width: 230px !important;
+  }
+
+  .home-pulse-card {
+    padding: 14px 14px 13px;
+  }
+
+  .home-pulse-value {
+    font-size: 28px;
+  }
+
+  .stat-box-container {
+    grid-template-columns: 1fr;
+  }
+
+  .command-hero-shell,
+  .war-effort-shell,
+  .command-shell-campaign-archive,
+  .hall-stage {
+    padding: 18px 14px;
+  }
+}
+
+@media (max-width: 412px) {
+  .hero-header-row {
+    padding: 12px;
+  }
+
+  .command-hero-shell,
+  .war-effort-shell,
+  .command-shell-campaign-archive,
+  .hall-stage {
+    padding: 16px 13px;
+  }
+
+  .command-hero-stat,
+  .hero-band-item,
+  .war-effort-shell-progress-card,
+  .war-effort-hero-stat,
+  .hall-stage-card,
+  .leaderboard-panel,
+  .home-nav-card {
+    padding: 14px;
+  }
+}
+
+@media (max-width: 390px) {
+  .navbar {
+    padding: 8px 10px;
+  }
+
+  .controls-wrapper {
+    gap: 8px 10px;
+  }
+
+  .hero-header-row {
+    padding: 12px 12px 14px;
+  }
+}
+
+@media (max-width: 360px) {
+  .nav-links-container {
+    width: min(300px, 96vw);
+  }
+
+  .home-pulse-value,
+  .stat-value,
+  .analytics-snapshot-value {
+    font-size: clamp(24px, 8vw, 28px);
+  }
+}
