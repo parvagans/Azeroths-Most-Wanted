@@ -30,7 +30,10 @@ class ChangeSummaryTests(unittest.TestCase):
 
         self.assertTrue(summary["empty"])
         self.assertEqual(summary["items"], [])
-        self.assertEqual(summary["empty_text"], "No activity changes recorded beyond the initial roster capture yet.")
+        self.assertEqual(
+            summary["empty_text"],
+            "Activity and trend changes will appear after comparison scans detect movement beyond the baseline.",
+        )
 
     def test_bootstrap_membership_movement_can_still_surface_other_change_items(self):
         summary = build_change_summary(

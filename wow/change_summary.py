@@ -7,7 +7,7 @@ from typing import Any
 
 CHANGE_SUMMARY_TITLE = "Latest Changes"
 CHANGE_SUMMARY_EMPTY_TEXT = "No notable changes recorded yet."
-CHANGE_SUMMARY_BOOTSTRAP_EMPTY_TEXT = "No activity changes recorded beyond the initial roster capture yet."
+CHANGE_SUMMARY_BOOTSTRAP_EMPTY_TEXT = "Activity and trend changes will appear after comparison scans detect movement beyond the baseline."
 
 TIMELINE_EVENT_ORDER = ("level_up", "item", "badge")
 TIMELINE_EVENT_LABELS = {

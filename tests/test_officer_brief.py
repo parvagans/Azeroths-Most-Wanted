@@ -172,7 +172,7 @@ class OfficerBriefTests(unittest.TestCase):
         self.assertEqual(summary["tone"], "neutral")
         self.assertNotIn("movement", [item["type"] for item in summary["items"]])
         self.assertGreaterEqual(len(summary["items"]), 2)
-        self.assertIn("baseline", summary["summary"].lower())
+        self.assertIn("early roster picture", summary["summary"].lower())
         self.assertIn("comparison scans", summary["summary"].lower())
         self.assertNotIn("churn", summary["summary"].lower())
 

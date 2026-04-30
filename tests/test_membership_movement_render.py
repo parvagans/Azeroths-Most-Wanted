@@ -138,9 +138,15 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
         self.assertEqual(len(membership_movement["recent"]), 5)
         self.assertTrue(latest_changes["empty"])
         self.assertEqual(latest_changes["items"], [])
-        self.assertEqual(latest_changes["empty_text"], "No activity changes recorded beyond the initial roster capture yet.")
+        self.assertEqual(
+            latest_changes["empty_text"],
+            "Activity and trend changes will appear after comparison scans detect movement beyond the baseline.",
+        )
         self.assertEqual(officer_brief["status"], "Building")
-        self.assertEqual(officer_brief["summary"], "Roster baseline captured; roster health will sharpen after more comparison scans.")
+        self.assertEqual(
+            officer_brief["summary"],
+            "Early roster picture captured; confidence improves as comparison scans add more activity, readiness, and movement signals.",
+        )
         self.assertNotIn("movement", [item["type"] for item in officer_brief["items"]])
 
     def test_generate_html_dashboard_serializes_membership_movement_payload(self):
@@ -247,7 +253,7 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("renderHomeMovementCard", js_text)
         self.assertIn("movement baseline", js_text)
         self.assertIn("Tracked Characters includes scanned mains and alts, so the totals can differ.", js_text)
-        self.assertIn("Future joins, departures, and rejoins will appear after the next comparison scan.", js_text)
+        self.assertIn("Future joins, departures, and rejoins appear after the next comparison scan.", js_text)
 
     def test_template_includes_latest_changes_card_markup_and_hook(self):
         template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")
@@ -261,7 +267,10 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn('renderHomeLatestChangesCard', js_text)
         self.assertIn('No notable changes recorded yet.', js_text)
         self.assertIn('Recent activity and trend shifts worth noting.', js_text)
-        self.assertIn('No activity changes recorded beyond the initial roster capture yet.', helper_text)
+        self.assertIn(
+            'Activity and trend changes will appear after comparison scans detect movement beyond the baseline.',
+            helper_text,
+        )
 
     def test_guild_pulse_copy_distinguishes_mains_alts_and_all_characters(self):
         template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")
