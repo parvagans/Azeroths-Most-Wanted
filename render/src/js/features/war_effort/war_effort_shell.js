@@ -30,8 +30,10 @@ function getWarEffortConfig(type) {
             desc: 'A war room for the guild leveling push. Track who is driving the campaign, how close the roster is to the weekly goal, and who is setting the pace for the march through Azeroth and into Outland.',
             emptyTitle: 'The campaign has begun.',
             emptyDesc: 'No levels have been claimed yet this cycle. Rally the leveling core, push your alts, and become the first name on the board.',
-            objectiveLabel: 'Levels earned this week',
+            objectiveLabel: 'Objective: 500 levels gained this week.',
             unitLabel: 'Levels',
+            progressUnitSingular: 'level',
+            progressUnitPlural: 'levels',
             ctaValue: 'Be the first to add levels this week.',
             ctaMeta: 'Turn a blank slate into forward motion and start the march toward the weekly objective.',
             target: window.WAR_EFFORT_THRESHOLDS.xp
@@ -43,8 +45,10 @@ function getWarEffortConfig(type) {
             desc: 'A live war tally for battleground pressure and honorable kills. Use this page to see who is opening the week strongest, how close the guild is to the HK objective, and where the fiercest PvP momentum lives.',
             emptyTitle: 'The blood ledger is still clean.',
             emptyDesc: 'No honorable kills have been recorded yet this cycle. Hit the battlegrounds, hunt the enemy, and open the week with the first HKs.',
-            objectiveLabel: 'Honorable kills earned this week',
+            objectiveLabel: 'Objective: 1,000 honorable kills this week.',
             unitLabel: 'HKs',
+            progressUnitSingular: 'honorable kill',
+            progressUnitPlural: 'honorable kills',
             ctaValue: 'Claim the first HKs of the week.',
             ctaMeta: 'Open the battleground war board and give the guild its first surge of PvP momentum.',
             target: window.WAR_EFFORT_THRESHOLDS.hk
@@ -56,8 +60,10 @@ function getWarEffortConfig(type) {
             desc: 'A trophy ledger for epic and legendary haul. This board turns the weekly loot race into a visible campaign, spotlighting who is filling the vault and how quickly the guild is stacking spoils.',
             emptyTitle: 'The hoard stands empty.',
             emptyDesc: 'No epics have been secured yet this cycle. Step into raids and dungeons, bring home the first trophy, and give the guild vault its first shine.',
-            objectiveLabel: 'Epics secured this week',
+            objectiveLabel: 'Objective: 40 notable gear upgrades this week.',
             unitLabel: 'Epics',
+            progressUnitSingular: 'upgrade',
+            progressUnitPlural: 'upgrades',
             ctaValue: 'Loot the first epic of the week.',
             ctaMeta: 'Start the trophy wall with one clean pull and one prize worth remembering.',
             target: window.WAR_EFFORT_THRESHOLDS.loot
@@ -69,8 +75,10 @@ function getWarEffortConfig(type) {
             desc: 'A ceremonial race board for the sprint to level 70. Watch the summit open, see who crossed first, and keep the weekly push visible until the cohort is filled.',
             emptyTitle: 'The summit awaits.',
             emptyDesc: 'No one has entered the Zenith Cohort this week. Push to level 70 and become the first hero etched into the record.',
-            objectiveLabel: 'New level 70s this week',
+            objectiveLabel: 'Objective: 5 members reach level 70 this week.',
             unitLabel: 'New 70s',
+            progressUnitSingular: 'member',
+            progressUnitPlural: 'members',
             ctaValue: 'Be the first new level 70.',
             ctaMeta: 'Turn the race board live and claim the first summit position before anyone else.',
             target: window.WAR_EFFORT_THRESHOLDS.zenith
@@ -109,26 +117,44 @@ function getWarEffortProgressState(pct) {
     return 'we-fill-state-low';
 }
 
-function getWarEffortMilestoneText(snapshot, config) {
-    const pct = snapshot && snapshot.pct ? snapshot.pct : 0;
+function getWarEffortProgressUnit(config, amount) {
+    const safeAmount = Number(amount) || 0;
+    return safeAmount === 1 ? config.progressUnitSingular : config.progressUnitPlural;
+}
+
+function getWarEffortStatusLabel(snapshot, config) {
     const current = snapshot && snapshot.current ? snapshot.current : 0;
     const target = snapshot && snapshot.target ? snapshot.target : config.target;
-    const checkpoints = [25, 50, 75, 100];
-    const nextCheckpoint = checkpoints.find(step => pct < step);
 
-    if (!nextCheckpoint) {
+    if (current >= target) return 'Complete';
+    if (current > 0) return 'In progress';
+    return 'Needs progress';
+}
+
+function formatWarEffortProgressLine(snapshot, config) {
+    const current = snapshot && snapshot.current ? snapshot.current : 0;
+    const target = snapshot && snapshot.target ? snapshot.target : config.target;
+    return `Progress: ${current.toLocaleString()} / ${target.toLocaleString()} ${config.progressUnitPlural}`;
+}
+
+function getWarEffortMilestoneText(snapshot, config) {
+    const current = snapshot && snapshot.current ? snapshot.current : 0;
+    const target = snapshot && snapshot.target ? snapshot.target : config.target;
+    const statusLabel = getWarEffortStatusLabel(snapshot, config);
+
+    if (current >= target) {
         return {
-            value: 'Objective crushed',
-            meta: 'The weekly target has already been cleared. Keep padding the record and widen the margin.'
+            value: 'Complete',
+            meta: 'Weekly target secured. Keep building the margin.'
         };
     }
 
-    const nextValue = Math.ceil((target * nextCheckpoint) / 100);
-    const remaining = Math.max(0, nextValue - current);
+    const remaining = Math.max(0, target - current);
+    const remainingUnit = getWarEffortProgressUnit(config, remaining);
 
     return {
-        value: `${remaining.toLocaleString()} ${config.unitLabel} to ${nextCheckpoint}%`,
-        meta: `Next campaign checkpoint: ${nextValue.toLocaleString()} ${config.unitLabel.toLowerCase()}.`
+        value: `${remaining.toLocaleString()} ${remainingUnit} needed`,
+        meta: `${statusLabel} • ${formatWarEffortProgressLine(snapshot, config)}`
     };
 }
 
@@ -165,6 +191,7 @@ function buildWarEffortShell(hashUrl, characters = []) {
     const progressText = clone.querySelector('.war-effort-shell-progress-text');
     const statsGrid = clone.querySelector('.war-effort-hero-stats');
     const infoBand = clone.querySelector('.war-effort-info-band');
+    const progressStatus = getWarEffortStatusLabel(snapshot, config);
 
     if (shell) shell.classList.add(`war-effort-shell-${config.theme}`);
     if (overline) overline.textContent = config.overline;
@@ -175,9 +202,16 @@ function buildWarEffortShell(hashUrl, characters = []) {
         : `No ${config.unitLabel.toLowerCase()} recorded yet this cycle.`;
     if (ribbonReset) ribbonReset.textContent = `Resets in ${getWarEffortResetText()} (Berlin)`;
     if (progressLabel) progressLabel.textContent = config.objectiveLabel;
-    if (progressMeta) progressMeta.textContent = snapshot.contributorCount > 0
-        ? `${snapshot.contributorCount.toLocaleString()} contributors • ${Math.round(snapshot.pct)}% complete`
-        : 'Blank slate • first contribution sets the pace';
+    if (progressMeta) {
+        const progressMetaParts = [progressStatus];
+        if (snapshot.contributorCount > 0) {
+            progressMetaParts.push(`${snapshot.contributorCount.toLocaleString()} contributor${snapshot.contributorCount === 1 ? '' : 's'}`);
+        } else {
+            progressMetaParts.push('First contribution sets the pace');
+        }
+        progressMetaParts.push(`${Math.round(snapshot.pct)}% complete`);
+        progressMeta.textContent = progressMetaParts.join(' • ');
+    }
 
     if (progressFill) {
         progressFill.classList.add(`we-fill-${config.theme}`);
@@ -187,7 +221,7 @@ function buildWarEffortShell(hashUrl, characters = []) {
 
     if (progressText) {
         progressText.className = `challenge-text ${snapshot.pct >= 100 ? 'we-text-state-max' : 'we-text-state-normal'} we-text-type-${config.theme}`;
-        progressText.textContent = `${snapshot.current.toLocaleString()} / ${snapshot.target.toLocaleString()} ${config.unitLabel}`;
+        progressText.textContent = formatWarEffortProgressLine(snapshot, config);
     }
 
     const lockState = snapshot.lockTime ? 'Locked' : 'Open';
@@ -303,30 +337,27 @@ function buildWarEffortSnapshot(type, current, target, contributors, options = {
         ? new Date(window.warEffortLockTimes[type]).toLocaleString('en-GB', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false }).replace(',', '')
         : '';
 
-    let homeSummary = config.emptyDesc;
-    let homeLeader = config.ctaValue;
+    let homeSummary = config.objectiveLabel;
+    let homeLeader = `Needs progress • ${formatWarEffortProgressLine({ current, target }, config)}`;
 
     if (contributorCount > 0) {
+        const statusLabel = getWarEffortStatusLabel({ current, target }, config);
         if (type === 'xp') {
-            homeSummary = `${contributorCount.toLocaleString()} heroes have added ${current.toLocaleString()} levels since reset.`;
-            homeLeader = hasLockedVanguard
-                ? `${displayTopName} holds the locked #1 slot with +${topValue.toLocaleString()} levels.`
-                : `${displayTopName} leads with +${topValue.toLocaleString()} levels this week.`;
+            homeLeader = statusLabel === 'Complete'
+                ? `Complete • ${contributorCount.toLocaleString()} contributors cleared the weekly target.`
+                : `In progress • ${contributorCount.toLocaleString()} contributors have added ${current.toLocaleString()} levels so far.`;
         } else if (type === 'hk') {
-            homeSummary = `${contributorCount.toLocaleString()} slayers have claimed ${current.toLocaleString()} HKs this cycle.`;
-            homeLeader = hasLockedVanguard
-                ? `${displayTopName} holds the locked #1 slot with +${topValue.toLocaleString()} HKs.`
-                : `${displayTopName} leads the blood ledger with +${topValue.toLocaleString()} HKs.`;
+            homeLeader = statusLabel === 'Complete'
+                ? `Complete • ${contributorCount.toLocaleString()} contributors pushed the guild past the HK target.`
+                : `In progress • ${contributorCount.toLocaleString()} contributors have recorded ${current.toLocaleString()} honorable kills.`;
         } else if (type === 'loot') {
-            homeSummary = `${contributorCount.toLocaleString()} raiders have hauled in ${current.toLocaleString()} epic drops this week.`;
-            homeLeader = hasLockedVanguard
-                ? `${displayTopName} holds the locked #1 slot with ${topValue.toLocaleString()} epic${topValue === 1 ? '' : 's'}.`
-                : `${displayTopName} has already secured ${topValue.toLocaleString()} epic${topValue === 1 ? '' : 's'} this cycle.`;
+            homeLeader = statusLabel === 'Complete'
+                ? `Complete • ${contributorCount.toLocaleString()} contributors filled the weekly gear-upgrade target.`
+                : `In progress • ${contributorCount.toLocaleString()} contributors have logged ${current.toLocaleString()} notable gear upgrades.`;
         } else {
-            homeSummary = `${current.toLocaleString()} heroes have reached level 70 since the reset.`;
-            homeLeader = topName
-                ? `${displayTopName} reached the summit first${vanguards[1] ? ` ahead of ${vanguards[1].charAt(0).toUpperCase() + vanguards[1].slice(1)}` : ''}.`
-                : 'The summit race is live.';
+            homeLeader = statusLabel === 'Complete'
+                ? `Complete • ${current.toLocaleString()} members have reached level 70 this week.`
+                : `In progress • ${current.toLocaleString()} member${current === 1 ? '' : 's'} have reached level 70 so far.`;
         }
     }
 

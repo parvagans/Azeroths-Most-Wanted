@@ -17,16 +17,28 @@ class WarEffortThresholdTests(unittest.TestCase):
         script_text = Path("render/script.js").read_text(encoding="utf-8")
         backend_text = Path("wow/war_effort.py").read_text(encoding="utf-8")
 
-        self.assertIn("0 / 500 Levels Gained", template_text)
-        self.assertIn("0 / 1000 HKs Gained", template_text)
-        self.assertIn("0 / 40 Epics Looted", template_text)
-        self.assertIn("0 / 5 New Level 70s", template_text)
+        self.assertIn("Objective: 500 levels gained this week.", template_text)
+        self.assertIn("Objective: 1,000 honorable kills this week.", template_text)
+        self.assertIn("Objective: 40 notable gear upgrades this week.", template_text)
+        self.assertIn("Objective: 5 members reach level 70 this week.", template_text)
+        self.assertIn("Progress: 0 / 500 levels", template_text)
+        self.assertIn("Progress: 0 / 1,000 honorable kills", template_text)
+        self.assertIn("Progress: 0 / 40 upgrades", template_text)
+        self.assertIn("Progress: 0 / 5 members", template_text)
 
         self.assertIn("window.WAR_EFFORT_THRESHOLDS = window.WAR_EFFORT_THRESHOLDS || Object.freeze({", shell_text)
         self.assertIn("window.WAR_EFFORT_THRESHOLDS.xp", shell_text)
         self.assertIn("window.WAR_EFFORT_THRESHOLDS.hk", shell_text)
         self.assertIn("window.WAR_EFFORT_THRESHOLDS.loot", shell_text)
         self.assertIn("window.WAR_EFFORT_THRESHOLDS.zenith", shell_text)
+        self.assertIn("Objective: 500 levels gained this week.", shell_text)
+        self.assertIn("Objective: 1,000 honorable kills this week.", shell_text)
+        self.assertIn("Objective: 40 notable gear upgrades this week.", shell_text)
+        self.assertIn("Objective: 5 members reach level 70 this week.", shell_text)
+        self.assertIn("Progress:", shell_text)
+        self.assertIn("Complete", shell_text)
+        self.assertIn("In progress", shell_text)
+        self.assertIn("Needs progress", shell_text)
 
         self.assertIn(
             "renderBar('guild-xp-fill', 'guild-xp-text', totalLevels, window.WAR_EFFORT_THRESHOLDS.xp, 'XP');",
@@ -44,6 +56,12 @@ class WarEffortThresholdTests(unittest.TestCase):
             "renderBar('guild-zenith-fill', 'guild-zenith-text', totalZenith, window.WAR_EFFORT_THRESHOLDS.zenith, 'ZENITH');",
             script_text,
         )
+        self.assertIn("progressUnitLabel = 'levels'", script_text)
+        self.assertIn("progressUnitLabel = 'honorable kills'", script_text)
+        self.assertIn("progressUnitLabel = 'upgrades'", script_text)
+        self.assertIn("progressUnitLabel = 'members'", script_text)
+        self.assertIn("labelSpan.textContent = 'Progress:';", script_text)
+        self.assertIn("crushSpan.textContent = 'Complete';", script_text)
 
         self.assertIn("XP_THRESHOLD = 500", backend_text)
         self.assertIn("HK_THRESHOLD = 1000", backend_text)

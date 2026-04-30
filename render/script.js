@@ -7206,15 +7206,15 @@ window.addEventListener('DOMContentLoaded', async () => {
             const textEl = document.getElementById(textId);
             const dynamicGlow = 10 + (pct * 0.25);
             
-            let colorBase, colorMid, colorMax, labelName, glowColor;
+            let colorBase, colorMid, colorMax, progressUnitLabel, glowColor;
             if (type === 'XP') {
-                colorBase = '#8B6508'; colorMid = '#ffd100'; colorMax = '#ff8000'; labelName = 'Levels'; glowColor = '#ffd100';
+                colorBase = '#8B6508'; colorMid = '#ffd100'; colorMax = '#ff8000'; progressUnitLabel = 'levels'; glowColor = '#ffd100';
             } else if (type === 'HK') {
-                colorBase = '#8B0000'; colorMid = '#e74c3c'; colorMax = '#ff4400'; labelName = 'HKs'; glowColor = '#ff0000';
+                colorBase = '#8B0000'; colorMid = '#e74c3c'; colorMax = '#ff4400'; progressUnitLabel = 'honorable kills'; glowColor = '#ff0000';
             } else if (type === 'LOOT') {
-                colorBase = '#4b0082'; colorMid = '#a335ee'; colorMax = '#ff8000'; labelName = 'Epics'; glowColor = '#ff8000';
+                colorBase = '#4b0082'; colorMid = '#a335ee'; colorMax = '#ff8000'; progressUnitLabel = 'upgrades'; glowColor = '#ff8000';
             } else { // ZENITH
-                colorBase = '#006064'; colorMid = '#3FC7EB'; colorMax = '#00e5ff'; labelName = 'Max Levels'; glowColor = '#00e5ff';
+                colorBase = '#006064'; colorMid = '#3FC7EB'; colorMax = '#00e5ff'; progressUnitLabel = 'members'; glowColor = '#00e5ff';
             }
 
             if (fillEl) {
@@ -7273,18 +7273,18 @@ window.addEventListener('DOMContentLoaded', async () => {
 
                 const labelSpan = document.createElement('span');
                 labelSpan.className = 'we-text-label';
-                labelSpan.textContent = labelName + ':';
+                labelSpan.textContent = 'Progress:';
                 
                 const valSpan = document.createElement('span');
                 valSpan.className = 'we-text-values';
-                valSpan.textContent = `${currentVal.toLocaleString()} / ${maxVal.toLocaleString()}`;
+                valSpan.textContent = `${currentVal.toLocaleString()} / ${maxVal.toLocaleString()} ${progressUnitLabel}`;
                 
                 if (pct >= 100) {
                     textEl.className = `challenge-text we-text-state-max ${textTypeClass}`;
                     
                     const crushSpan = document.createElement('span');
                     crushSpan.className = `we-text-crushed ${crushedClass}`;
-                    crushSpan.textContent = '🔥 CRUSHED!';
+                    crushSpan.textContent = 'Complete';
                     
                     textEl.appendChild(labelSpan);
                     textEl.appendChild(valSpan);
