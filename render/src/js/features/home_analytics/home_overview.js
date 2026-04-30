@@ -29,7 +29,7 @@ function setHomePulseSupport(valueId, supportTexts = []) {
     let visibleCount = 0;
 
     pills.forEach((pill, index) => {
-        const text = supportTexts[index] || '';
+        const text = String(supportTexts[index] || '').trim();
         pill.textContent = text;
         pill.hidden = !text;
         if (text) visibleCount++;

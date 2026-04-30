@@ -263,6 +263,7 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
     def test_guild_pulse_copy_distinguishes_mains_alts_and_all_characters(self):
         template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")
         js_text = Path("render/src/js/features/home_analytics/home_overview.js").read_text(encoding="utf-8")
+        script_text = Path("render/script.js").read_text(encoding="utf-8")
         css_text = Path("render/style.css").read_text(encoding="utf-8")
 
         self.assertIn('Tracked Characters', template_text)
@@ -274,10 +275,14 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn('id="home-pulse-raidready-support-a"', template_text)
         self.assertIn('id="home-pulse-ilvl-support-a"', template_text)
         self.assertIn("setHomePulseSupport", js_text)
+        self.assertIn("setHomeTextVisibility", js_text)
         self.assertIn("All scanned guild characters", js_text)
         self.assertIn("Seen in the last 14 days.", js_text)
         self.assertIn("deployable roster strength", js_text)
         self.assertIn("Average equipped iLvl for level 70 mains.", js_text)
+        self.assertIn("since previous scan", script_text)
+        self.assertNotIn("▲ ${diff}", script_text)
+        self.assertIn(".home-pulse-support-pill[hidden] {", css_text)
         self.assertIn(".home-pulse-context {", css_text)
         self.assertIn(".home-pulse-support {", css_text)
         self.assertIn(".home-pulse-support-pill {", css_text)

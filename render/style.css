@@ -8146,6 +8146,10 @@ body.nav-menu-open {
   line-height: 1.3;
 }
 
+.home-pulse-support-pill[hidden] {
+  display: none !important;
+}
+
 .home-pulse-meta {
   margin-top: auto;
   color: rgba(198, 190, 167, 0.86);

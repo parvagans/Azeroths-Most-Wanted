@@ -5114,30 +5114,61 @@ window.addEventListener('DOMContentLoaded', async () => {
             const today = heatmapData[heatmapData.length - 1];
             const yesterday = heatmapData[heatmapData.length - 2];
 
-            function applyTrend(elementId, todayVal, yestVal) {
+            function resolveTrendMetric(day, key, fallbackKey = '') {
+                if (!day || typeof day !== 'object') {
+                    return { hasValue: false, value: 0 };
+                }
+
+                const candidateKeys = [key, fallbackKey].filter(Boolean);
+                for (const candidateKey of candidateKeys) {
+                    if (!Object.prototype.hasOwnProperty.call(day, candidateKey)) continue;
+                    const rawValue = day[candidateKey];
+                    if (rawValue === null || rawValue === undefined || rawValue === '') continue;
+
+                    const value = Number(rawValue);
+                    if (Number.isFinite(value)) {
+                        return { hasValue: true, value };
+                    }
+                }
+
+                return { hasValue: false, value: 0 };
+            }
+
+            function applyTrend(elementId, todayMetric, yestMetric) {
                 const el = document.getElementById(elementId);
-                if (!el || yestVal == null) return;
-                const diff = todayVal - yestVal;
+                if (!el) return;
 
                 el.textContent = '';
+                el.hidden = true;
+                if (!todayMetric || !yestMetric || !todayMetric.hasValue || !yestMetric.hasValue) return;
+                const diff = todayMetric.value - yestMetric.value;
                 const span = document.createElement('span');
 
                 if (diff > 0) {
-                    span.textContent = `▲ ${diff}`;
+                    span.textContent = `+${diff} since previous scan`;
                     span.classList.add('trend-positive');
                 } else if (diff < 0) {
-                    span.textContent = `▼ ${Math.abs(diff)}`;
+                    span.textContent = `-${Math.abs(diff)} since previous scan`;
                     span.classList.add('trend-negative');
                 } else {
-                    span.textContent = '–';
+                    span.textContent = 'No change since previous scan';
                     span.classList.add('trend-neutral');
                 }
 
                 el.appendChild(span);
+                el.hidden = false;
             }
 
-            applyTrend('trend-total', getHeatmapMetricValue(today, 'total_roster', 'total_roster'), getHeatmapMetricValue(yesterday, 'total_roster', 'total_roster'));
-            applyTrend('trend-active', getHeatmapMetricValue(today, 'active_roster_mains', 'active_roster'), getHeatmapMetricValue(yesterday, 'active_roster_mains', 'active_roster'));
+            applyTrend(
+                'trend-total',
+                resolveTrendMetric(today, 'total_roster', 'total_roster'),
+                resolveTrendMetric(yesterday, 'total_roster', 'total_roster')
+            );
+            applyTrend(
+                'trend-active',
+                resolveTrendMetric(today, 'active_roster_mains', 'active_roster'),
+                resolveTrendMetric(yesterday, 'active_roster_mains', 'active_roster')
+            );
 
             function drawSpark(canvasId, dataKey, colorStr, fallbackKey = '') {
                 const ctx = document.getElementById(canvasId);
@@ -7532,4 +7563,3 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     window.addEventListener('hashchange', route);
 });
-
