@@ -1,15 +1,15 @@
 import os
-import tempfile
 import unittest
 from pathlib import Path
 
 from render.html_dashboard import generate_html_dashboard
+from tests.workspace_temp import workspace_temp_dir
 
 
 class LocalSmokeTests(unittest.TestCase):
     def test_generate_html_dashboard_creates_expected_outputs(self):
         original_cwd = os.getcwd()
-        temp_dir = tempfile.TemporaryDirectory()
+        temp_dir = workspace_temp_dir()
 
         try:
             os.chdir(temp_dir.name)

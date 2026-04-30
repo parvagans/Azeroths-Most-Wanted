@@ -1,12 +1,12 @@
 import json
 import os
 import re
-import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
 
 from render.html_dashboard import generate_html_dashboard
+from tests.workspace_temp import workspace_temp_dir
 from wow.output import finalize_dashboard_output
 
 
@@ -87,7 +87,7 @@ class OfficerBriefRenderTests(unittest.IsolatedAsyncioTestCase):
 
     def test_generate_html_dashboard_serializes_officer_brief_payload(self):
         original_cwd = os.getcwd()
-        temp_dir = tempfile.TemporaryDirectory()
+        temp_dir = workspace_temp_dir()
 
         try:
             os.chdir(temp_dir.name)

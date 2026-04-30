@@ -1,17 +1,17 @@
 import json
 import os
-import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
 
+from tests.workspace_temp import workspace_temp_dir
 from wow import output as output_module
 
 
 class OutputWriterTests(unittest.TestCase):
     def test_write_timeline_output_creates_asset_json_in_cwd(self):
         original_cwd = os.getcwd()
-        temp_dir = tempfile.TemporaryDirectory()
+        temp_dir = workspace_temp_dir()
 
         try:
             os.chdir(temp_dir.name)
@@ -33,7 +33,7 @@ class OutputWriterTests(unittest.TestCase):
             temp_dir.cleanup()
 
     def test_write_api_status_output_writes_asset_json_next_to_module(self):
-        temp_dir = tempfile.TemporaryDirectory()
+        temp_dir = workspace_temp_dir()
         original_module_file = output_module.__file__
 
         try:

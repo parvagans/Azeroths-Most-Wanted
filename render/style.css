@@ -2358,24 +2358,6 @@ body.nav-menu-open {
   color: #d1b0ff;
 }
 
-@media (max-width: 1180px) {.hall-stage-spotlight, .hall-stage-wall {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 760px) {.hall-stage {
-    padding: 18px;
-  }
-
-.hall-stage-spotlight, .hall-stage-wall {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 520px) {.hall-stage-spotlight, .hall-stage-wall {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
 
 .hero-band-kicker {
   font-size: 10px;
@@ -2442,15 +2424,6 @@ body.nav-menu-open {
   color: #d6cfbc;
 }
 
-@media (max-width: 1100px) {.command-shell-badges .command-info-band {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 760px) {.command-shell-badges .command-info-band {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
 
 .hall-stage {
   position: relative;
@@ -2648,28 +2621,6 @@ body.nav-menu-open {
   color: #d1b0ff;
 }
 
-@media (max-width: 1180px) {.hall-feature-grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-
-.hall-wall-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 760px) {.hall-stage {
-    padding: 20px;
-  }
-
-.hall-feature-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 520px) {.hall-feature-grid, .hall-wall-grid {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
 
 .ladder-shell-pve .hero-band-kicker {
   color: #94f2c4;
@@ -4934,117 +4885,6 @@ body.nav-menu-open {
   gap: 72px;
 }
 
-@media (max-width: 1100px) {.home-command-deck, .home-pulse-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-.home-war-table-grid, .home-secondary-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (max-width: 800px) {.hero-subtitle {
-    font-size: 14px;
-  }
-
-.home-command-deck, .home-pulse-grid, .home-secondary-grid {
-    grid-template-columns: 1fr;
-  }
-
-.home-command-card, .home-pulse-card, .home-destination-card {
-    min-height: 0;
-  }
-
-.home-pulse-card {
-    padding: 18px 18px 16px;
-  }
-
-.home-latest-changes-card {
-    padding: 16px 18px 18px;
-  }
-
-.home-officer-brief-card {
-    padding: 16px 18px 18px;
-  }
-}
-
-@media (max-width: 600px) {.home-section-title {
-    font-size: 24px;
-  }
-
-.home-nav-card {
-    padding: 18px 16px 16px;
-  }
-
-.home-nav-value, .home-pulse-value {
-    font-size: 32px;
-  }
-
-.home-pulse-label {
-    margin-bottom: 10px;
-  }
-
-.home-pulse-context {
-    margin-bottom: 10px;
-  }
-
-.home-metric-scope {
-    width: 100%;
-    max-width: none;
-    margin-top: 16px;
-  }
-
-.home-metric-scope-summary {
-    width: 100%;
-    justify-content: center;
-    text-align: center;
-    padding: 9px 14px;
-    font-size: 11px;
-  }
-
-.home-metric-scope-panel {
-    padding: 15px 16px 16px;
-  }
-
-.home-metric-scope-list {
-    font-size: 12px;
-    line-height: 1.6;
-  }
-
-.home-pulse-meta {
-    max-width: none;
-  }
-
-.home-pulse-support {
-    gap: 6px;
-  }
-
-.home-pulse-support-pill {
-    font-size: 10px;
-    padding: 5px 8px;
-  }
-
-.home-latest-changes-item {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-.home-officer-brief-head {
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    min-height: 0;
-  }
-
-.home-officer-brief-status {
-    position: static;
-  }
-
-.home-officer-brief-item {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-}
 
 .collapsed-list .leaderboard-row:nth-child(n + 3) {
   display: none !important;
@@ -5376,45 +5216,6 @@ body.nav-menu-open {
 }
 
 /* Responsive */
-@media (max-width: 800px) {
-  .hero-header-row {
-    grid-template-columns: 1fr;
-    gap: 18px;
-    margin-bottom: 40px;
-    padding: 14px 16px 16px;
-    border-radius: 22px;
-  }
-
-  .hero-logo-col .main-logo {
-    width: min(100%, 320px);
-    max-width: 320px !important;
-  }
-
-  .hero-text-col {
-    align-items: center;
-    text-align: center;
-    max-width: 100%;
-  }
-
-  .hero-text-col .hero-subtitle {
-    max-width: 100%;
-  }
-
-  .command-ribbon-container {
-    flex-direction: column;
-    gap: 15px;
-    margin-bottom: 30px;
-  }
-}
-
-@media (max-width: 600px) {.lb-podium-wrap {
-    gap: 4px;
-  }
-
-.podium-block {
-    padding: 30px 2px 8px 2px;
-  }
-}
 
 /* Floating crown and podium stat pill */
 .podium-crown {
@@ -5515,33 +5316,6 @@ body.nav-menu-open {
   gap: 6px;
 }
 
-@media (max-width: 600px) {.lb-podium-wrap.ladder-podium-wrap {
-    gap: 6px;
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .ladder-podium-block {
-    padding: 36px 6px 72px;
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .podium-step-1, .lb-podium-wrap.ladder-podium-wrap .podium-step-2, .lb-podium-wrap.ladder-podium-wrap .podium-step-3 {
-    transform: none;
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .ladder-podium-block .podium-name {
-    font-size: 12px;
-    min-height: 2.8em;
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .ladder-podium-block .podium-pill {
-    min-width: 94px;
-    bottom: 10px;
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .ladder-podium-block .podium-rank {
-    bottom: 8px;
-    font-size: 28px;
-  }
-}
 
 .lb-podium-wrap.ladder-podium-wrap {
   align-items: flex-end;
@@ -5696,113 +5470,6 @@ body.nav-menu-open {
   gap: 4px;
 }
 
-@media (max-width: 900px) {.lb-podium-wrap.ladder-podium-wrap {
-    gap: 8px;
-    margin-top: 20px;
-    margin-bottom: 2px;
-    padding-top: 26px;
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .podium-step-1 {
-    min-height: 178px;
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .podium-step-2 {
-    min-height: 154px;
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .podium-step-3 {
-    min-height: 142px;
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .ladder-podium-block {
-    padding: 16px 8px 12px;
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .ladder-podium-block:hover {
-    transform: translateY(-4px);
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .ladder-podium-block .podium-avatar {
-    width: 46px;
-    height: 46px;
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .ladder-podium-block .podium-crown {
-    top: -48px;
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .ladder-podium-block .podium-name {
-    font-size: 13px;
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .ladder-podium-block .podium-pill {
-    min-width: 84px;
-    padding: 4px 10px;
-  }
-}
-
-@media (max-width: 600px) {.lb-podium-wrap.ladder-podium-wrap {
-    gap: 6px;
-    margin-top: 14px;
-    margin-bottom: 0;
-    padding-top: 20px;
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .podium-step-1 {
-    min-height: 156px;
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .podium-step-2 {
-    min-height: 138px;
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .podium-step-3 {
-    min-height: 126px;
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .ladder-podium-block {
-    padding: 14px 6px 10px;
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .ladder-podium-block:hover {
-    transform: translateY(-3px);
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .ladder-podium-block .podium-avatar {
-    width: 40px;
-    height: 40px;
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .ladder-podium-block .podium-crown {
-    top: -42px;
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .ladder-podium-block .podium-rank {
-    top: 8px;
-    left: 8px;
-    font-size: 14px;
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .ladder-podium-block .podium-name {
-    min-height: 2.4em;
-    margin-top: 4px;
-    font-size: 12px;
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .ladder-podium-block .podium-pill {
-    min-width: 78px;
-    padding: 4px 8px;
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .ladder-podium-block .podium-stat-val {
-    font-size: 14px;
-  }
-
-.lb-podium-wrap.ladder-podium-wrap .ladder-podium-block .podium-stat-lbl {
-    font-size: 10px;
-  }
-}
 
 @keyframes floatCrown {
   0% {
@@ -6215,12 +5882,6 @@ body.nav-menu-open {
   color: #cdbf98;
 }
 
-@media (max-width: 760px) {.ladder-stats-inline {
-    flex-wrap: wrap;
-    gap: 8px;
-    justify-content: flex-end;
-  }
-}
 
 .ladder-row-flash {
   animation: ladderFlashPulse 1.8s ease;
@@ -6260,52 +5921,6 @@ body.nav-menu-open {
   }
 }
 
-@media (max-width: 900px) {.ladder-hero-stats, .ladder-info-band {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 680px) {.ladder-hero-shell {
-    padding: 20px;
-  }
-
-.ladder-find-controls {
-    flex-direction: column;
-  }
-
-.ladder-hero-stats, .ladder-info-band {
-    grid-template-columns: minmax(0, 1fr);
-  }
-
-.ladder-rank-separator::before, .ladder-rank-separator::after {
-    width: 14%;
-  }
-}
-
-@media (max-width: 900px) {.ladder-info-band {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-}
-
-@media (max-width: 680px) {.ladder-info-band {
-    grid-template-columns: minmax(0, 1fr);
-  }
-}
-
-@media (max-width: 600px) {.command-info-band, .ladder-info-band {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    gap: 10px;
-  }
-
-.hero-band-item {
-    min-height: 76px;
-    padding: 12px;
-  }
-
-.hero-band-value {
-    font-size: 19px;
-  }
-}
 
 /* ========================================= */
 /* FINAL POLISH PASS                         */
@@ -6736,39 +6351,6 @@ body[data-route="ladder-pvp"] #ember-canvas, body[data-route="war-effort-hk"] #e
   }
 }
 
-@media (max-width: 1024px) {body::before {
-    opacity: 0.54;
-  }
-
-body::after {
-    opacity: 0.22;
-  }
-
-.home-command-section, .home-pulse-section, .home-war-effort-section, .weekly-mvps-wrapper, .home-ladders-section, .home-secondary-section {
-    margin-top: 48px;
-  }
-
-.lb-podium-wrap {
-    padding-inline: 8px;
-  }
-}
-
-@media (max-width: 680px) {.home-section-heading {
-    margin-bottom: 20px;
-  }
-
-.home-section-heading-compact {
-    margin-bottom: 18px;
-  }
-
-.home-nav-card .home-nav-copy {
-    max-width: none;
-  }
-
-.leaderboard-row:hover, .podium-block:hover {
-    transform: translateY(-2px);
-  }
-}
 
 @media (prefers-reduced-motion: reduce) {html {
     scroll-behavior: auto;
@@ -6930,147 +6512,6 @@ body[data-app-ready="true"] #main-dashboard {
   }
 }
 
-@media (max-width: 920px) {.home-dashboard-grid {
-    gap: 52px;
-    margin-top: 56px;
-  }
-
-.home-command-section, .home-pulse-section, .home-war-effort-section, .weekly-mvps-wrapper, .home-ladders-section, .home-secondary-section {
-    margin-top: 56px;
-  }
-
-.home-command-deck, .home-pulse-grid, .home-secondary-grid, .home-war-table-grid {
-    gap: 18px;
-  }
-
-.home-insights-row {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 16px;
-  }
-
-.home-roster-intelligence-section {
-    gap: 22px;
-    margin-top: 56px;
-  }
-
-.home-movement-card {
-    margin-top: 18px;
-    padding: 17px 18px 18px;
-  }
-
-.weekly-mvps-wrapper {
-    margin-bottom: 24px;
-  }
-
-.dashboard-footer {
-    margin-top: 56px;
-  }
-
-.nav-utility-cluster {
-    grid-template-columns: minmax(0, 1fr);
-    gap: 8px;
-  }
-
-.custom-select {
-    width: 100%;
-  }
-
-.custom-select {
-    min-height: 44px;
-  }
-
-}
-
-@media (max-width: 640px) {.home-dashboard-grid {
-    gap: 44px;
-    margin-top: 44px;
-  }
-
-.home-command-section, .home-pulse-section, .home-war-effort-section, .weekly-mvps-wrapper, .home-ladders-section, .home-secondary-section {
-    margin-top: 44px;
-    scroll-margin-top: 88px;
-  }
-
-.home-command-deck, .home-pulse-grid, .home-secondary-grid, .home-war-table-grid, .mvp-cards-container {
-    gap: 14px;
-  }
-
-.home-nav-card, .leaderboard-panel, .ladder-hero-stat-card, .command-hero-stat, .war-effort-shell-progress-card, .war-effort-hero-stat, .hero-band-item, .hall-stage-card {
-    padding: 16px;
-  }
-
-.home-movement-card {
-    padding: 16px;
-  }
-
-.home-roster-intelligence-section {
-    gap: 18px;
-    margin-top: 44px;
-  }
-
-.dashboard-footer {
-    margin-top: 44px;
-    padding: 16px 16px 22px;
-    gap: 7px;
-  }
-
-.footer-tech-stack, .footer-update-info, .footer-contact-info {
-    font-size: 11px;
-    line-height: 1.4;
-  }
-
-.footer-disclaimer {
-    max-width: none;
-    font-size: 10px;
-    line-height: 1.4;
-  }
-
-.home-movement-item {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-
-.home-movement-meta-wrap {
-    justify-content: flex-start;
-  }
-
-.ac-empty-state {
-    padding: 14px 12px;
-  }
-
-.ac-empty-text {
-    font-size: 12px;
-    line-height: 1.5;
-    overflow-wrap: anywhere;
-  }
-
-.concise-view-context {
-    line-height: 1.45;
-  }
-
-.concise-back-btn {
-    width: 100%;
-    max-width: 240px;
-  }
-
-.home-nav-card .home-nav-cta {
-    padding-top: 14px;
-  }
-
-.lb-podium-wrap {
-    padding: 18px 4px 8px;
-    margin: 18px auto 10px;
-  }
-
-.loader-content {
-    width: min(92vw, 420px);
-    padding: 22px 18px;
-  }
-
-.ac-empty-state, .mvp-empty-state, .mvp-placeholder-card, .tl-empty-msg {
-    padding: 14px 12px;
-  }
-}
 
 @media (hover: none) and (pointer: coarse) {.home-nav-card:hover, .leaderboard-panel:hover, .ladder-hero-stat-card:hover, .hero-band-item:hover, .hall-stage-card:hover, .command-hero-stat:hover, .war-effort-shell-progress-card:hover, .war-effort-hero-stat:hover, .stat-box:hover, .podium-block:hover, .leaderboard-row:hover {
     transform: none;
@@ -7278,28 +6719,4 @@ body[data-route-family="character"] {
 
 .custom-tooltip .tooltip-hint, .custom-tooltip.we-tooltip-war-effort .we-tt-score {
   color: var(--amw-route-accent);
-}
-
-@media (max-width: 640px) {.nav-btn-route::after {
-    left: 10px;
-    right: 10px;
-  }
-
-.home-nav-eyebrow, .command-hero-ribbon-label, .war-effort-hero-ribbon-label, .hero-band-kicker, .ladder-insight-kicker, .hall-stage-card-kicker, .timeline-kicker, .tt-label {
-    letter-spacing: 0.13em;
-  }
-}
-
-@media (max-width: 780px) {.home-api-status-banner {
-    margin: -22px auto 28px auto;
-    padding: 16px 18px;
-  }
-
-.home-api-status-title {
-    font-size: 16px;
-  }
-
-.home-api-status-message {
-    font-size: 13px;
-  }
 }
