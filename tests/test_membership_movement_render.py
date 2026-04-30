@@ -300,7 +300,9 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn(".home-pulse-support-pill {", css_text)
         self.assertIn(".view-all-btn:focus-visible", css_text)
         self.assertIn(".view-heroes-btn:focus-visible", css_text)
-        self.assertIn(".challenge-link:focus-visible", css_text)
+        war_effort_css_text = Path("render/src/css/features/war_effort/war_effort.css").read_text(encoding="utf-8")
+        self.assertIn(".challenge-link:focus-visible", war_effort_css_text)
+        self.assertNotIn(".challenge-link:focus-visible", css_text)
 
     def test_source_template_includes_favicon_and_github_links(self):
         template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")
