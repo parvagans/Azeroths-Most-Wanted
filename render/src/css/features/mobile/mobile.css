@@ -672,6 +672,7 @@
 
   .analytics-hero-band,
   .analytics-campaign-history-metrics,
+  .analytics-readiness-funnel-stages,
   .analytics-kpi-wrapper,
   .analytics-quick-routes,
   .analytics-pressure-grid,
@@ -1307,12 +1308,27 @@
     grid-template-columns: 1fr;
   }
 
+  .analytics-readiness-funnel-card {
+    padding: 16px;
+  }
+
+  .analytics-readiness-funnel-stages {
+    grid-template-columns: 1fr;
+  }
+
   .analytics-campaign-history-metric {
     padding: 13px 14px;
   }
 
+  .analytics-readiness-funnel-stage {
+    padding: 13px 14px;
+  }
+
   .analytics-campaign-history-summary,
-  .analytics-campaign-history-empty {
+  .analytics-campaign-history-empty,
+  .analytics-readiness-funnel-helper,
+  .analytics-readiness-funnel-note,
+  .analytics-readiness-funnel-empty {
     font-size: 13px;
   }
 

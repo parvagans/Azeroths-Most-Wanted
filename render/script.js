@@ -4633,6 +4633,11 @@ window.addEventListener('DOMContentLoaded', async () => {
         const mainActiveRosterCount = getNumericConfigValue(config, 'active_14_days_mains', mainActiveRosterFallback);
         const mainRaidReadyCount = getNumericConfigValue(config, 'raid_ready_count_mains', mainRaidReadyRoster.length);
         const mainAvgIlvl = getNumericConfigValue(config, 'avg_ilvl_70_mains', mainLvl70Count > 0 ? Math.round(mainTotalIlvl / mainLvl70Count) : 0);
+        const trackedMainCount = getNumericConfigValue(
+            analyticsConfigSource,
+            'total_members_mains',
+            Array.isArray(mainRoster) ? mainRoster.length : 0
+        );
         const analyticsGuildRosterTotal = getNumericConfigValue(
             analyticsConfigSource,
             'total_members',
@@ -4642,6 +4647,12 @@ window.addEventListener('DOMContentLoaded', async () => {
             const lvl = c.level || 0;
             return lvl >= 60 && lvl <= 69;
         }).length;
+        const hasAnalyticsSnapshotData = (
+            (Array.isArray(rawGuildRoster) && rawGuildRoster.length > 0)
+            || (Array.isArray(rosterData) && rosterData.length > 0)
+            || trackedMainCount > 0
+            || analyticsGuildRosterTotal > 0
+        );
 
         if (typeof renderAnalyticsSnapshotStrip === 'function') {
             renderAnalyticsSnapshotStrip({
@@ -4657,6 +4668,16 @@ window.addEventListener('DOMContentLoaded', async () => {
 
         if (typeof renderAnalyticsCampaignHistoryCard === 'function') {
             renderAnalyticsCampaignHistoryCard(campaignArchiveData);
+        }
+
+        if (typeof renderAnalyticsReadinessFunnel === 'function') {
+            renderAnalyticsReadinessFunnel({
+                hasSnapshotData: hasAnalyticsSnapshotData,
+                guildRoster: analyticsGuildRosterTotal,
+                activeMains: mainActiveRosterCount,
+                level70Mains: mainLvl70Count,
+                raidReadyMains: mainRaidReadyCount
+            });
         }
 
         const setKpiLabel = (valueId, text) => {

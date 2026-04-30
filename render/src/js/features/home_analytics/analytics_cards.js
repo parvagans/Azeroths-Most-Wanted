@@ -224,6 +224,121 @@ function renderAnalyticsCampaignHistoryCard(archive = {}) {
     }
 }
 
+function formatAnalyticsFunnelPercent(count, total) {
+    const numericCount = Number(count);
+    const numericTotal = Number(total);
+    if (!Number.isFinite(numericCount) || !Number.isFinite(numericTotal) || numericTotal <= 0) return null;
+    return Math.round((numericCount / numericTotal) * 100);
+}
+
+function renderAnalyticsReadinessFunnel(funnel = {}) {
+    const cardEl = document.getElementById('analytics-readiness-funnel-card');
+    if (!cardEl) return;
+
+    const stagesEl = document.getElementById('analytics-readiness-funnel-stages');
+    const summaryEl = document.getElementById('analytics-readiness-funnel-summary');
+    const noteEl = document.getElementById('analytics-readiness-funnel-note');
+    const emptyEl = document.getElementById('analytics-readiness-funnel-empty');
+
+    if (!stagesEl || !summaryEl || !noteEl || !emptyEl) return;
+
+    const hasSnapshotData = !!funnel.hasSnapshotData;
+    const totalRoster = Number(funnel.guildRoster);
+    const activeMains = Number(funnel.activeMains);
+    const level70Mains = Number(funnel.level70Mains);
+    const raidReadyMains = Number(funnel.raidReadyMains);
+
+    if (!hasSnapshotData || !Number.isFinite(totalRoster) || totalRoster <= 0) {
+        stagesEl.innerHTML = '';
+        summaryEl.textContent = 'Readiness funnel data is not available for this snapshot.';
+        noteEl.hidden = true;
+        emptyEl.hidden = false;
+        return;
+    }
+
+    const hasActive = Number.isFinite(activeMains) && activeMains >= 0;
+    const hasLevel70 = Number.isFinite(level70Mains) && level70Mains >= 0;
+    const hasRaidReady = Number.isFinite(raidReadyMains) && raidReadyMains >= 0;
+
+    const stageDefinitions = [
+        {
+            key: 'guild-roster',
+            label: 'Guild Roster',
+            value: totalRoster,
+            meterPercent: 100,
+            helper: 'Known characters in the current roster snapshot.',
+            meta: '100% of known roster',
+            available: true
+        },
+        {
+            key: 'active-mains',
+            label: 'Active Mains',
+            value: activeMains,
+            meterPercent: formatAnalyticsFunnelPercent(activeMains, totalRoster),
+            helper: 'Mains seen in the configured recent activity window.',
+            meta: hasActive ? `${formatAnalyticsFunnelPercent(activeMains, totalRoster)}% of known roster` : 'Not available from current snapshot',
+            available: hasActive
+        },
+        {
+            key: 'level-70-mains',
+            label: 'Level 70 Mains',
+            value: level70Mains,
+            meterPercent: formatAnalyticsFunnelPercent(level70Mains, totalRoster),
+            helper: 'Tracked mains currently at level 70.',
+            meta: hasLevel70 ? `${formatAnalyticsFunnelPercent(level70Mains, totalRoster)}% of known roster` : 'Not available from current snapshot',
+            available: hasLevel70
+        },
+        {
+            key: 'raid-ready-mains',
+            label: 'Raid-Ready Mains',
+            value: raidReadyMains,
+            meterPercent: formatAnalyticsFunnelPercent(raidReadyMains, totalRoster),
+            helper: 'Mains meeting the current raid-ready threshold.',
+            meta: hasRaidReady
+                ? (() => {
+                    const rosterShare = formatAnalyticsFunnelPercent(raidReadyMains, totalRoster);
+                    const levelShare = hasLevel70 ? formatAnalyticsFunnelPercent(raidReadyMains, level70Mains) : null;
+                    if (levelShare === null) return `${rosterShare}% of known roster`;
+                    return `${rosterShare}% of known roster · ${levelShare}% of level 70 mains`;
+                })()
+                : 'Not available from current snapshot',
+            available: hasRaidReady
+        }
+    ];
+
+    const availableStages = stageDefinitions.filter(stage => stage.available);
+    const hasPartialData = availableStages.length > 0 && availableStages.length < stageDefinitions.length;
+
+    if (!availableStages.length) {
+        stagesEl.innerHTML = '';
+        summaryEl.textContent = 'Readiness funnel data is not available for this snapshot.';
+        noteEl.hidden = true;
+        emptyEl.hidden = false;
+        return;
+    }
+
+    stagesEl.innerHTML = availableStages.map(stage => {
+        const meterPercent = Number.isFinite(Number(stage.meterPercent)) ? Math.max(0, Math.min(100, Number(stage.meterPercent))) : 0;
+        return `
+            <div class="analytics-readiness-funnel-stage" data-stage="${stage.key}">
+                <div class="analytics-readiness-funnel-stage-head">
+                    <span class="analytics-readiness-funnel-label">${stage.label}</span>
+                    <strong class="analytics-readiness-funnel-value">${Number(stage.value).toLocaleString()}</strong>
+                </div>
+                <div class="analytics-readiness-funnel-meter" aria-hidden="true">
+                    <span class="analytics-readiness-funnel-fill" style="width: ${meterPercent}%;"></span>
+                </div>
+                <span class="analytics-readiness-funnel-meta">${stage.meta}</span>
+                <span class="analytics-readiness-funnel-helper">${stage.helper}</span>
+            </div>
+        `;
+    }).join('');
+
+    summaryEl.textContent = 'This funnel compares the same snapshot across raw roster size, active mains, level 70 mains, and raid-ready mains. Activity and level-cap stages are parallel readiness cuts, while raid-ready mains remain a subset of level 70 mains.';
+    noteEl.hidden = !hasPartialData;
+    emptyEl.hidden = true;
+}
+
 function getPressureState(count, role) {
     if (role === 'Tank') {
         if (count <= 2) return { state: 'Thin shield wall', meta: 'Priority role for dependable raid structure and dungeon leadership.' };

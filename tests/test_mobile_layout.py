@@ -105,6 +105,8 @@ class MobileLayoutTests(unittest.TestCase):
         self.assertIn(".analytics-snapshot-grid", mobile_css)
         self.assertIn(".analytics-campaign-history-metrics", mobile_css)
         self.assertIn(".analytics-campaign-history-footer", mobile_css)
+        self.assertIn(".analytics-readiness-funnel-stages", mobile_css)
+        self.assertIn(".analytics-readiness-funnel-card", mobile_css)
         self.assertIn(".char-card-deployment-grid", mobile_css)
         self.assertIn(".timeline-container.timeline-home-board .monuments-grid", mobile_css)
         self.assertIn(".arch-pipeline", mobile_css)
