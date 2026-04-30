@@ -671,6 +671,7 @@
   }
 
   .analytics-hero-band,
+  .analytics-campaign-history-metrics,
   .analytics-kpi-wrapper,
   .analytics-quick-routes,
   .analytics-pressure-grid,
@@ -704,6 +705,15 @@
   .analytics-readiness-media,
   .analytics-spotlight-media {
     align-items: flex-start;
+  }
+
+  .analytics-campaign-history-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .analytics-campaign-history-cta {
+    width: 100%;
   }
 
   .home-api-status-banner {
@@ -1287,6 +1297,23 @@
   .analytics-readiness-card,
   .analytics-spotlight-card {
     padding: 16px;
+  }
+
+  .analytics-campaign-history-card {
+    padding: 16px;
+  }
+
+  .analytics-campaign-history-metrics {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-campaign-history-metric {
+    padding: 13px 14px;
+  }
+
+  .analytics-campaign-history-summary,
+  .analytics-campaign-history-empty {
+    font-size: 13px;
   }
 
   .analytics-route-card .home-nav-cta {

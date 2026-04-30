@@ -152,6 +152,78 @@ function renderAnalyticsSnapshotStrip(snapshot = {}) {
     });
 }
 
+function formatAnalyticsCampaignArchiveWeek(weekValue) {
+    const rawWeek = String(weekValue || '').trim();
+    if (!rawWeek) return '—';
+
+    const parsedWeek = new Date(rawWeek);
+    if (Number.isNaN(parsedWeek.getTime())) return rawWeek;
+
+    return parsedWeek.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric'
+    });
+}
+
+function renderAnalyticsCampaignHistoryCard(archive = {}) {
+    const cardEl = document.getElementById('analytics-campaign-history-card');
+    if (!cardEl) return;
+
+    const summaryEl = document.getElementById('analytics-campaign-history-summary');
+    const emptyEl = document.getElementById('analytics-campaign-history-empty');
+    const weeksValueEl = document.getElementById('analytics-campaign-history-weeks');
+    const latestValueEl = document.getElementById('analytics-campaign-history-latest');
+    const entriesValueEl = document.getElementById('analytics-campaign-history-entries');
+    const reigningValueEl = document.getElementById('analytics-campaign-history-reigning');
+    const metricsEl = document.getElementById('analytics-campaign-history-metrics');
+    const ctaEl = document.getElementById('analytics-campaign-history-cta');
+
+    const weeks = Array.isArray(archive.weeks) ? archive.weeks : [];
+    const derivedWeekCount = Number.isFinite(Number(archive.archived_weeks))
+        ? Number(archive.archived_weeks)
+        : weeks.length;
+    const latestWeekRaw = String(archive.latest_week || weeks[0]?.week_anchor || '').trim();
+    const derivedEntryCount = Number.isFinite(Number(archive.total_campaign_entries))
+        ? Number(archive.total_campaign_entries)
+        : weeks.reduce((sum, week) => {
+            return sum + Number(week?.war_effort_entry_count || 0) + Number(week?.ladder_entry_count || 0);
+        }, 0);
+    const derivedReigningCount = Number.isFinite(Number(archive.reigning_titles_logged))
+        ? Number(archive.reigning_titles_logged)
+        : weeks.reduce((sum, week) => sum + Number(week?.reigning_entry_count || 0), 0);
+    const hasArchive = derivedWeekCount > 0 || !!latestWeekRaw || derivedEntryCount > 0 || derivedReigningCount > 0;
+
+    if (weeksValueEl) weeksValueEl.textContent = hasArchive ? derivedWeekCount.toLocaleString() : '—';
+    if (latestValueEl) latestValueEl.textContent = hasArchive ? formatAnalyticsCampaignArchiveWeek(latestWeekRaw) : '—';
+    if (entriesValueEl) entriesValueEl.textContent = hasArchive ? derivedEntryCount.toLocaleString() : '—';
+    if (reigningValueEl) reigningValueEl.textContent = hasArchive ? derivedReigningCount.toLocaleString() : '—';
+
+    if (summaryEl) {
+        if (hasArchive) {
+            const weekLabel = formatAnalyticsCampaignArchiveWeek(latestWeekRaw);
+            const weekNoun = derivedWeekCount === 1 ? 'week' : 'weeks';
+            const entryNoun = derivedEntryCount === 1 ? 'entry' : 'entries';
+            summaryEl.textContent = `${derivedWeekCount.toLocaleString()} archived ${weekNoun} are currently recorded. Latest week: ${weekLabel}. ${derivedEntryCount.toLocaleString()} campaign ${entryNoun} are represented in the archive.`;
+        } else {
+            summaryEl.textContent = 'No archived campaign weeks are available yet.';
+        }
+    }
+
+    if (emptyEl) {
+        emptyEl.hidden = hasArchive;
+        emptyEl.textContent = 'No archived campaign weeks are available yet.';
+    }
+
+    if (metricsEl) {
+        metricsEl.setAttribute('data-archive-state', hasArchive ? 'populated' : 'empty');
+    }
+
+    if (ctaEl) {
+        ctaEl.setAttribute('href', '#campaign-archive');
+    }
+}
+
 function getPressureState(count, role) {
     if (role === 'Tank') {
         if (count <= 2) return { state: 'Thin shield wall', meta: 'Priority role for dependable raid structure and dungeon leadership.' };

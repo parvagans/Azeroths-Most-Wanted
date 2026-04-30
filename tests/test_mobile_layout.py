@@ -103,6 +103,8 @@ class MobileLayoutTests(unittest.TestCase):
         self.assertIn(".war-effort-home-card-footer", mobile_css)
         self.assertIn(".campaign-archive-grid,\n  .campaign-archive-grid-war-effort,\n  .campaign-archive-grid-dual", mobile_css)
         self.assertIn(".analytics-snapshot-grid", mobile_css)
+        self.assertIn(".analytics-campaign-history-metrics", mobile_css)
+        self.assertIn(".analytics-campaign-history-footer", mobile_css)
         self.assertIn(".char-card-deployment-grid", mobile_css)
         self.assertIn(".timeline-container.timeline-home-board .monuments-grid", mobile_css)
         self.assertIn(".arch-pipeline", mobile_css)

@@ -4597,6 +4597,9 @@ window.addEventListener('DOMContentLoaded', async () => {
         const prevMvps = dashboardConfig.prev_mvps || {};
         const analyticsTrends = dashboardConfig.global_trends || {};
         const analyticsConfigSource = dashboardConfig && Object.keys(dashboardConfig).length > 0 ? dashboardConfig : config;
+        const campaignArchiveData = analyticsConfigSource && analyticsConfigSource.campaign_archive
+            ? analyticsConfigSource.campaign_archive
+            : {};
         const mainRoster = filterMainCharacters(rosterData);
         const formatDualCount = (mainCount, allCount) => `${mainCount.toLocaleString()} / ${allCount.toLocaleString()}`;
 
@@ -4650,6 +4653,10 @@ window.addEventListener('DOMContentLoaded', async () => {
                 raidReadyDelta: analyticsTrends.trend_ready_mains,
                 avgIlvlValue: mainAvgIlvl
             });
+        }
+
+        if (typeof renderAnalyticsCampaignHistoryCard === 'function') {
+            renderAnalyticsCampaignHistoryCard(campaignArchiveData);
         }
 
         const setKpiLabel = (valueId, text) => {
