@@ -40,7 +40,7 @@ function applyReadinessCard(id, config) {
         route = '',
         portrait = getClassIcon('Warrior'),
         alt = '',
-        cta = 'Inspect dossier âž”'
+        cta = 'Inspect dossier ➔'
     } = config || {};
 
     const eyebrowEl = card.querySelector('.analytics-readiness-kicker');
@@ -75,7 +75,7 @@ function applySpotlightCard(id, config) {
         route = '',
         portrait = getClassIcon('Warrior'),
         alt = '',
-        cta = 'Inspect âž”'
+        cta = 'Inspect ➔'
     } = config || {};
 
     const eyebrowEl = card.querySelector('.analytics-spotlight-kicker');
@@ -121,4 +121,3 @@ function getPressureState(count, role) {
     if (count <= 10) return { state: 'Battle-ready line', meta: 'Melee presence is healthy for most progression and farm nights.' };
     return { state: 'Frontline overflowing', meta: 'Melee pressure is abundant across the current warband.' };
 }
-
