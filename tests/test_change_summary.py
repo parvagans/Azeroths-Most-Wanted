@@ -15,7 +15,7 @@ class ChangeSummaryTests(unittest.TestCase):
             },
         )
 
-    def test_bootstrap_membership_movement_is_treated_as_baseline(self):
+    def test_bootstrap_membership_movement_is_suppressed_from_latest_changes(self):
         summary = build_change_summary(
             membership_movement={
                 "joined": 625,
@@ -28,13 +28,28 @@ class ChangeSummaryTests(unittest.TestCase):
             trend_data={},
         )
 
-        self.assertEqual(len(summary["items"]), 1)
-        self.assertEqual(summary["items"][0]["type"], "movement")
-        self.assertEqual(
-            summary["items"][0]["label"],
-            "625 members recorded as the movement baseline",
+        self.assertTrue(summary["empty"])
+        self.assertEqual(summary["items"], [])
+        self.assertEqual(summary["empty_text"], "No notable changes recorded yet.")
+
+    def test_bootstrap_membership_movement_can_still_surface_other_change_items(self):
+        summary = build_change_summary(
+            membership_movement={
+                "joined": 625,
+                "departed": 0,
+                "rejoined": 0,
+                "total": 625,
+                "bootstrap": True,
+            },
+            timeline_events=[
+                {"type": "level_up"},
+                {"type": "item"},
+            ],
+            trend_data={},
         )
-        self.assertEqual(summary["items"][0]["tone"], "neutral")
+
+        self.assertEqual([item["type"] for item in summary["items"]], ["level_up", "item"])
+        self.assertNotIn("movement", [item["type"] for item in summary["items"]])
 
     def test_normal_membership_movement_counts_are_summarized_in_order(self):
         summary = build_change_summary(

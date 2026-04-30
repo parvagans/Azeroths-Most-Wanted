@@ -7537,7 +7537,7 @@ body.nav-menu-open {
 .home-dashboard-grid {
   display: flex;
   flex-direction: column;
-  gap: 48px;
+  gap: 56px;
   width: 100%;
   max-width: 1240px;
   margin: 0 auto;
@@ -7583,7 +7583,7 @@ body.nav-menu-open {
 }
 
 .home-pulse-section {
-  margin-top: 40px;
+  margin-top: 48px;
 }
 
 .home-section-heading {
@@ -7661,7 +7661,7 @@ body.nav-menu-open {
 .home-war-effort-section {
   width: 100%;
   max-width: 1240px;
-  margin: 44px auto 0;
+  margin: 52px auto 0;
 }
 
 .home-war-effort-stage {
@@ -7973,7 +7973,7 @@ body.nav-menu-open {
 }
 
 .dashboard-footer {
-  margin-top: 44px;
+  margin-top: 52px;
   padding: 18px 18px 26px;
   border-top: 1px solid rgba(184, 145, 71, 0.12);
   display: flex;
@@ -8135,10 +8135,10 @@ body.nav-menu-open {
 .home-roster-intelligence-section {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 20px;
   width: 100%;
   max-width: 1240px;
-  margin: 30px auto 0;
+  margin: 46px auto 0;
 }
 
 .home-roster-intelligence-heading {
@@ -8146,7 +8146,7 @@ body.nav-menu-open {
 }
 
 .home-roster-intelligence-sync {
-  margin: 4px 0 0;
+  margin: 8px 0 0;
   color: rgba(214, 205, 178, 0.76);
   font-size: 11px;
   line-height: 1.45;
@@ -10885,7 +10885,7 @@ body[data-app-ready="true"] #main-dashboard {
 
 @media (max-width: 920px) {
   .home-dashboard-grid {
-    gap: 34px;
+    gap: 40px;
   }
 
   .home-command-section,
@@ -10894,7 +10894,7 @@ body[data-app-ready="true"] #main-dashboard {
   .weekly-mvps-wrapper,
   .home-ladders-section,
   .home-secondary-section {
-    margin-top: 40px;
+    margin-top: 44px;
   }
 
   .home-command-deck,
@@ -10909,6 +10909,11 @@ body[data-app-ready="true"] #main-dashboard {
   .home-insights-row {
     grid-template-columns: minmax(0, 1fr);
     gap: 16px;
+  }
+
+  .home-roster-intelligence-section {
+    gap: 16px;
+    margin-top: 34px;
   }
 
   .home-movement-card {
@@ -10941,7 +10946,7 @@ body[data-app-ready="true"] #main-dashboard {
 
 @media (max-width: 640px) {
   .home-dashboard-grid {
-    gap: 24px;
+    gap: 30px;
   }
 
   .home-command-section,
@@ -10952,7 +10957,7 @@ body[data-app-ready="true"] #main-dashboard {
   .home-secondary-section,
   .analytics-summary-section,
   .analytics-intel-section {
-    margin-top: 32px;
+    margin-top: 34px;
     scroll-margin-top: 88px;
   }
 
@@ -10993,8 +10998,13 @@ body[data-app-ready="true"] #main-dashboard {
     padding: 16px;
   }
 
+  .home-roster-intelligence-section {
+    gap: 14px;
+    margin-top: 28px;
+  }
+
   .dashboard-footer {
-    margin-top: 36px;
+    margin-top: 40px;
     padding: 16px 16px 22px;
     gap: 7px;
   }

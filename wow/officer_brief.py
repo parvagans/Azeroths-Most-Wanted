@@ -412,7 +412,7 @@ def build_officer_brief(*, roster_summary=None, membership_movement=None, latest
     movement_items = _extract_membership_item(membership_movement)
     movement = membership_movement if isinstance(membership_movement, dict) else {}
     bootstrap = bool(movement.get("bootstrap"))
-    if not (bootstrap and _latest_changes_has_movement_item(latest_changes)):
+    if not bootstrap:
         items.extend(movement_items)
     items.extend(_extract_activity_item(roster_metrics))
     items.extend(_extract_readiness_item(roster_metrics))

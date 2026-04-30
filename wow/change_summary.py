@@ -37,14 +37,7 @@ def _extract_membership_movement_item(membership_movement: Any) -> list[dict[str
         return []
 
     if membership_movement.get("bootstrap"):
-        member_word = "member" if total == 1 else "members"
-        return [
-            {
-                "type": "movement",
-                "label": f"{total} {member_word} recorded as the movement baseline",
-                "tone": "neutral",
-            }
-        ]
+        return []
 
     joined = _clean_int(membership_movement.get("joined"), 0)
     departed = _clean_int(membership_movement.get("departed"), 0)
