@@ -258,7 +258,7 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn('What changed recently', template_text)
         self.assertIn('renderHomeLatestChangesCard', js_text)
         self.assertIn('No notable changes recorded yet.', js_text)
-        self.assertIn('Movement first, then recent activity and trend deltas.', js_text)
+        self.assertIn('Recent activity and trend shifts worth noting.', js_text)
 
     def test_source_template_includes_favicon_and_github_links(self):
         template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")

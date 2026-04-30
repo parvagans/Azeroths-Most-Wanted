@@ -132,7 +132,7 @@ function renderHomeLatestChangesCard(dashboardConfig = {}) {
     titleEl.textContent = latestChanges.title || 'What changed recently';
     summaryEl.textContent = latestChanges.empty || items.length === 0
         ? emptyText
-        : 'Movement first, then recent activity and trend deltas.';
+        : 'Recent activity and trend shifts worth noting.';
 
     listEl.innerHTML = '';
     if (latestChanges.empty || items.length === 0) {
