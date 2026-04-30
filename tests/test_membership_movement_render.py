@@ -323,6 +323,9 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn('Contact</a>', template_text)
         self.assertNotIn('class="footer-source-info"', template_text)
         self.assertIn('class="footer-contact-info"', template_text)
+        self.assertIn('href="#campaign-archive"', template_text)
+        self.assertIn('View Campaign Archive', template_text)
+        self.assertIn('Campaign Archive', template_text)
 
     def test_home_command_tiles_are_navigation_tiles_not_duplicate_metrics(self):
         template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")
