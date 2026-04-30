@@ -5,11 +5,37 @@ function setHomeText(id, value) {
     if (el) el.textContent = value;
 }
 
+function setHomeTextVisibility(id, value) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.textContent = value;
+    el.hidden = !value;
+}
+
 function setHomeCardText(valueId, selector, value) {
     const valueEl = document.getElementById(valueId);
     const cardEl = valueEl ? valueEl.closest('.home-nav-card') : null;
     const targetEl = cardEl ? cardEl.querySelector(selector) : null;
     if (targetEl) targetEl.textContent = value;
+}
+
+function setHomePulseSupport(valueId, supportTexts = []) {
+    const valueEl = document.getElementById(valueId);
+    const cardEl = valueEl ? valueEl.closest('.home-nav-card') : null;
+    const supportEl = cardEl ? cardEl.querySelector('.home-pulse-support') : null;
+    if (!supportEl) return;
+
+    const pills = Array.from(supportEl.querySelectorAll('.home-pulse-support-pill'));
+    let visibleCount = 0;
+
+    pills.forEach((pill, index) => {
+        const text = supportTexts[index] || '';
+        pill.textContent = text;
+        pill.hidden = !text;
+        if (text) visibleCount++;
+    });
+
+    supportEl.hidden = visibleCount === 0;
 }
 
 function formatHomeApiStatusTime(isoString) {
@@ -307,18 +333,45 @@ function populateHomeOverview(dashboardConfig = {}) {
     const raidReadyAllCount = getNumericConfigValue(dashboardConfig, 'raid_ready_count', raidReadyAllFallback);
     const raidReadyMainCount = getNumericConfigValue(dashboardConfig, 'raid_ready_count_mains', raidReadyMainFallback);
     const avgLvl70Ilvl = getNumericConfigValue(dashboardConfig, 'avg_ilvl_70_mains', avgLvl70IlvlFallback);
+    const totalAltCount = Math.max(0, totalAllCount - totalMainCount);
+    const activeAltCount = Math.max(0, activeAllCount - activeMainCount);
+    const raidReadyAltCount = Math.max(0, raidReadyAllCount - raidReadyMainCount);
+
     setHomeText('home-pulse-total', totalAllCount.toLocaleString());
     setHomeText('home-pulse-active', activeMainCount.toLocaleString());
     setHomeText('home-pulse-raidready', raidReadyMainCount.toLocaleString());
     setHomeText('home-kpi-ilvl', avgLvl70Ilvl.toLocaleString());
 
-    setHomeCardText('home-pulse-total', '.home-pulse-meta', `Mains: ${totalMainCount.toLocaleString()} / All chars: ${totalAllCount.toLocaleString()} / spark and trend compare all-character daily history.`);
-    setHomeCardText('home-pulse-active', '.home-pulse-label', 'Active in 14 Days (Mains)');
-    setHomeCardText('home-pulse-active', '.home-pulse-meta', `All chars: ${activeAllCount.toLocaleString()} / spark and trend now follow mains-only daily history.`);
-    setHomeCardText('home-pulse-raidready', '.home-pulse-label', 'Raid Ready (Mains)');
-    setHomeCardText('home-pulse-raidready', '.home-pulse-meta', `All chars: ${raidReadyAllCount.toLocaleString()} / mains shown first for deployment strength.`);
-    setHomeCardText('home-kpi-ilvl', '.home-pulse-label', 'Avg Level 70 iLvl (Mains)');
-    setHomeCardText('home-kpi-ilvl', '.home-pulse-meta', 'Mains-only read for capped roster power.');
+    setHomeCardText('home-pulse-total', '.home-pulse-label', 'Tracked Characters');
+    setHomeCardText('home-pulse-total', '.home-pulse-context', 'All scanned guild characters');
+    setHomePulseSupport('home-pulse-total', [
+        `${totalMainCount.toLocaleString()} mains`,
+        `${totalAltCount.toLocaleString()} alts`
+    ]);
+    setHomeCardText('home-pulse-total', '.home-pulse-meta', 'Main-based cards use mains first.');
+
+    setHomeCardText('home-pulse-active', '.home-pulse-label', 'Active Mains');
+    setHomeCardText('home-pulse-active', '.home-pulse-context', '14-day window');
+    setHomePulseSupport('home-pulse-active', [
+        `${activeAllCount.toLocaleString()} all active characters`,
+        `${activeAltCount.toLocaleString()} active alts`
+    ]);
+    setHomeCardText('home-pulse-active', '.home-pulse-meta', 'Seen in the last 14 days.');
+
+    setHomeCardText('home-pulse-raidready', '.home-pulse-label', 'Raid-Ready Mains');
+    setHomeCardText('home-pulse-raidready', '.home-pulse-context', 'Main-first deployment view');
+    setHomeTextVisibility('home-pulse-raidready-trend', '');
+    setHomePulseSupport('home-pulse-raidready', [
+        `${raidReadyAllCount.toLocaleString()} all raid-ready characters`,
+        `${raidReadyAltCount.toLocaleString()} raid-ready alts`
+    ]);
+    setHomeCardText('home-pulse-raidready', '.home-pulse-meta', 'Mains shown first because they reflect deployable roster strength.');
+
+    setHomeCardText('home-kpi-ilvl', '.home-pulse-label', 'Avg Level 70 iLvl');
+    setHomeCardText('home-kpi-ilvl', '.home-pulse-context', 'Level 70 mains only');
+    setHomeTextVisibility('home-pulse-ilvl-trend', '');
+    setHomePulseSupport('home-kpi-ilvl', ['Mains only']);
+    setHomeCardText('home-kpi-ilvl', '.home-pulse-meta', 'Average equipped iLvl for level 70 mains.');
 
     renderHomeMovementCard(dashboardConfig);
     renderHomeLatestChangesCard(dashboardConfig);

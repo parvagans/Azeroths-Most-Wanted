@@ -260,6 +260,28 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn('No notable changes recorded yet.', js_text)
         self.assertIn('Recent activity and trend shifts worth noting.', js_text)
 
+    def test_guild_pulse_copy_distinguishes_mains_alts_and_all_characters(self):
+        template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")
+        js_text = Path("render/src/js/features/home_analytics/home_overview.js").read_text(encoding="utf-8")
+        css_text = Path("render/style.css").read_text(encoding="utf-8")
+
+        self.assertIn('Tracked Characters', template_text)
+        self.assertIn('Active Mains', template_text)
+        self.assertIn('Raid-Ready Mains', template_text)
+        self.assertIn('Avg Level 70 iLvl', template_text)
+        self.assertIn('id="home-pulse-total-support-a"', template_text)
+        self.assertIn('id="home-pulse-active-support-a"', template_text)
+        self.assertIn('id="home-pulse-raidready-support-a"', template_text)
+        self.assertIn('id="home-pulse-ilvl-support-a"', template_text)
+        self.assertIn("setHomePulseSupport", js_text)
+        self.assertIn("All scanned guild characters", js_text)
+        self.assertIn("Seen in the last 14 days.", js_text)
+        self.assertIn("deployable roster strength", js_text)
+        self.assertIn("Average equipped iLvl for level 70 mains.", js_text)
+        self.assertIn(".home-pulse-context {", css_text)
+        self.assertIn(".home-pulse-support {", css_text)
+        self.assertIn(".home-pulse-support-pill {", css_text)
+
     def test_source_template_includes_favicon_and_github_links(self):
         template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")
 

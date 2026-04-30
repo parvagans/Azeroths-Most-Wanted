@@ -824,37 +824,57 @@
 
                     <div class="home-pulse-grid">
                         <button type="button" class="home-nav-card home-pulse-card" data-home-route="total">
-                            <span class="home-pulse-label">Total Roster</span>
+                            <span class="home-pulse-label">Tracked Characters</span>
+                            <span id="home-pulse-total-context" class="home-pulse-context">All scanned guild characters</span>
                             <strong id="home-pulse-total" class="home-pulse-value">0</strong>
                             <span id="trend-total" class="home-pulse-trend">-</span>
                             <div class="home-spark-wrap">
                                 <canvas id="spark-total" class="home-spark"></canvas>
                             </div>
-                            <span class="home-pulse-meta">Compared with the previous daily snapshot.</span>
+                            <div class="home-pulse-support">
+                                <span id="home-pulse-total-support-a" class="home-pulse-support-pill">0 mains</span>
+                                <span id="home-pulse-total-support-b" class="home-pulse-support-pill">0 alts</span>
+                            </div>
+                            <span class="home-pulse-meta">Main-based cards use mains first.</span>
                         </button>
 
                         <button type="button" class="home-nav-card home-pulse-card" data-home-route="active">
-                            <span class="home-pulse-label">Active in 14 Days</span>
+                            <span class="home-pulse-label">Active Mains</span>
+                            <span id="home-pulse-active-context" class="home-pulse-context">14-day window</span>
                             <strong id="home-pulse-active" class="home-pulse-value">0</strong>
                             <span id="trend-active" class="home-pulse-trend">-</span>
                             <div class="home-spark-wrap">
                                 <canvas id="spark-active" class="home-spark"></canvas>
                             </div>
-                            <span class="home-pulse-meta">Recent movement, logins, loot, and other signs of life.</span>
+                            <div class="home-pulse-support">
+                                <span id="home-pulse-active-support-a" class="home-pulse-support-pill">0 all active characters</span>
+                                <span id="home-pulse-active-support-b" class="home-pulse-support-pill">0 active alts</span>
+                            </div>
+                            <span class="home-pulse-meta">Seen in the last 14 days.</span>
                         </button>
 
                         <button type="button" class="home-nav-card home-pulse-card" data-home-route="raidready">
-                            <span class="home-pulse-label">Raid Ready</span>
+                            <span class="home-pulse-label">Raid-Ready Mains</span>
+                            <span id="home-pulse-raidready-context" class="home-pulse-context">Main-first deployment view</span>
                             <strong id="home-pulse-raidready" class="home-pulse-value">0</strong>
-                            <span class="home-pulse-trend home-pulse-trend-static">Roster prepared for content tonight.</span>
-                            <span class="home-pulse-meta">Best quick read for deployment strength and roster confidence.</span>
+                            <span id="home-pulse-raidready-trend" class="home-pulse-trend home-pulse-trend-static"></span>
+                            <div class="home-pulse-support">
+                                <span id="home-pulse-raidready-support-a" class="home-pulse-support-pill">0 all raid-ready characters</span>
+                                <span id="home-pulse-raidready-support-b" class="home-pulse-support-pill">0 raid-ready alts</span>
+                            </div>
+                            <span class="home-pulse-meta">Mains shown first because they reflect deployable roster strength.</span>
                         </button>
 
                         <button type="button" class="home-nav-card home-pulse-card" data-home-route="ladder-pve">
                             <span class="home-pulse-label">Avg Level 70 iLvl</span>
+                            <span id="home-pulse-ilvl-context" class="home-pulse-context">Level 70 mains only</span>
                             <strong id="home-kpi-ilvl" class="home-pulse-value">0</strong>
-                            <span class="home-pulse-trend home-pulse-trend-static">Direct shortcut to the PvE ladder.</span>
-                            <span class="home-pulse-meta">A simple signal for how much power your capped roster carries.</span>
+                            <span id="home-pulse-ilvl-trend" class="home-pulse-trend home-pulse-trend-static"></span>
+                            <div class="home-pulse-support">
+                                <span id="home-pulse-ilvl-support-a" class="home-pulse-support-pill">Mains only</span>
+                                <span id="home-pulse-ilvl-support-b" class="home-pulse-support-pill" hidden></span>
+                            </div>
+                            <span class="home-pulse-meta">Average equipped iLvl for level 70 mains.</span>
                         </button>
                     </div>
                 </section>
