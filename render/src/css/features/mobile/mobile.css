@@ -1349,6 +1349,10 @@
     grid-template-columns: 1fr;
   }
 
+  .analytics-readiness-gap-section {
+    margin: 2px auto 30px;
+  }
+
   .analytics-campaign-history-metric {
     padding: 13px 14px;
   }
@@ -1362,6 +1366,36 @@
   .analytics-readiness-funnel-helper,
   .analytics-readiness-funnel-note,
   .analytics-readiness-funnel-empty {
+    font-size: 13px;
+  }
+
+  .analytics-readiness-gap-card {
+    padding: 16px;
+  }
+
+  .analytics-readiness-gap-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-readiness-gap-meter-wrap {
+    gap: 6px;
+  }
+
+  .analytics-readiness-gap-meter {
+    height: 8px;
+  }
+
+  .analytics-readiness-gap-fill {
+    box-shadow: 0 0 14px rgba(46, 204, 113, 0.18);
+  }
+
+  .analytics-readiness-gap-stat {
+    padding: 13px 14px;
+  }
+
+  .analytics-readiness-gap-summary,
+  .analytics-readiness-gap-note,
+  .analytics-readiness-gap-meter-meta {
     font-size: 13px;
   }
 
@@ -1615,7 +1649,15 @@
     padding: 14px;
   }
 
+  .analytics-readiness-gap-card {
+    padding: 14px;
+  }
+
   .analytics-roster-composition-panel {
+    padding: 12px 13px;
+  }
+
+  .analytics-readiness-gap-stat {
     padding: 12px 13px;
   }
 
@@ -1633,6 +1675,16 @@
 
   .analytics-roster-composition-row-meta {
     font-size: 11px;
+  }
+
+  .analytics-readiness-gap-summary,
+  .analytics-readiness-gap-note,
+  .analytics-readiness-gap-meter-meta {
+    font-size: 12px;
+  }
+
+  .analytics-readiness-gap-value {
+    font-size: 17px;
   }
 
   .char-card-summary-grid {
@@ -1654,11 +1706,27 @@
     padding: 11px 12px;
   }
 
+  .analytics-readiness-gap-card {
+    padding: 12px;
+  }
+
+  .analytics-readiness-gap-stat {
+    padding: 11px 12px;
+  }
+
   .analytics-roster-composition-row-value {
     font-size: 16px;
   }
 
   .analytics-roster-composition-footer-note {
+    font-size: 11px;
+  }
+
+  .analytics-readiness-gap-value {
+    font-size: 16px;
+  }
+
+  .analytics-readiness-gap-note {
     font-size: 11px;
   }
 
@@ -1725,6 +1793,14 @@
     margin-right: auto;
   }
 
+  .analytics-readiness-gap-card {
+    padding: 12px;
+  }
+
+  .analytics-readiness-gap-stat {
+    padding: 11px 12px;
+  }
+
   .controls-wrapper {
     gap: 8px 10px;
   }
@@ -1755,6 +1831,14 @@
 
   .nav-links-container {
     width: min(300px, 96vw);
+  }
+
+  .analytics-readiness-gap-card {
+    padding: 10px;
+  }
+
+  .analytics-readiness-gap-stat {
+    padding: 10px 11px;
   }
 
   .home-pulse-value,

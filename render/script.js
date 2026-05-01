@@ -4680,6 +4680,15 @@ window.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
+        if (typeof renderAnalyticsReadinessGap === 'function') {
+            renderAnalyticsReadinessGap({
+                hasSnapshotData: hasAnalyticsSnapshotData,
+                level70Mains: mainLvl70Count,
+                raidReadyMains: mainRaidReadyCount,
+                avgIlvl70: mainAvgIlvl
+            });
+        }
+
         if (typeof renderAnalyticsRosterComposition === 'function') {
             renderAnalyticsRosterComposition({
                 roster: Array.isArray(rawGuildRoster) && rawGuildRoster.length > 0 ? rawGuildRoster : rosterData

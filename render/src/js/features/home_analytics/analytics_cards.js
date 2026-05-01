@@ -339,6 +339,134 @@ function renderAnalyticsReadinessFunnel(funnel = {}) {
     emptyEl.hidden = true;
 }
 
+function buildAnalyticsReadinessGapStat({ label, value, meta, tone = '' }) {
+    const safeValue = value === null || value === undefined || value === ''
+        ? '—'
+        : String(value);
+    const safeMeta = meta || 'Not available from current snapshot';
+
+    return `
+        <div class="analytics-readiness-gap-stat" data-tone="${escapeAnalyticsHtml(tone)}">
+            <span class="analytics-readiness-gap-label">${escapeAnalyticsHtml(label)}</span>
+            <strong class="analytics-readiness-gap-value">${escapeAnalyticsHtml(safeValue)}</strong>
+            <span class="analytics-readiness-gap-meta">${escapeAnalyticsHtml(safeMeta)}</span>
+        </div>
+    `;
+}
+
+function renderAnalyticsReadinessGap(gap = {}) {
+    const cardEl = document.getElementById('analytics-readiness-gap-card');
+    if (!cardEl) return;
+
+    const summaryEl = document.getElementById('analytics-readiness-gap-summary');
+    const noteEl = document.getElementById('analytics-readiness-gap-note');
+    const statsEl = document.getElementById('analytics-readiness-gap-stats');
+    const meterWrapEl = document.getElementById('analytics-readiness-gap-meter-wrap');
+    const meterFillEl = document.getElementById('analytics-readiness-gap-fill');
+    const meterMetaEl = document.getElementById('analytics-readiness-gap-meter-meta');
+
+    if (!summaryEl || !noteEl || !statsEl || !meterWrapEl || !meterFillEl || !meterMetaEl) return;
+
+    const hasSnapshotData = !!gap.hasSnapshotData;
+    const level70Mains = Number(gap.level70Mains);
+    const raidReadyMains = Number(gap.raidReadyMains);
+    const avgIlvl70 = Number(gap.avgIlvl70);
+
+    const hasLevel70 = Number.isFinite(level70Mains) && level70Mains >= 0;
+    const hasRaidReady = Number.isFinite(raidReadyMains) && raidReadyMains >= 0;
+    const hasAvgIlvl = Number.isFinite(avgIlvl70) && avgIlvl70 > 0;
+
+    if (!hasSnapshotData || (!hasLevel70 && !hasRaidReady && !hasAvgIlvl)) {
+        statsEl.innerHTML = '';
+        meterWrapEl.hidden = true;
+        summaryEl.textContent = 'Readiness gap data is not available for this snapshot.';
+        noteEl.hidden = true;
+        noteEl.textContent = 'Some readiness gap fields are unavailable from the current snapshot.';
+        cardEl.setAttribute('data-readiness-gap-state', 'empty');
+        return;
+    }
+
+    const canComputeGap = hasLevel70 && hasRaidReady && level70Mains > 0;
+    const sharePercent = canComputeGap
+        ? formatAnalyticsFunnelPercent(raidReadyMains, level70Mains)
+        : null;
+    const gapCount = canComputeGap ? Math.max(level70Mains - raidReadyMains, 0) : null;
+
+    const stats = [];
+    if (hasRaidReady) {
+        stats.push(buildAnalyticsReadinessGapStat({
+            label: 'Raid-ready mains',
+            value: raidReadyMains.toLocaleString(),
+            meta: hasLevel70
+                ? (sharePercent === null ? 'Not available from current snapshot' : `${sharePercent}% of level 70 mains`)
+                : 'Tracked from current snapshot',
+            tone: 'ready'
+        }));
+    }
+    if (hasLevel70) {
+        stats.push(buildAnalyticsReadinessGapStat({
+            label: 'Level 70 mains',
+            value: level70Mains.toLocaleString(),
+            meta: 'Current level-cap main roster',
+            tone: 'level'
+        }));
+    }
+    if (gapCount !== null) {
+        stats.push(buildAnalyticsReadinessGapStat({
+            label: 'Not-yet raid-ready',
+            value: gapCount.toLocaleString(),
+            meta: sharePercent === null
+                ? 'Not available from current snapshot'
+                : `${Math.max(0, 100 - sharePercent)}% of level 70 mains`,
+            tone: 'gap'
+        }));
+    }
+    if (sharePercent !== null) {
+        stats.push(buildAnalyticsReadinessGapStat({
+            label: 'Raid-ready share',
+            value: `${sharePercent}%`,
+            meta: 'Of current level 70 mains',
+            tone: 'share'
+        }));
+    }
+    if (hasAvgIlvl) {
+        stats.push(buildAnalyticsReadinessGapStat({
+            label: 'Avg level 70 iLvl',
+            value: avgIlvl70.toLocaleString(),
+            meta: 'Level 70 mains only',
+            tone: 'ilvl'
+        }));
+    }
+
+    statsEl.innerHTML = stats.join('');
+
+    if (sharePercent !== null) {
+        meterWrapEl.hidden = false;
+        meterFillEl.style.width = `${sharePercent}%`;
+        meterMetaEl.textContent = `${sharePercent}% raid-ready among level 70 mains`;
+    } else {
+        meterWrapEl.hidden = true;
+        meterFillEl.style.width = '0%';
+        meterMetaEl.textContent = 'Raid-ready share of level 70 mains.';
+    }
+
+    if (hasLevel70 && hasRaidReady && level70Mains > 0) {
+        summaryEl.textContent = `${raidReadyMains.toLocaleString()} of ${level70Mains.toLocaleString()} level 70 mains are raid-ready. ${gapCount.toLocaleString()} are not yet raid-ready.`;
+    } else if (hasLevel70 && level70Mains <= 0) {
+        summaryEl.textContent = 'No level 70 mains are recorded in the current snapshot.';
+    } else if (hasLevel70) {
+        summaryEl.textContent = `${level70Mains.toLocaleString()} level 70 mains are recorded in the current snapshot.`;
+    } else if (hasRaidReady) {
+        summaryEl.textContent = `${raidReadyMains.toLocaleString()} raid-ready mains are recorded in the current snapshot.`;
+    } else {
+        summaryEl.textContent = 'Readiness gap data is not available for this snapshot.';
+    }
+
+    noteEl.hidden = canComputeGap && hasAvgIlvl;
+    noteEl.textContent = 'Some readiness gap fields are unavailable from the current snapshot.';
+    cardEl.setAttribute('data-readiness-gap-state', canComputeGap && hasAvgIlvl ? 'populated' : 'partial');
+}
+
 function escapeAnalyticsHtml(value) {
     return String(value ?? '')
         .replace(/&/g, '&amp;')
