@@ -4680,6 +4680,12 @@ window.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
+        if (typeof renderAnalyticsRosterComposition === 'function') {
+            renderAnalyticsRosterComposition({
+                roster: Array.isArray(rawGuildRoster) && rawGuildRoster.length > 0 ? rawGuildRoster : rosterData
+            });
+        }
+
         const setKpiLabel = (valueId, text) => {
             const valueEl = document.getElementById(valueId);
             const labelEl = valueEl ? valueEl.closest('.stat-box')?.querySelector('.stat-label') : null;

@@ -672,6 +672,7 @@
 
   .analytics-hero-band,
   .analytics-campaign-history-metrics,
+  .analytics-roster-composition-grid,
   .analytics-readiness-funnel-stages,
   .analytics-kpi-wrapper,
   .analytics-quick-routes,
@@ -697,6 +698,7 @@
   }
 
   .analytics-route-card,
+  .analytics-roster-composition-card,
   .analytics-pressure-card,
   .analytics-readiness-card,
   .analytics-spotlight-card {
@@ -711,6 +713,42 @@
   .analytics-campaign-history-footer {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .analytics-roster-composition-card {
+    padding: 16px;
+  }
+
+  .analytics-roster-composition-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-roster-composition-panel {
+    padding: 13px 14px;
+  }
+
+  .analytics-roster-composition-row-head {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+
+  .analytics-roster-composition-row-value {
+    white-space: normal;
+    line-height: 1.1;
+  }
+
+  .analytics-roster-composition-row-meta {
+    font-size: 12px;
+  }
+
+  .analytics-roster-composition-footer {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .analytics-roster-composition-cta {
+    width: 100%;
   }
 
   .analytics-campaign-history-cta {
@@ -1578,6 +1616,30 @@
     padding: 18px 14px;
   }
 
+  .analytics-roster-composition-card {
+    padding: 14px;
+  }
+
+  .analytics-roster-composition-panel {
+    padding: 12px 13px;
+  }
+
+  .analytics-roster-composition-row {
+    gap: 6px;
+  }
+
+  .analytics-roster-composition-row-label {
+    font-size: 11px;
+  }
+
+  .analytics-roster-composition-row-value {
+    font-size: 17px;
+  }
+
+  .analytics-roster-composition-row-meta {
+    font-size: 11px;
+  }
+
   .char-card-summary-grid {
     grid-template-columns: 1fr;
   }
@@ -1587,6 +1649,18 @@
 @media (max-width: 412px) {
   .hero-header-row {
     padding: 12px;
+  }
+
+  .analytics-roster-composition-card {
+    padding: 12px;
+  }
+
+  .analytics-roster-composition-panel {
+    padding: 11px 12px;
+  }
+
+  .analytics-roster-composition-row-value {
+    font-size: 16px;
   }
 
   .command-hero-shell,

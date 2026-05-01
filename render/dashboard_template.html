@@ -1356,14 +1356,43 @@
                     </div>
                 </section>
 
-                <section class="analytics-intel-section analytics-intel-section-composition">
+                <section id="analytics-roster-composition-section" class="analytics-intel-section analytics-intel-section-composition">
                     <div class="home-section-heading home-section-heading-compact analytics-heading">
-                        <span class="home-section-kicker">Warband Composition</span>
-                        <h3 class="home-section-title">What the roster is made of</h3>
-                        <p class="home-section-subtitle">Use this section to inspect depth, class spread, and faction flavor across the scanned guild.</p>
+                        <span class="home-section-kicker">Roster Composition</span>
+                        <h3 class="home-section-title">What the current snapshot looks like</h3>
+                        <p class="home-section-subtitle">A compact snapshot of mains vs alts, class mix, and level bands before the detailed composition charts below.</p>
                     </div>
 
-                    <div class="analytics-card-grid analytics-card-grid-three">
+                    <article id="analytics-roster-composition-card" class="analytics-roster-composition-card">
+                        <div class="analytics-roster-composition-copy">
+                            <span class="analytics-roster-composition-kicker">Snapshot Scope</span>
+                            <p id="analytics-roster-composition-summary" class="analytics-roster-composition-summary">Roster composition data is not available for this snapshot.</p>
+                            <p id="analytics-roster-composition-note" class="analytics-roster-composition-note" hidden>Some composition fields are unavailable from the current snapshot.</p>
+                        </div>
+
+                        <div class="analytics-roster-composition-grid" aria-label="Roster composition snapshot">
+                            <section class="analytics-roster-composition-panel analytics-roster-composition-panel-type">
+                                <span class="analytics-roster-composition-panel-label">Character Type</span>
+                                <div id="analytics-roster-composition-types" class="analytics-roster-composition-list"></div>
+                            </section>
+
+                            <section class="analytics-roster-composition-panel analytics-roster-composition-panel-classes">
+                                <span class="analytics-roster-composition-panel-label">Top Classes</span>
+                                <div id="analytics-roster-composition-classes" class="analytics-roster-composition-list"></div>
+                            </section>
+
+                            <section class="analytics-roster-composition-panel analytics-roster-composition-panel-levels">
+                                <span class="analytics-roster-composition-panel-label">Level Bands</span>
+                                <div id="analytics-roster-composition-levels" class="analytics-roster-composition-list"></div>
+                            </section>
+                        </div>
+
+                        <div class="analytics-roster-composition-footer">
+                            <a href="#analytics-composition-charts" id="analytics-roster-composition-cta" class="analytics-roster-composition-cta">Open detailed composition charts</a>
+                        </div>
+                    </article>
+
+                    <div id="analytics-composition-charts" class="analytics-card-grid analytics-card-grid-three">
                         <div class="heatmap-wrapper analytics-card analytics-card-composition">
                             <div class="analytics-card-head">
                                 <h3 class="heatmap-title chart-title-center">📊 Class Distribution <span class="chart-title-sub">Scanned Roster</span></h3>

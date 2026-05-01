@@ -339,6 +339,179 @@ function renderAnalyticsReadinessFunnel(funnel = {}) {
     emptyEl.hidden = true;
 }
 
+function escapeAnalyticsHtml(value) {
+    return String(value ?? '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+
+function formatAnalyticsSnapshotShare(count, total) {
+    const numericCount = Number(count);
+    const numericTotal = Number(total);
+    if (!Number.isFinite(numericCount) || !Number.isFinite(numericTotal) || numericTotal <= 0) return null;
+    return Math.round((numericCount / numericTotal) * 100);
+}
+
+function formatAnalyticsSnapshotShareText(count, total) {
+    const share = formatAnalyticsSnapshotShare(count, total);
+    return share === null ? 'Not available from current snapshot' : `${share}% of roster`;
+}
+
+function getAnalyticsRosterClass(entry) {
+    const rawClass = entry && (entry.class || entry.character_class || entry.playable_class || (entry.profile && entry.profile.class));
+    const className = String(rawClass || 'Unknown').trim();
+    return className || 'Unknown';
+}
+
+function getAnalyticsRosterLevel(entry) {
+    const rawLevel = entry && (entry.level ?? entry.current_level ?? (entry.profile && entry.profile.level));
+    const level = Number(rawLevel);
+    return Number.isFinite(level) ? level : null;
+}
+
+function buildAnalyticsCompositionRow({ label, count, total, meta, tone = '' }) {
+    const share = formatAnalyticsSnapshotShare(count, total);
+    const safeCount = Number.isFinite(Number(count)) ? Number(count).toLocaleString() : '—';
+    const safeMeta = meta || (share === null ? 'Not available from current snapshot' : `${share}% of snapshot`);
+    const fillPercent = Number.isFinite(share) ? Math.max(0, Math.min(100, share)) : 0;
+
+    return `
+        <div class="analytics-roster-composition-row" data-tone="${escapeAnalyticsHtml(tone)}">
+            <div class="analytics-roster-composition-row-head">
+                <span class="analytics-roster-composition-row-label">${escapeAnalyticsHtml(label)}</span>
+                <strong class="analytics-roster-composition-row-value">${safeCount}</strong>
+            </div>
+            <div class="analytics-roster-composition-meter" aria-hidden="true">
+                <span class="analytics-roster-composition-fill" style="width: ${fillPercent}%;"></span>
+            </div>
+            <span class="analytics-roster-composition-row-meta">${escapeAnalyticsHtml(safeMeta)}</span>
+        </div>
+    `;
+}
+
+function renderAnalyticsRosterComposition(composition = {}) {
+    const cardEl = document.getElementById('analytics-roster-composition-card');
+    if (!cardEl) return;
+
+    const summaryEl = document.getElementById('analytics-roster-composition-summary');
+    const noteEl = document.getElementById('analytics-roster-composition-note');
+    const typesEl = document.getElementById('analytics-roster-composition-types');
+    const classesEl = document.getElementById('analytics-roster-composition-classes');
+    const levelsEl = document.getElementById('analytics-roster-composition-levels');
+    const ctaEl = document.getElementById('analytics-roster-composition-cta');
+
+    if (!summaryEl || !noteEl || !typesEl || !classesEl || !levelsEl || !ctaEl) return;
+
+    const roster = Array.isArray(composition.roster) ? composition.roster.filter(Boolean) : [];
+    const totalRoster = roster.length;
+    const emptyCopy = 'Roster composition data is not available for this snapshot.';
+    const partialCopy = 'Some composition fields are unavailable from the current snapshot.';
+
+    if (!totalRoster) {
+        typesEl.textContent = '';
+        classesEl.textContent = '';
+        levelsEl.textContent = '';
+        summaryEl.textContent = emptyCopy;
+        noteEl.hidden = true;
+        noteEl.textContent = partialCopy;
+        ctaEl.setAttribute('href', '#analytics-composition-charts');
+        cardEl.setAttribute('data-composition-state', 'empty');
+        return;
+    }
+
+    const typeCounts = getAltAwareCounts(roster, true);
+    const classCounts = new Map();
+    let knownClassCount = 0;
+    let knownLevelCount = 0;
+    let level70Count = 0;
+    let level60to69Count = 0;
+    let below60Count = 0;
+
+    roster.forEach(entry => {
+        if (!entry) return;
+
+        const className = getAnalyticsRosterClass(entry);
+        classCounts.set(className, (classCounts.get(className) || 0) + 1);
+        if (className !== 'Unknown') {
+            knownClassCount++;
+        }
+
+        const level = getAnalyticsRosterLevel(entry);
+        if (level !== null) {
+            knownLevelCount++;
+            if (level >= 70) level70Count++;
+            else if (level >= 60) level60to69Count++;
+            else below60Count++;
+        }
+    });
+
+    const topClasses = [...classCounts.entries()]
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+
+    typesEl.innerHTML = [
+        buildAnalyticsCompositionRow({
+            label: 'Mains',
+            count: typeCounts.mainCount,
+            total: typeCounts.allCount,
+            meta: formatAnalyticsSnapshotShareText(typeCounts.mainCount, typeCounts.allCount),
+            tone: 'main'
+        }),
+        buildAnalyticsCompositionRow({
+            label: 'Alts',
+            count: typeCounts.altCount,
+            total: typeCounts.allCount,
+            meta: formatAnalyticsSnapshotShareText(typeCounts.altCount, typeCounts.allCount),
+            tone: 'alt'
+        })
+    ].join('');
+
+    classesEl.innerHTML = topClasses.length > 0
+        ? topClasses.map(([label, count]) => buildAnalyticsCompositionRow({
+            label,
+            count,
+            total: totalRoster,
+            meta: formatAnalyticsSnapshotShareText(count, totalRoster),
+            tone: 'class'
+        })).join('')
+        : `<div class="analytics-roster-composition-empty-state">No class data available from this snapshot.</div>`;
+
+    levelsEl.innerHTML = [
+        buildAnalyticsCompositionRow({
+            label: 'Level 70',
+            count: level70Count,
+            total: totalRoster,
+            meta: formatAnalyticsSnapshotShareText(level70Count, totalRoster),
+            tone: 'level'
+        }),
+        buildAnalyticsCompositionRow({
+            label: 'Level 60-69',
+            count: level60to69Count,
+            total: totalRoster,
+            meta: formatAnalyticsSnapshotShareText(level60to69Count, totalRoster),
+            tone: 'level'
+        }),
+        buildAnalyticsCompositionRow({
+            label: 'Below 60',
+            count: below60Count,
+            total: totalRoster,
+            meta: formatAnalyticsSnapshotShareText(below60Count, totalRoster),
+            tone: 'level'
+        })
+    ].join('');
+
+    const hasMissingCompositionFields = knownClassCount < totalRoster || knownLevelCount < totalRoster;
+
+    summaryEl.textContent = 'This snapshot uses the raw guild roster to split mains and alts, then surfaces the most represented classes and level bands at a glance.';
+    noteEl.hidden = !hasMissingCompositionFields;
+    noteEl.textContent = partialCopy;
+    cardEl.setAttribute('data-composition-state', hasMissingCompositionFields ? 'partial' : 'populated');
+    ctaEl.setAttribute('href', '#analytics-composition-charts');
+}
+
 function getPressureState(count, role) {
     if (role === 'Tank') {
         if (count <= 2) return { state: 'Thin shield wall', meta: 'Priority role for dependable raid structure and dungeon leadership.' };
