@@ -46,6 +46,7 @@ class MobileLayoutTests(unittest.TestCase):
             "Phone layouts: home, roster cards, archive, analytics, dossier",
             "Compact phone stats and metric scopes",
             "Roster distribution bars and cards",
+            "Progression readiness bars and cards",
             "Narrow-phone root alignment",
             "Very narrow phones and bottom-browser chrome",
         ):
@@ -116,6 +117,16 @@ class MobileLayoutTests(unittest.TestCase):
         self.assertIn(".analytics-distribution-item-value", mobile_css)
         self.assertIn(".analytics-distribution-item-meta", mobile_css)
         self.assertIn(".analytics-distribution-note", mobile_css)
+        self.assertIn(".analytics-progression-readiness-section", mobile_css)
+        self.assertIn(".analytics-progression-grid", mobile_css)
+        self.assertIn(".analytics-progression-card", mobile_css)
+        self.assertIn(".analytics-progression-head", mobile_css)
+        self.assertIn(".analytics-progression-list", mobile_css)
+        self.assertIn(".analytics-progression-item", mobile_css)
+        self.assertIn(".analytics-progression-item-head", mobile_css)
+        self.assertIn(".analytics-progression-item-value", mobile_css)
+        self.assertIn(".analytics-progression-meter", mobile_css)
+        self.assertIn(".analytics-progression-fill", mobile_css)
         self.assertIn(".analytics-readiness-gap-section", mobile_css)
         self.assertIn(".analytics-readiness-gap-card", mobile_css)
         self.assertIn(".analytics-readiness-gap-stats", mobile_css)
@@ -190,6 +201,12 @@ class MobileLayoutTests(unittest.TestCase):
         self.assertIn("const cardEl = document.getElementById('home-movement-card');", Path(
             ROOT / "render/src/js/features/home_analytics/home_overview.js"
         ).read_text(encoding="utf-8"))
+
+    def test_analytics_mobile_css_no_longer_relies_on_readiness_canvas_selectors(self):
+        self.assertNotIn(".analytics-card-composition .chart-canvas-wrapper", self.analytics_css)
+        self.assertNotIn(".analytics-card-readiness .chart-canvas-wrapper", self.analytics_css)
+        self.assertNotIn(".analytics-card-composition .chart-canvas-wrapper", self.mobile_css)
+        self.assertNotIn(".analytics-card-readiness .chart-canvas-wrapper", self.mobile_css)
 
     def test_public_cleanup_and_removed_homepage_surfaces_remain_absent(self):
         self.assertNotIn("github.com", self.template)

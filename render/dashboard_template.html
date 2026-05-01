@@ -1450,33 +1450,41 @@
                     </div>
                 </section>
 
-                <section class="analytics-intel-section analytics-intel-section-readiness">
+                <section id="analytics-progression-readiness-section" class="analytics-intel-section analytics-intel-section-readiness">
                     <div class="home-section-heading home-section-heading-compact analytics-heading">
                         <span class="home-section-kicker">Progression Readiness</span>
                         <h3 class="home-section-title">How close the guild is to endgame strength</h3>
-                        <p class="home-section-subtitle">These charts separate leveling progress from max-level gear readiness.</p>
+                        <p class="home-section-subtitle">These bars separate leveling progress from max-level gear readiness.</p>
                     </div>
 
-                    <div class="analytics-card-grid analytics-card-grid-two">
-                        <div class="heatmap-wrapper analytics-card analytics-card-readiness">
-                            <div class="analytics-card-head">
-                                <h3 class="heatmap-title chart-title-center">📈 Level Distribution <span class="chart-title-sub">Roster-known Levels</span></h3>
-                                <span class="analytics-card-hint">Click a bracket to inspect that level range</span>
-                            </div>
-                            <div class="chart-canvas-wrapper">
-                                <canvas id="levelDistChart"></canvas>
-                            </div>
-                        </div>
+                    <p id="analytics-progression-note" class="analytics-progression-note" hidden>Some progression readiness fields are unavailable from the current snapshot.</p>
 
-                        <div class="heatmap-wrapper analytics-card analytics-card-readiness">
-                            <div class="analytics-card-head">
-                                <h3 class="heatmap-title chart-title-center">⚔️ Max Level iLvl Spread <span class="chart-title-sub">Lvl 70s Only</span></h3>
-                                <span class="analytics-card-hint">Click a bracket to inspect geared level 70 characters</span>
+                    <div class="analytics-card-grid analytics-card-grid-two analytics-progression-grid">
+                        <article id="analytics-level-distribution-card" class="analytics-card analytics-card-readiness analytics-progression-card">
+                            <div class="analytics-progression-head">
+                                <div class="analytics-progression-head-copy">
+                                    <span class="analytics-progression-kicker">Level Distribution</span>
+                                    <h4 class="analytics-progression-title">Roster-known Levels</h4>
+                                    <span class="analytics-progression-scope">XP-style progression bands</span>
+                                </div>
+                                <span class="analytics-card-hint">Click a bar to inspect that bracket</span>
                             </div>
-                            <div class="chart-canvas-wrapper">
-                                <canvas id="ilvlDistChart"></canvas>
+                            <p class="analytics-progression-summary">Current level bands across the roster snapshot.</p>
+                            <div id="analytics-level-distribution-list" class="analytics-progression-list" aria-label="Level distribution roster"></div>
+                        </article>
+
+                        <article id="analytics-ilvl-spread-card" class="analytics-card analytics-card-readiness analytics-progression-card">
+                            <div class="analytics-progression-head">
+                                <div class="analytics-progression-head-copy">
+                                    <span class="analytics-progression-kicker">Max Level iLvl Spread</span>
+                                    <h4 class="analytics-progression-title">Lvl 70s Only</h4>
+                                    <span class="analytics-progression-scope">Item-level readiness brackets</span>
+                                </div>
+                                <span class="analytics-card-hint">Click a bar to inspect geared level 70 characters</span>
                             </div>
-                        </div>
+                            <p class="analytics-progression-summary">How the level 70 roster spreads across item-level ranges.</p>
+                            <div id="analytics-ilvl-spread-list" class="analytics-progression-list" aria-label="Max level item level spread roster"></div>
+                        </article>
                     </div>
                 </section>
 

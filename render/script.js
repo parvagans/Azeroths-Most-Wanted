@@ -167,8 +167,6 @@ window.addEventListener('DOMContentLoaded', async () => {
     window.activeClassExpanded = null;
     let mainDonutChartInstance = null;     
     let conciseDonutChartInstance = null;
-    let levelChartInstance = null;
-    let ilvlChartInstance = null;
     let analyticsActivityChartInst = null;
     window.roleChartInstance = null;
     const analyticsView = document.getElementById('analytics-view');   
@@ -4687,6 +4685,14 @@ window.addEventListener('DOMContentLoaded', async () => {
             });
         }
 
+        const analyticsRosterSnapshot = Array.isArray(rawGuildRoster) && rawGuildRoster.length > 0 ? rawGuildRoster : rosterData;
+
+        if (typeof renderAnalyticsProgressionReadiness === 'function') {
+            renderAnalyticsProgressionReadiness({
+                roster: analyticsRosterSnapshot
+            });
+        }
+
         if (typeof renderAnalyticsHonorSnapshot === 'function') {
             renderAnalyticsHonorSnapshot({
                 hasSnapshotData: hasAnalyticsSnapshotData,
@@ -4694,8 +4700,6 @@ window.addEventListener('DOMContentLoaded', async () => {
                 totalHks
             });
         }
-
-        const analyticsRosterSnapshot = Array.isArray(rawGuildRoster) && rawGuildRoster.length > 0 ? rawGuildRoster : rosterData;
 
         if (typeof renderAnalyticsRosterComposition === 'function') {
             renderAnalyticsRosterComposition({

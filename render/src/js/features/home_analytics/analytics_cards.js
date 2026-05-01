@@ -643,6 +643,21 @@ function getAnalyticsRosterLevel(entry) {
     return Number.isFinite(level) ? level : null;
 }
 
+function getAnalyticsRosterIlvl(entry) {
+    const rawIlvl = entry && (
+        entry.equipped_item_level
+        ?? entry.item_level
+        ?? entry.current_item_level
+        ?? (entry.profile && (
+            entry.profile.equipped_item_level
+            ?? entry.profile.item_level
+            ?? entry.profile.current_item_level
+        ))
+    );
+    const ilvl = Number(rawIlvl);
+    return Number.isFinite(ilvl) && ilvl > 0 ? ilvl : null;
+}
+
 function buildAnalyticsCompositionRow({ label, count, total, meta, tone = '' }) {
     const share = formatAnalyticsSnapshotShare(count, total);
     const safeCount = Number.isFinite(Number(count)) ? Number(count).toLocaleString() : '—';
@@ -688,6 +703,225 @@ function buildAnalyticsDistributionItem({ label, count, total, meta, tone = '', 
             <span class="analytics-distribution-item-meta">${escapeAnalyticsHtml(safeMeta)}</span>
         </${route ? 'button' : 'div'}>
     `;
+}
+
+function buildAnalyticsProgressionRow({ label, count, total, meta, tone = '', route = '' }) {
+    const share = formatAnalyticsSnapshotShare(count, total);
+    const safeCount = Number.isFinite(Number(count)) ? Number(count).toLocaleString() : '—';
+    const safeMeta = meta || (share === null ? 'Not available from current snapshot' : `${share}% of roster`);
+    const fillPercent = Number.isFinite(share) ? Math.max(0, Math.min(100, share)) : 0;
+    const routeAttr = route ? ` data-home-route="${escapeAnalyticsHtml(route)}"` : '';
+    const labelText = escapeAnalyticsHtml(label);
+    const interactiveClass = route ? '' : ' is-static';
+    const tagName = route ? 'button type="button"' : 'div';
+
+    return `
+        <${tagName} class="analytics-progression-item${interactiveClass}" data-tone="${escapeAnalyticsHtml(tone)}"${routeAttr}${route ? ` aria-label="Inspect ${labelText}"` : ''}>
+            <div class="analytics-progression-item-head">
+                <span class="analytics-progression-item-label">${labelText}</span>
+                <strong class="analytics-progression-item-value">${safeCount}</strong>
+            </div>
+            <div class="analytics-progression-meter" aria-hidden="true">
+                <span class="analytics-progression-fill" style="width: ${fillPercent > 0 ? Math.max(6, fillPercent) : 0}%;"></span>
+            </div>
+            <span class="analytics-progression-item-meta">${escapeAnalyticsHtml(safeMeta)}</span>
+        </${route ? 'button' : 'div'}>
+    `;
+}
+
+function formatAnalyticsProgressionShareText(count, total, suffix = 'of known roster') {
+    const share = formatAnalyticsSnapshotShare(count, total);
+    if (share === null) return 'Not available from current snapshot';
+    return `${share}% ${suffix}`;
+}
+
+function renderAnalyticsProgressionReadiness(progression = {}) {
+    const sectionEl = document.getElementById('analytics-progression-readiness-section');
+    if (!sectionEl) return;
+
+    const noteEl = document.getElementById('analytics-progression-note');
+    const levelCardEl = document.getElementById('analytics-level-distribution-card');
+    const levelListEl = document.getElementById('analytics-level-distribution-list');
+    const ilvlCardEl = document.getElementById('analytics-ilvl-spread-card');
+    const ilvlListEl = document.getElementById('analytics-ilvl-spread-list');
+
+    if (!noteEl || !levelCardEl || !levelListEl || !ilvlCardEl || !ilvlListEl) return;
+
+    const roster = Array.isArray(progression.roster) ? progression.roster.filter(Boolean) : [];
+    const emptyLevelCopy = 'Level distribution data is not available for this snapshot.';
+    const emptyIlvlCopy = 'Item-level spread data is not available for this snapshot.';
+    const partialCopy = 'Some progression readiness fields are unavailable from the current snapshot.';
+
+    if (!roster.length) {
+        levelListEl.innerHTML = `<div class="analytics-progression-empty-state">${escapeAnalyticsHtml(emptyLevelCopy)}</div>`;
+        ilvlListEl.innerHTML = `<div class="analytics-progression-empty-state">${escapeAnalyticsHtml(emptyIlvlCopy)}</div>`;
+        noteEl.hidden = true;
+        noteEl.textContent = partialCopy;
+        sectionEl.setAttribute('data-progression-state', 'empty');
+        levelCardEl.setAttribute('data-progression-state', 'empty');
+        ilvlCardEl.setAttribute('data-progression-state', 'empty');
+        return;
+    }
+
+    const levelCounts = new Map();
+    const ilvlCounts = new Map();
+    let unknownLevelCount = 0;
+    let totalLevel70Count = 0;
+    let unknownIlvlCount = 0;
+
+    roster.forEach(entry => {
+        const level = getAnalyticsRosterLevel(entry);
+        if (level === null) {
+            unknownLevelCount++;
+            return;
+        }
+
+        let levelLabel = '';
+        if (level >= 70) {
+            levelLabel = 'Level 70';
+            totalLevel70Count++;
+        } else if (level >= 60) {
+            levelLabel = 'Level 60-69';
+        } else if (level >= 50) {
+            levelLabel = 'Level 50-59';
+        } else {
+            levelLabel = 'Below 50';
+        }
+
+        const existingLevelCount = levelCounts.get(levelLabel) || 0;
+        levelCounts.set(levelLabel, existingLevelCount + 1);
+
+        if (level >= 70) {
+            const ilvl = getAnalyticsRosterIlvl(entry);
+            if (ilvl === null) {
+                unknownIlvlCount++;
+                return;
+            }
+
+            let ilvlLabel = '';
+            if (ilvl >= 130) {
+                ilvlLabel = '130+';
+            } else if (ilvl >= 120) {
+                ilvlLabel = '120-129';
+            } else if (ilvl >= 110) {
+                ilvlLabel = '110-119';
+            } else if (ilvl >= 100) {
+                ilvlLabel = '100-109';
+            } else {
+                ilvlLabel = '<100';
+            }
+
+            const existingIlvlCount = ilvlCounts.get(ilvlLabel) || 0;
+            ilvlCounts.set(ilvlLabel, existingIlvlCount + 1);
+        }
+    });
+
+    const levelTotal = roster.length;
+    const levelBandOrder = {
+        'Level 70': 0,
+        'Level 60-69': 1,
+        'Level 50-59': 2,
+        'Below 50': 3,
+    };
+    const levelToneByLabel = {
+        'Level 70': { route: 'filter-level-70', tone: 'peak' },
+        'Level 60-69': { route: 'filter-level-60-69', tone: 'mid' },
+        'Level 50-59': { route: 'filter-level-50-59', tone: 'low' },
+        'Below 50': { route: 'filter-level-1-49', tone: 'base' },
+    };
+
+    const knownLevelEntries = [...levelCounts.entries()]
+        .filter(([label, count]) => label !== 'Unknown' && count > 0)
+        .map(([label, count]) => ({
+            label,
+            count,
+            ...(levelToneByLabel[label] || { route: '', tone: '' })
+        }))
+        .sort((a, b) => (levelBandOrder[a.label] ?? 99) - (levelBandOrder[b.label] ?? 99));
+
+    const levelUnknown = unknownLevelCount > 0
+        ? { label: 'Unknown', count: unknownLevelCount, route: '', tone: 'unknown' }
+        : null;
+
+    const levelRows = [...knownLevelEntries];
+    if (levelUnknown) levelRows.push(levelUnknown);
+
+    const ilvlBandOrder = { '130+': 0, '120-129': 1, '110-119': 2, '100-109': 3, '<100': 4 };
+    const ilvlToneByLabel = {
+        '130+': { route: 'filter-ilvl-130+', tone: 'prime' },
+        '120-129': { route: 'filter-ilvl-120-129', tone: 'high' },
+        '110-119': { route: 'filter-ilvl-110-119', tone: 'steady' },
+        '100-109': { route: 'filter-ilvl-100-109', tone: 'rising' },
+        '<100': { route: 'filter-ilvl-<100', tone: 'under' }
+    };
+    const ilvlKnownRows = [...ilvlCounts.entries()]
+        .map(([label, count]) => ({
+            label,
+            count,
+            ...(ilvlToneByLabel[label] || { route: '', tone: '' })
+        }))
+        .sort((a, b) => (ilvlBandOrder[a.label] ?? 99) - (ilvlBandOrder[b.label] ?? 99));
+
+    const levelHasPartialData = unknownLevelCount > 0;
+    const levelHasKnownData = levelRows.some(row => row.label !== 'Unknown');
+    const ilvlHasPartialData = unknownIlvlCount > 0;
+    const ilvlHasKnownData = ilvlKnownRows.length > 0;
+    const hasPartialData = levelHasPartialData || ilvlHasPartialData;
+
+    if (!levelHasKnownData) {
+        levelListEl.innerHTML = `<div class="analytics-progression-empty-state">${escapeAnalyticsHtml(emptyLevelCopy)}</div>`;
+        levelCardEl.setAttribute('data-progression-state', 'empty');
+    } else {
+        const levelItems = levelRows
+            .filter(row => row.count > 0)
+            .map(row => buildAnalyticsProgressionRow({
+                label: row.label,
+                count: row.count,
+                total: levelTotal,
+                meta: row.label === 'Unknown'
+                    ? 'Not available from current snapshot'
+                    : formatAnalyticsProgressionShareText(row.count, levelTotal, 'of roster'),
+                tone: row.tone,
+                route: row.route
+            }));
+
+        levelListEl.innerHTML = levelItems.join('');
+        levelCardEl.setAttribute('data-progression-state', levelHasPartialData ? 'partial' : 'populated');
+    }
+
+    const level70Total = totalLevel70Count;
+    if (!ilvlHasKnownData) {
+        ilvlListEl.innerHTML = `<div class="analytics-progression-empty-state">${escapeAnalyticsHtml(emptyIlvlCopy)}</div>`;
+        ilvlCardEl.setAttribute('data-progression-state', 'empty');
+    } else {
+        const ilvlItems = ilvlKnownRows
+            .filter(row => row.count > 0)
+            .map(row => buildAnalyticsProgressionRow({
+                label: row.label,
+                count: row.count,
+                total: level70Total,
+                meta: formatAnalyticsProgressionShareText(row.count, level70Total, 'of level 70s'),
+                tone: row.tone,
+                route: row.route
+            }));
+
+        if (unknownIlvlCount > 0) {
+            ilvlItems.push(buildAnalyticsProgressionRow({
+                label: 'Unknown',
+                count: unknownIlvlCount,
+                total: level70Total,
+                meta: 'Not available from current snapshot',
+                tone: 'unknown'
+            }));
+        }
+
+        ilvlListEl.innerHTML = ilvlItems.join('');
+        ilvlCardEl.setAttribute('data-progression-state', ilvlHasPartialData ? 'partial' : 'populated');
+    }
+
+    noteEl.hidden = !hasPartialData;
+    noteEl.textContent = partialCopy;
+    sectionEl.setAttribute('data-progression-state', hasPartialData ? 'partial' : 'populated');
 }
 
 function renderAnalyticsRosterComposition(composition = {}) {

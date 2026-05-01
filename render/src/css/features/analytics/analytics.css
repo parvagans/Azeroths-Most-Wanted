@@ -599,6 +599,233 @@
   line-height: 1.5;
 }
 
+.analytics-progression-readiness-section {
+  width: 100%;
+  max-width: 1240px;
+  margin: 4px auto 30px;
+  scroll-margin-top: 112px;
+}
+
+.analytics-progression-note {
+  margin: 0 0 10px;
+  color: #9fb0c1;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.analytics-progression-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.analytics-progression-card {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  min-width: 0;
+  padding: 18px;
+  border-radius: 18px;
+}
+
+.analytics-progression-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.analytics-progression-head-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.analytics-progression-kicker {
+  color: #9fd2ff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.4px;
+  line-height: 1.3;
+  text-transform: uppercase;
+}
+
+.analytics-progression-title {
+  margin: 0;
+  color: #eef5ff;
+  font-size: 16px;
+  line-height: 1.35;
+}
+
+.analytics-progression-scope {
+  align-self: flex-start;
+  color: #d5e8ff;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1.2px;
+  line-height: 1.3;
+  text-transform: uppercase;
+  padding: 6px 10px;
+  border-radius: 999px;
+  background: rgba(93, 173, 226, 0.08);
+  border: 1px solid rgba(93, 173, 226, 0.15);
+}
+
+.analytics-progression-summary {
+  margin: 0;
+  color: #9fb0c1;
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.analytics-progression-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-width: 0;
+}
+
+.analytics-progression-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+  padding: 13px 14px 14px;
+  text-align: left;
+  appearance: none;
+  -webkit-appearance: none;
+  cursor: pointer;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(180deg, rgba(19, 25, 34, 0.94) 0%, rgba(10, 12, 17, 0.98) 100%);
+  color: inherit;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+
+.analytics-progression-item:hover,
+.analytics-progression-item:focus-visible {
+  transform: translateY(-1px);
+  border-color: rgba(93, 173, 226, 0.34);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.24);
+  outline: none;
+}
+
+.analytics-progression-item.is-static {
+  cursor: default;
+}
+
+.analytics-progression-item-secondary {
+  border-color: rgba(163, 53, 238, 0.12);
+}
+
+.analytics-progression-item-secondary:hover,
+.analytics-progression-item-secondary:focus-visible {
+  border-color: rgba(163, 53, 238, 0.3);
+}
+
+.analytics-progression-item-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.analytics-progression-item-label {
+  color: #eef5ff;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.analytics-progression-item-value {
+  color: #f7e7b0;
+  font-family: "Cinzel", serif;
+  font-size: 18px;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.analytics-progression-meter {
+  position: relative;
+  width: 100%;
+  height: 8px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+
+.analytics-progression-fill {
+  display: block;
+  height: 100%;
+  min-width: 4px;
+  border-radius: inherit;
+  background: linear-gradient(90deg, rgba(93, 173, 226, 0.92) 0%, rgba(168, 222, 255, 0.92) 100%);
+  box-shadow: 0 0 14px rgba(93, 173, 226, 0.18);
+}
+
+.analytics-progression-item[data-tone="peak"] .analytics-progression-fill,
+.analytics-progression-item[data-tone="prime"] .analytics-progression-fill {
+  background: linear-gradient(90deg, rgba(255, 209, 0, 0.95) 0%, rgba(255, 233, 132, 0.95) 100%);
+  box-shadow: 0 0 14px rgba(255, 209, 0, 0.22);
+}
+
+.analytics-progression-item[data-tone="mid"] .analytics-progression-fill,
+.analytics-progression-item[data-tone="high"] .analytics-progression-fill {
+  background: linear-gradient(90deg, rgba(93, 173, 226, 0.92) 0%, rgba(168, 222, 255, 0.92) 100%);
+}
+
+.analytics-progression-item[data-tone="low"] .analytics-progression-fill,
+.analytics-progression-item[data-tone="rising"] .analytics-progression-fill {
+  background: linear-gradient(90deg, rgba(255, 135, 59, 0.94) 0%, rgba(255, 191, 128, 0.94) 100%);
+  box-shadow: 0 0 14px rgba(255, 135, 59, 0.18);
+}
+
+.analytics-progression-item[data-tone="base"] .analytics-progression-fill,
+.analytics-progression-item[data-tone="steady"] .analytics-progression-fill {
+  background: linear-gradient(90deg, rgba(46, 204, 113, 0.9) 0%, rgba(126, 236, 170, 0.9) 100%);
+  box-shadow: 0 0 14px rgba(46, 204, 113, 0.16);
+}
+
+.analytics-progression-item[data-tone="under"] .analytics-progression-fill {
+  background: linear-gradient(90deg, rgba(163, 53, 238, 0.88) 0%, rgba(205, 145, 255, 0.88) 100%);
+  box-shadow: 0 0 14px rgba(163, 53, 238, 0.16);
+}
+
+.analytics-progression-item[data-tone="unknown"] {
+  border-color: rgba(159, 176, 193, 0.14);
+}
+
+.analytics-progression-item[data-tone="unknown"] .analytics-progression-fill {
+  background: linear-gradient(90deg, rgba(159, 176, 193, 0.5) 0%, rgba(211, 219, 229, 0.68) 100%);
+  box-shadow: none;
+}
+
+.analytics-progression-item-meta {
+  color: #9fb0c1;
+  font-size: 11px;
+  line-height: 1.5;
+}
+
+.analytics-progression-empty-state {
+  padding: 14px;
+  color: #9fb0c1;
+  font-size: 12px;
+  line-height: 1.55;
+  border-radius: 12px;
+  border: 1px dashed rgba(159, 176, 193, 0.18);
+  background: rgba(10, 11, 15, 0.55);
+}
+
+.analytics-progression-empty-state-inline {
+  margin-top: 2px;
+}
+
 .analytics-honor-section {
   width: 100%;
   max-width: 1240px;
@@ -1362,10 +1589,6 @@
 
 .analytics-card-side .chart-canvas-wrapper {
   height: 260px;
-}
-
-.analytics-card-composition .chart-canvas-wrapper, .analytics-card-readiness .chart-canvas-wrapper {
-  height: 220px;
 }
 
 .analytics-intel-section-composition .analytics-card:first-child {

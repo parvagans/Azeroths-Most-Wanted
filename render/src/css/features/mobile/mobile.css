@@ -91,9 +91,7 @@
     height: 290px;
   }
 
-  .analytics-card-side .chart-canvas-wrapper,
-  .analytics-card-composition .chart-canvas-wrapper,
-  .analytics-card-readiness .chart-canvas-wrapper {
+  .analytics-card-side .chart-canvas-wrapper {
     height: 230px;
   }
 }
@@ -691,10 +689,12 @@
     height: 260px;
   }
 
-  .analytics-card-side .chart-canvas-wrapper,
-  .analytics-card-composition .chart-canvas-wrapper,
-  .analytics-card-readiness .chart-canvas-wrapper {
+  .analytics-card-side .chart-canvas-wrapper {
     height: 210px;
+  }
+
+  .analytics-progression-readiness-section {
+    margin: 2px auto 30px;
   }
 
   .analytics-route-card,
@@ -756,6 +756,59 @@
   }
 
   .analytics-distribution-item-meta {
+    font-size: 12px;
+  }
+
+  /* Progression readiness bars and cards */
+  .analytics-progression-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .analytics-progression-card {
+    padding: 16px;
+  }
+
+  .analytics-progression-list {
+    gap: 8px;
+  }
+
+  .analytics-progression-head {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .analytics-progression-item-head {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .analytics-progression-item-value {
+    white-space: normal;
+  }
+
+  .analytics-progression-item {
+    padding: 12px 13px 13px;
+  }
+
+  .analytics-progression-meter {
+    height: 7px;
+  }
+
+  .analytics-progression-fill {
+    min-width: 3px;
+  }
+
+  .analytics-progression-note {
+    font-size: 13px;
+  }
+
+  .analytics-progression-summary,
+  .analytics-progression-item-meta {
+    font-size: 12px;
+  }
+
+  .analytics-progression-empty-state {
     font-size: 12px;
   }
 
@@ -1704,6 +1757,22 @@
     padding: 14px;
   }
 
+  .analytics-progression-card {
+    padding: 14px;
+  }
+
+  .analytics-progression-item {
+    padding: 11px 12px 12px;
+  }
+
+  .analytics-progression-item-value {
+    font-size: 17px;
+  }
+
+  .analytics-progression-note {
+    font-size: 12px;
+  }
+
   .analytics-readiness-gap-card {
     padding: 14px;
   }
@@ -1918,6 +1987,31 @@
     padding: 12px;
   }
 
+  .analytics-progression-card {
+    padding: 12px;
+  }
+
+  .analytics-progression-item {
+    gap: 6px;
+    padding: 10px 11px 11px;
+  }
+
+  .analytics-progression-item-head {
+    gap: 3px;
+  }
+
+  .analytics-progression-item-value {
+    font-size: 16px;
+  }
+
+  .analytics-progression-item-meta {
+    font-size: 11px;
+  }
+
+  .analytics-progression-summary {
+    font-size: 12px;
+  }
+
   .analytics-distribution-item {
     gap: 6px;
     padding: 10px 11px 11px;
@@ -2004,6 +2098,25 @@
   }
 
   .analytics-distribution-item-meta {
+    font-size: 11px;
+  }
+
+  .analytics-progression-card {
+    padding: 10px;
+  }
+
+  .analytics-progression-item {
+    gap: 5px;
+    padding: 9px 10px 10px;
+  }
+
+  .analytics-progression-item-value {
+    font-size: 16px;
+  }
+
+  .analytics-progression-summary,
+  .analytics-progression-note,
+  .analytics-progression-item-meta {
     font-size: 11px;
   }
 
