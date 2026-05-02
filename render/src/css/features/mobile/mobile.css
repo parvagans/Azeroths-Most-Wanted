@@ -98,6 +98,12 @@
 
 /* Global mobile shell, nav, drawer, selector, and search */
 @media (max-width: 1024px) {
+  html,
+  body {
+    width: 100%;
+    max-width: 100%;
+  }
+
   body::before {
     opacity: 0.54;
   }
@@ -106,15 +112,21 @@
     opacity: 0.22;
   }
 
+  body {
+    align-items: stretch;
+  }
+
   .navbar {
     padding: 10px 12px;
   }
 
+  #main-dashboard,
   .dashboard-layout,
   .dashboard-layout.dashboard-layout-home,
   .dashboard-layout.dashboard-layout-solo {
+    align-self: stretch;
     flex-direction: column;
-    align-items: center;
+    align-items: stretch;
     width: 100%;
     max-width: 100%;
     margin: 20px auto 24px;
@@ -122,13 +134,28 @@
     padding: 0 10px;
   }
 
-  .main-content {
+  .main-content,
+  .timeline-container,
+  .analytics-view-container,
+  .concise-wrapper,
+  .full-card-container,
+  .arch-view-wrapper,
+  .war-effort-shell,
+  .command-shell-campaign-archive,
+  .hall-stage,
+  .leaderboards-wrapper,
+  .mvp-cards-container,
+  .weekly-mvps-wrapper {
+    align-self: stretch;
     width: 100%;
     max-width: 100%;
+    min-width: 0;
     margin-left: auto;
     margin-right: auto;
+  }
+
+  .main-content {
     padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
-    min-width: 0;
   }
 
   .timeline-container {
@@ -138,6 +165,29 @@
     max-height: none;
     overflow-y: visible;
     margin-top: 30px;
+  }
+
+  .concise-wrapper {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 18px;
+  }
+
+  .concise-sidebar,
+  .concise-main-col,
+  .leaderboard-panel,
+  .mvp-card {
+    flex: none;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+  }
+
+  .leaderboards-wrapper,
+  .mvp-cards-container {
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
   }
 
   .controls-wrapper {

@@ -69,11 +69,31 @@ class MobileLayoutTests(unittest.TestCase):
 
     def test_mobile_root_width_alignment_is_width_safe(self):
         self.assertIn(
-            ".dashboard-layout,\n  .dashboard-layout.dashboard-layout-home,\n  .dashboard-layout.dashboard-layout-solo {\n    flex-direction: column;\n    align-items: center;\n    width: 100%;\n    max-width: 100%;",
+            "body {\n    align-items: stretch;\n  }",
             self.mobile_css,
         )
         self.assertIn(
-            ".main-content {\n    width: 100%;\n    max-width: 100%;\n    margin-left: auto;\n    margin-right: auto;",
+            "@media (max-width: 1024px) {\n  html,\n  body {\n    width: 100%;\n    max-width: 100%;\n  }",
+            self.mobile_css,
+        )
+        self.assertIn(
+            "#main-dashboard,\n  .dashboard-layout,\n  .dashboard-layout.dashboard-layout-home,\n  .dashboard-layout.dashboard-layout-solo {\n    align-self: stretch;\n    flex-direction: column;\n    align-items: stretch;\n    width: 100%;\n    max-width: 100%;",
+            self.mobile_css,
+        )
+        self.assertIn(
+            ".main-content,\n  .timeline-container,\n  .analytics-view-container,\n  .concise-wrapper,\n  .full-card-container,\n  .arch-view-wrapper,\n  .war-effort-shell,\n  .command-shell-campaign-archive,\n  .hall-stage,\n  .leaderboards-wrapper,\n  .mvp-cards-container,\n  .weekly-mvps-wrapper {\n    align-self: stretch;\n    width: 100%;\n    max-width: 100%;\n    min-width: 0;\n    margin-left: auto;\n    margin-right: auto;",
+            self.mobile_css,
+        )
+        self.assertIn(
+            ".concise-wrapper {\n    flex-direction: column;\n    align-items: stretch;\n    gap: 18px;\n  }",
+            self.mobile_css,
+        )
+        self.assertIn(
+            ".concise-sidebar,\n  .concise-main-col,\n  .leaderboard-panel,\n  .mvp-card {\n    flex: none;\n    width: 100%;\n    max-width: 100%;\n    min-width: 0;\n  }",
+            self.mobile_css,
+        )
+        self.assertIn(
+            ".leaderboards-wrapper,\n  .mvp-cards-container {\n    flex-direction: column;\n    align-items: stretch;\n    justify-content: flex-start;\n  }",
             self.mobile_css,
         )
         self.assertIn(
@@ -104,7 +124,14 @@ class MobileLayoutTests(unittest.TestCase):
         mobile_css = self.mobile_css
         self.assertIn(".home-dashboard-grid", mobile_css)
         self.assertIn(".concise-char-bar", mobile_css)
+        self.assertIn(".concise-wrapper", mobile_css)
+        self.assertIn(".concise-sidebar", mobile_css)
+        self.assertIn(".concise-main-col", mobile_css)
         self.assertIn(".stat-box-container", mobile_css)
+        self.assertIn(".leaderboards-wrapper", mobile_css)
+        self.assertIn(".leaderboard-panel", mobile_css)
+        self.assertIn(".mvp-cards-container", mobile_css)
+        self.assertIn(".mvp-card", mobile_css)
         self.assertIn(".hall-stage-spotlight", mobile_css)
         self.assertIn(".war-effort-home-card-footer", mobile_css)
         self.assertIn(".campaign-archive-grid,\n  .campaign-archive-grid-war-effort,\n  .campaign-archive-grid-dual", mobile_css)
