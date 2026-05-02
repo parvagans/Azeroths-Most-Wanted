@@ -302,7 +302,7 @@ async def main_async():
         active_roster_set = set(roster_names)
         
         print("🌐 Fetching updated timeline for War Efforts...")
-        dashboard_feed = await fetch_turso(session, "SELECT * FROM timeline ORDER BY timestamp DESC LIMIT 10000")
+        dashboard_feed = await fetch_turso(session, "SELECT * FROM timeline ORDER BY timestamp DESC LIMIT 15000")
 
         # Keep the current week's war-effort lock state in sync with Turso history.
         we_file = "asset/war_effort.json"
