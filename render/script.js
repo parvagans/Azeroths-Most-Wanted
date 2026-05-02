@@ -2041,7 +2041,8 @@ window.addEventListener('DOMContentLoaded', async () => {
             const intelligenceNode = buildDossierIntelligencePanel({
                 profile: p,
                 source: char,
-                timelineEvents: typeof timelineData !== 'undefined' ? timelineData : []
+                timelineEvents: typeof timelineData !== 'undefined' ? timelineData : [],
+                dashboardConfig: typeof config !== 'undefined' ? config : {}
             });
             if (intelligenceNode) {
                 intelligenceProfileEl.appendChild(intelligenceNode);

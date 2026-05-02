@@ -322,6 +322,287 @@ function getDossierReadinessSnapshot(profile, source = null) {
     return { label: 'Needs gear', meta: `${ilvl} equipped iLvl` };
 }
 
+function formatDossierTimestamp(value) {
+    if (!value) return '';
+
+    try {
+        const parsed = new Date(String(value).replace('Z', '+00:00'));
+        if (Number.isNaN(parsed.getTime())) return '';
+
+        return parsed.toLocaleString('de-DE', {
+            timeZone: 'Europe/Berlin',
+            day: '2-digit',
+            month: '2-digit',
+            year: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        }) + ' Uhr';
+    } catch (error) {
+        return '';
+    }
+}
+
+function getDossierIdentitySnapshot(profile, source = null) {
+    const level = parseInt(profile?.level || source?.level, 10) || 0;
+    const cClass = getCharClass(source || { profile }) || 'Unknown';
+    const raceName = profile?.race && profile.race.name
+        ? (typeof profile.race.name === 'string' ? profile.race.name : (profile.race.name.en_US || 'Unknown'))
+        : (source?.race || 'Unknown');
+    const guildRank = profile?.guild_rank || source?.guild_rank || source?.rank || 'Member';
+    const activeSpec = String(profile?.active_spec || source?.active_spec || '').trim();
+    const roleLabel = activeSpec ? getCharacterRole(cClass, activeSpec) : 'Unknown';
+    const isAlt = isAltCharacter(source);
+    const mainAltLabel = isAlt ? 'Alt' : 'Main';
+
+    return {
+        level,
+        cClass,
+        raceName,
+        guildRank,
+        activeSpec,
+        roleLabel,
+        isAlt,
+        isMain: !isAlt,
+        mainAltLabel,
+        levelLabel: level > 0 ? `Level ${level}` : 'Level unknown'
+    };
+}
+
+function getDossierContributionSnapshot(profile, source = null) {
+    const honorableKills = parseInt(profile?.honorable_kills || source?.honorable_kills, 10) || 0;
+
+    return {
+        honorableKills,
+        label: honorableKills > 0 ? 'PvP contributor' : 'No PvP contribution',
+        meta: honorableKills > 0
+            ? `${honorableKills.toLocaleString()} honorable kills recorded.`
+            : 'No honorable kills recorded in the current snapshot.'
+    };
+}
+
+function getDossierMovementSnapshot(profile, dashboardConfig = {}) {
+    const movement = dashboardConfig?.membership_movement || {};
+    const recent = Array.isArray(movement.recent) ? movement.recent : [];
+    const targetName = normalizeDossierCharacterName(profile?.name);
+    if (!targetName || recent.length === 0) return null;
+
+    const match = recent.find(entry => normalizeDossierCharacterName(entry?.character_name || entry?.character) === targetName);
+    if (!match) return null;
+
+    const eventType = String(match.event_type || '').trim().toLowerCase();
+    const label = eventType === 'joined'
+        ? 'Recently joined'
+        : (eventType === 'rejoined'
+            ? 'Recently rejoined'
+            : (eventType === 'departed'
+                ? 'Recently departed'
+                : 'Movement logged'));
+
+    const detectedText = formatDossierTimestamp(match.detected_at);
+
+    return {
+        eventType,
+        label,
+        meta: detectedText ? `Latest movement: ${detectedText}` : 'Latest movement recorded in the current roster scan.',
+        tone: eventType || 'movement'
+    };
+}
+
+function buildDossierOfficerNotes({ identity, readiness, activity, contribution, movement }) {
+    const notes = [];
+
+    if (identity.isAlt) {
+        notes.push('Alt character; exclude from mains-only readiness totals.');
+    } else if (identity.level >= 70 && readiness.label === 'Raid ready') {
+        notes.push('Raid-ready main.');
+    } else if (identity.level >= 70) {
+        notes.push('Level 70 but below raid-ready threshold.');
+    } else if (identity.level > 0) {
+        notes.push('Below level 70; keep leveling before roster decisions.');
+    } else {
+        notes.push('Level is not available from the current snapshot.');
+    }
+
+    const equippedIlvl = parseInt(identity.equippedIlvl || 0, 10) || 0;
+    const averageIlvl = parseInt(identity.averageIlvl || 0, 10) || 0;
+    if (identity.level >= 70 && equippedIlvl <= 0) {
+        notes.push('Missing item-level data; inspect profile source before roster decisions.');
+    } else if (identity.level >= 70 && readiness.label === 'Staging for raid') {
+        notes.push('Staging for raid; review enchants before progression nights.');
+    } else if (!identity.activeSpec && identity.level >= 70) {
+        notes.push('No active spec recorded; confirm role assignment.');
+    }
+
+    if (movement && (movement.eventType === 'joined' || movement.eventType === 'rejoined')) {
+        notes.push(movement.eventType === 'joined'
+            ? 'Recently joined; review rank/spec when available.'
+            : 'Recently rejoined; verify current rank and spec.');
+    } else if (activity.label === 'Inactive lately' && identity.level >= 70) {
+        notes.push('Inactive lately; confirm bench or raid plans before deployment.');
+    } else if (contribution.honorableKills > 0) {
+        notes.push('Active PvP contributor.');
+    }
+
+    if (notes.length === 0) {
+        notes.push('Roster status is stable.');
+    }
+
+    const deduped = [];
+    const seen = new Set();
+    notes.forEach(note => {
+        const clean = String(note || '').trim();
+        if (!clean || seen.has(clean)) return;
+        seen.add(clean);
+        deduped.push(clean);
+    });
+
+    return deduped.slice(0, 3);
+}
+
+function buildDossierOfficerBadge({ label, tone = 'neutral' }) {
+    const badge = document.createElement('span');
+    badge.className = 'char-badge char-card-officer-badge';
+    badge.setAttribute('data-tone', tone);
+    badge.textContent = label;
+    return badge;
+}
+
+function buildDossierOfficerBriefPanel({ profile, source = null, dashboardConfig = {} }) {
+    if (!profile) return null;
+
+    const effectiveConfig = dashboardConfig && typeof dashboardConfig === 'object'
+        ? dashboardConfig
+        : (typeof config !== 'undefined' ? config : {});
+
+    const identity = getDossierIdentitySnapshot(profile, source);
+    const readiness = getDossierReadinessSnapshot(profile, source);
+    const activity = getDossierActivitySnapshot(profile, source);
+    const contribution = getDossierContributionSnapshot(profile, source);
+    const movement = getDossierMovementSnapshot(profile, effectiveConfig);
+
+    const equippedIlvl = parseInt(profile?.equipped_item_level || source?.equipped_item_level, 10) || 0;
+    const averageIlvl = parseInt(profile?.average_item_level || source?.average_item_level, 10) || 0;
+    const scanTimestamp = formatDossierTimestamp(effectiveConfig?.last_updated);
+    const notes = buildDossierOfficerNotes({
+        identity: { ...identity, equippedIlvl, averageIlvl },
+        readiness,
+        activity,
+        contribution,
+        movement
+    });
+
+    const shell = document.createElement('section');
+    shell.className = 'char-card-intelligence-layout char-card-officer-layout';
+
+    const header = document.createElement('div');
+    header.className = 'char-card-intelligence-header char-card-officer-header';
+
+    const kickerEl = document.createElement('span');
+    kickerEl.className = 'char-card-panel-kicker';
+    kickerEl.textContent = 'Officer Brief';
+
+    const titleEl = document.createElement('h3');
+    titleEl.className = 'char-card-intelligence-title char-card-officer-title';
+    titleEl.textContent = 'Field Readout';
+
+    const copyEl = document.createElement('p');
+    copyEl.className = 'char-card-intelligence-copy char-card-officer-copy';
+    copyEl.textContent = 'Identity, readiness, contribution, and action cues from the latest snapshot.';
+
+    header.appendChild(kickerEl);
+    header.appendChild(titleEl);
+    header.appendChild(copyEl);
+    shell.appendChild(header);
+
+    const badgeRow = document.createElement('div');
+    badgeRow.className = 'char-badges-container char-card-officer-badges';
+
+    const badgeDefs = [];
+    if (identity.level > 0) {
+        badgeDefs.push({ label: identity.level === 70 ? 'Level 70' : `Level ${identity.level}`, tone: identity.level === 70 ? 'level' : 'level-sub' });
+    }
+    if (readiness.label === 'Raid ready') {
+        badgeDefs.push({ label: 'Raid Ready', tone: 'ready' });
+    } else if (readiness.label === 'Staging for raid') {
+        badgeDefs.push({ label: 'Staging', tone: 'staging' });
+    } else if (readiness.label === 'Needs gear') {
+        badgeDefs.push({ label: 'Needs Gear', tone: 'warning' });
+    } else if (readiness.label === 'Still advancing') {
+        badgeDefs.push({ label: 'Still Advancing', tone: 'advancing' });
+    }
+    if (activity.label === 'Recently active') {
+        badgeDefs.push({ label: 'Active', tone: 'active' });
+    } else if (activity.label === 'Quiet lately') {
+        badgeDefs.push({ label: 'Quiet', tone: 'quiet' });
+    } else if (activity.label === 'Inactive lately') {
+        badgeDefs.push({ label: 'Inactive', tone: 'inactive' });
+    }
+    badgeDefs.push({ label: identity.mainAltLabel, tone: identity.isAlt ? 'alt' : 'main' });
+    if (contribution.honorableKills > 0) {
+        badgeDefs.push({ label: 'PvP', tone: 'pvp' });
+    }
+    if (identity.level >= 70 && equippedIlvl <= 0) {
+        badgeDefs.push({ label: 'Missing Gear Data', tone: 'warning' });
+    }
+    if (movement && (movement.eventType === 'joined' || movement.eventType === 'rejoined')) {
+        badgeDefs.push({ label: movement.eventType === 'joined' ? 'Recently Joined' : 'Recently Rejoined', tone: 'movement' });
+    }
+
+    badgeDefs.forEach(item => {
+        badgeRow.appendChild(buildDossierOfficerBadge(item));
+    });
+    shell.appendChild(badgeRow);
+
+    const grid = document.createElement('div');
+    grid.className = 'char-card-intelligence-grid char-card-officer-grid';
+    grid.appendChild(buildDossierInfoTile({
+        label: 'Identity',
+        value: `${identity.cClass} · ${identity.raceName}`,
+        meta: [identity.guildRank, identity.mainAltLabel, identity.activeSpec || identity.roleLabel].filter(Boolean).join(' · '),
+        className: 'char-card-officer-tile char-card-officer-tile-identity'
+    }));
+    grid.appendChild(buildDossierInfoTile({
+        label: 'Readiness',
+        value: readiness.label,
+        meta: [
+            identity.level > 0 ? identity.levelLabel : '',
+            equippedIlvl > 0 ? `${equippedIlvl.toLocaleString()} equipped iLvl` : 'Equipped iLvl unavailable',
+            averageIlvl > 0 ? `Avg ${averageIlvl.toLocaleString()} iLvl` : ''
+        ].filter(Boolean).join(' · '),
+        className: 'char-card-officer-tile char-card-officer-tile-readiness'
+    }));
+    grid.appendChild(buildDossierInfoTile({
+        label: 'Activity',
+        value: activity.label,
+        meta: [activity.meta || 'Last seen unknown', scanTimestamp ? `Scanned ${scanTimestamp}` : ''].filter(Boolean).join(' · '),
+        className: 'char-card-officer-tile char-card-officer-tile-activity'
+    }));
+    grid.appendChild(buildDossierInfoTile({
+        label: 'Contribution',
+        value: contribution.honorableKills > 0 ? `${contribution.honorableKills.toLocaleString()} HKs` : 'No HKs recorded',
+        meta: [contribution.meta, movement ? movement.meta : 'No recent movement recorded.'].filter(Boolean).join(' · '),
+        className: 'char-card-officer-tile char-card-officer-tile-contribution'
+    }));
+    shell.appendChild(grid);
+
+    const notesSection = buildDossierIntelligenceSection({
+        label: 'Officer Notes',
+        meta: 'Deterministic cues grounded in roster, movement, and scan data.',
+        items: notes.map(note => ({ label: note }))
+    });
+    shell.appendChild(notesSection);
+
+    if (scanTimestamp) {
+        const footer = document.createElement('p');
+        footer.className = 'char-card-officer-footer';
+        footer.textContent = `Latest dashboard scan: ${scanTimestamp}`;
+        shell.appendChild(footer);
+    }
+
+    return shell;
+}
+
 function buildDossierRecentChangeItems(characterName, timelineEvents = []) {
     const counts = { item: 0, level_up: 0, badge: 0 };
     const normalizedName = normalizeDossierCharacterName(characterName);
@@ -406,80 +687,7 @@ function buildDossierIntelligenceSection({ label, meta = '', items = [] }) {
     return section;
 }
 
-function buildDossierIntelligencePanel({ profile, source = null, timelineEvents = [] }) {
+function buildDossierIntelligencePanel({ profile, source = null, timelineEvents = [], dashboardConfig = {} }) {
     if (!profile) return null;
-
-    const shell = document.createElement('section');
-    shell.className = 'char-card-intelligence-layout';
-
-    const header = document.createElement('div');
-    header.className = 'char-card-intelligence-header';
-
-    const kickerEl = document.createElement('span');
-    kickerEl.className = 'char-card-panel-kicker';
-    kickerEl.textContent = 'Character Intelligence';
-
-    const titleEl = document.createElement('h3');
-    titleEl.className = 'char-card-intelligence-title';
-    titleEl.textContent = 'Recent Field Signals';
-
-    const copyEl = document.createElement('p');
-    copyEl.className = 'char-card-intelligence-copy';
-    copyEl.textContent = 'Recent activity, readiness, and earned recognition recorded for this hero.';
-
-    header.appendChild(kickerEl);
-    header.appendChild(titleEl);
-    header.appendChild(copyEl);
-    shell.appendChild(header);
-
-    const activity = getDossierActivitySnapshot(profile, source);
-    const readiness = getDossierReadinessSnapshot(profile, source);
-
-    const summaryGrid = document.createElement('div');
-    summaryGrid.className = 'char-card-intelligence-grid';
-    summaryGrid.appendChild(buildDossierInfoTile({
-        label: 'Activity',
-        value: activity.label,
-        meta: activity.meta,
-        className: 'char-card-intelligence-tile-activity'
-    }));
-    summaryGrid.appendChild(buildDossierInfoTile({
-        label: 'Readiness',
-        value: readiness.label,
-        meta: readiness.meta,
-        className: 'char-card-intelligence-tile-readiness'
-    }));
-    shell.appendChild(summaryGrid);
-
-    const recentItems = buildDossierRecentChangeItems(profile.name, timelineEvents);
-    const recognitionItems = buildDossierRecognitionItems(profile, source);
-
-    if (recentItems.length === 0 && recognitionItems.length === 0) {
-        const emptyEl = document.createElement('p');
-        emptyEl.className = 'char-card-intelligence-empty';
-        emptyEl.textContent = 'No tracked intelligence signals yet. Activity, readiness, recognition, and recent changes will appear as more scans accumulate.';
-        shell.appendChild(emptyEl);
-        return shell;
-    }
-
-    const sections = document.createElement('div');
-    sections.className = 'char-card-intelligence-sections';
-
-    if (recentItems.length > 0) {
-        sections.appendChild(buildDossierIntelligenceSection({
-            label: 'Recent Changes',
-            meta: 'Recent changes from the last 14 days.',
-            items: recentItems
-        }));
-    }
-    if (recognitionItems.length > 0) {
-        sections.appendChild(buildDossierIntelligenceSection({
-            label: 'Recognition',
-            meta: 'Recognition from tracked MVP, vanguard, and campaign signals.',
-            items: recognitionItems
-        }));
-    }
-
-    shell.appendChild(sections);
-    return shell;
+    return buildDossierOfficerBriefPanel({ profile, source, dashboardConfig, timelineEvents });
 }

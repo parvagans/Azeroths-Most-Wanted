@@ -175,6 +175,105 @@
   line-height: 1.45;
 }
 
+.char-card-officer-badges {
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.char-card-officer-badge {
+  min-width: 0;
+  text-transform: none;
+  letter-spacing: 0.04em;
+}
+
+.char-card-officer-badge[data-tone="level"],
+.char-card-officer-badge[data-tone="ready"],
+.char-card-officer-badge[data-tone="active"] {
+  border-color: rgba(143, 227, 136, 0.34);
+  color: #8fe388;
+}
+
+.char-card-officer-badge[data-tone="level-sub"],
+.char-card-officer-badge[data-tone="staging"],
+.char-card-officer-badge[data-tone="movement"] {
+  border-color: rgba(255, 216, 110, 0.34);
+  color: #ffd86e;
+}
+
+.char-card-officer-badge[data-tone="main"] {
+  border-color: rgba(255, 209, 0, 0.34);
+  color: #ffe59d;
+}
+
+.char-card-officer-badge[data-tone="alt"] {
+  border-color: rgba(201, 139, 255, 0.34);
+  color: #d5a4ff;
+}
+
+.char-card-officer-badge[data-tone="pvp"] {
+  border-color: rgba(255, 95, 95, 0.34);
+  color: #ff9d9d;
+}
+
+.char-card-officer-badge[data-tone="warning"],
+.char-card-officer-badge[data-tone="advancing"],
+.char-card-officer-badge[data-tone="inactive"] {
+  border-color: rgba(255, 157, 122, 0.34);
+  color: #ffb092;
+}
+
+.char-card-officer-badge[data-tone="quiet"] {
+  border-color: rgba(185, 174, 147, 0.34);
+  color: #d6ceb6;
+}
+
+.char-card-officer-layout {
+  gap: 14px;
+}
+
+.char-card-officer-header {
+  gap: 4px;
+}
+
+.char-card-officer-title {
+  font-size: 22px;
+}
+
+.char-card-officer-copy {
+  max-width: 100%;
+}
+
+.char-card-officer-grid {
+  gap: 10px;
+}
+
+.char-card-officer-tile .char-card-dossier-tile-value {
+  font-size: 18px;
+}
+
+.char-card-officer-tile-identity .char-card-dossier-tile-value {
+  color: #f6ebcb;
+}
+
+.char-card-officer-tile-readiness .char-card-dossier-tile-value {
+  color: #8fe388;
+}
+
+.char-card-officer-tile-activity .char-card-dossier-tile-value {
+  color: #cfe1ff;
+}
+
+.char-card-officer-tile-contribution .char-card-dossier-tile-value {
+  color: #ffb092;
+}
+
+.char-card-officer-footer {
+  margin: 0;
+  color: #9f9274;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
 .char-card-commendation-grid {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));

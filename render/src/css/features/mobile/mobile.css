@@ -1737,6 +1737,22 @@
   .char-card-intelligence-sections {
     grid-template-columns: 1fr;
   }
+
+  .char-card-officer-title {
+    font-size: 18px;
+  }
+
+  .char-card-officer-badges {
+    gap: 6px;
+  }
+
+  .char-card-officer-badge {
+    font-size: 12px;
+  }
+
+  .char-card-officer-footer {
+    font-size: 11px;
+  }
 }
 
 /* Narrow hall grids */

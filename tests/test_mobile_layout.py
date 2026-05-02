@@ -162,6 +162,10 @@ class MobileLayoutTests(unittest.TestCase):
         self.assertIn(".analytics-roster-composition-row-meta", mobile_css)
         self.assertIn(".analytics-roster-composition-footer-note", mobile_css)
         self.assertIn(".char-card-deployment-grid", mobile_css)
+        self.assertIn(".char-card-officer-title", mobile_css)
+        self.assertIn(".char-card-officer-badges", mobile_css)
+        self.assertIn(".char-card-officer-badge", mobile_css)
+        self.assertIn(".char-card-officer-footer", mobile_css)
         self.assertIn(".timeline-container.timeline-home-board .monuments-grid", mobile_css)
         self.assertIn(".arch-pipeline", mobile_css)
 
