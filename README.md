@@ -1,108 +1,166 @@
-# ⚔️ Azeroth's Most Wanted Armory
+# Azeroth’s Most Wanted Armory
 
-![GitHub Actions](https://img.shields.io/badge/Automated-GitHub%20Actions-2088FF?style=for-the-badge&logo=github)
-![Python](https://img.shields.io/badge/Python-3.10-3776AB?style=for-the-badge&logo=python)
-![Turso](https://img.shields.io/badge/Turso-Edge%20Database-41D0B6?style=for-the-badge&logo=sqlite)
-![Jinja2](https://img.shields.io/badge/Jinja2-Static%20Gen-B41717?style=for-the-badge)
+Azeroth’s Most Wanted Armory is a portfolio-grade guild intelligence dashboard and automation pipeline for a World of Warcraft Classic guild. It combines Python async ingestion, Turso/libSQL over HTTP, Jinja2-based static rendering, GitHub Actions automation, and a mobile-friendly client-side dashboard to turn live Blizzard data into a polished officer-facing portal.
 
-A fully automated, high-performance static dashboard providing dynamic equipment, stats, and loot history for the World of Warcraft Classic guild **Azeroth's Most Wanted** (Thunderstrike). 
+## Live Dashboard
 
-This project was built to demonstrate how to process thousands of API data points daily and render complex historical analytics **without a traditional backend or any recurring hosting fees.**
+[View the live dashboard](https://azeroths-most-wanted.eu.org/)
 
-🔗 **[View the Live Dashboard](https://codenode-automation.github.io/Azeroths-Most-Wanted/)**
+## What This Project Demonstrates
 
----
+- API ingestion and normalization from the Blizzard API.
+- Async data-pipeline design with throttled character fetches.
+- Persistent storage in Turso/libSQL rather than ephemeral API output.
+- Static site generation with Jinja2 templates.
+- Automation and deployment through GitHub Actions and GitHub Pages.
+- Mobile-first dashboard UX with client-side filtering, routing, and search.
+- Defensive rendering for incomplete roster data and partial profile payloads.
+- Source, unit, and local preview validation before publication.
 
-## ⚡ System Architecture: 100% Free & Serverless
+## Architecture Overview
 
-Azeroth's Most Wanted Armory operates on a fully automated, zero-cost tech stack. By combining edge databases, static site generation, and GitHub Actions, the system achieves maximum uptime and zero database latency on the client side.
+```mermaid
+flowchart LR
+    A[Blizzard API] --> B[Python async ingestion]
+    B --> C[Turso / libSQL]
+    C --> D[Jinja2 static renderer]
+    D --> E[Generated HTML + JSON assets]
+    E --> F[GitHub Pages dashboard]
+```
 
-<div align="center">
+The pipeline is intentionally simple:
 
-### 1️⃣ EXTRACTION: Asynchronous Pull
-<img src="asset/software_logo/python.png" height="50" alt="Python">
+1. Python collects roster, character, timeline, and campaign data from Blizzard and the project database.
+2. The data is normalized into a current roster snapshot plus historical records.
+3. Turso/libSQL stores roster state, timelines, movement, campaign history, and other snapshots that should not live only in API responses.
+4. Jinja2 renders the dashboard shell and embeds the data needed by the client-side experience.
+5. GitHub Pages serves the generated static site, while GitHub Actions coordinates refresh, validation, and deployment. In this repository the refresh workflow is exposed as `workflow_dispatch`.
 
-Python utilizes **AsyncIO** and **Aiohttp** to concurrently fetch live character profiles from the Blizzard REST API. A semaphore system acts as a bouncer to respect API rate limits while processing vast amounts of data in seconds.
+## Data Pipeline
 
-⬇️
+The repository’s pipeline is designed around a refresh-and-render model rather than a live application server.
 
-### 2️⃣ STORAGE: Edge Database
-<img src="asset/software_logo/turso.png" height="50" alt="Turso"> &nbsp;&nbsp;&nbsp; <img src="asset/software_logo/sqlite.png" height="50" alt="SQLite">
+- `main.py` authenticates against Blizzard, loads stored state, fetches guild and character data, and writes the generated outputs.
+- `wow/` contains the ingestion, normalization, history, badge, campaign, officer-brief, and war-effort logic.
+- `render/html_dashboard.py` assembles the final HTML document and injects the generated CSS, JS, and JSON payloads.
+- `render/script.js` powers the client-side interactions once the static page loads.
+- `tests/` protects the data pipeline, renderer, and layout behavior with source-level checks.
 
-Processed data is pushed in chunked, bulk transactions to a **Turso** edge database (libSQL/SQLite) using direct REST API calls. This avoids driver bottlenecks and allows for infinite, free storage of historical guild trends and loot timelines.
+The key outputs are:
 
-⬇️
+- current roster state
+- raw roster snapshots
+- timeline/history data
+- campaign archive data
+- movement summaries
+- officer brief summaries
+- the generated `index.html` dashboard
+- JSON assets under `asset/`
 
-### 3️⃣ AUTOMATION: CI/CD Pipeline
-<img src="asset/software_logo/github.png" height="50" alt="GitHub"> &nbsp;&nbsp;&nbsp; <img src="asset/software_logo/cron.png" height="50" alt="Cron">
+## Storage Model
 
-**GitHub Actions** acts as the server. A strict **Cron** schedule (or manual dispatch) triggers the workflow pipeline to authenticate, fetch API updates, push to the database, and rebuild the website without human intervention.
+Turso/libSQL is used to keep the project stateful without needing a traditional backend service.
 
-⬇️
+It stores:
 
-### 4️⃣ COMPILATION: Static Generation
-<img src="asset/software_logo/jinga.png" height="50" alt="Jinja2"> &nbsp;&nbsp;&nbsp; <img src="asset/software_logo/html5.png" height="50" alt="HTML5">
+- current roster rows
+- gear and character state
+- historical snapshots
+- timeline events
+- campaign/archive records
+- movement and summary data used by the dashboard
 
-**Jinja2** templates ingest the latest database queries to dynamically generate raw HTML. The result is a lightning-fast, ultra-secure static frontend powered by HTML5 and modern CSS (bypassing the need for a Node.js framework).
+That separation makes the dashboard more than a single API pull. It can compare current state against previous snapshots and surface meaningful historical context.
 
-⬇️
+## Dashboard Features
 
-### 5️⃣ VISUALIZATION: Client-Side Rendering
-<img src="asset/software_logo/json.png" height="50" alt="JSON">
+The generated site currently includes:
 
-Heavy payloads, like the thousands of lines of timeline activity, are pre-compiled into static **JSON** files (`timeline.json`, `roster.json`). The frontend consumes this data natively, using **Chart.js** to render heatmaps and analytics with zero database latency.
+- roster intelligence and summary metrics
+- a character dossier / full-card profile view
+- War Effort tracking and campaign history
+- Analytics cards for roster composition, progression, readiness, and tempo
+- Hall of Heroes recognition and campaign footprint views
+- search, filtering, and route-driven navigation on the client side
+- mobile navigation with hamburger/menu behavior
+- defensive rendering for partial roster profiles and missing fields
 
-</div>
+The UI is designed to be officer-friendly: it emphasizes readiness, movement, recognition, and roster signals rather than broad consumer-facing polish.
 
----
+## Reliability and Validation
 
-*Disclaimer: World of Warcraft, Warcraft and Blizzard Entertainment are trademarks or registered trademarks of Blizzard Entertainment, Inc. in the U.S. and/or other countries. This is a portfolio/community project and is not affiliated with, endorsed by, or sponsored by Blizzard Entertainment.*
+The repository uses several layers of validation:
 
-## Local validation before commit
+- unit tests for the data pipeline and render helpers
+- local preview generation before shipping source changes
+- GitHub Actions validation before the credentialed data-refresh step
+- fail-fast configuration checks for Blizzard and Turso environment setup
+- generated-output boundaries so source and publish artifacts stay separate
 
-One-command PowerShell validation:
+## Local Validation
+
+Use these commands from the repository root:
+
+```powershell
+.\venv\Scripts\python.exe -m unittest discover -v
+.\tools\preview-local.ps1 -NoServe
+```
+
+The helper below is also available for a fuller local maintenance pass:
 
 ```powershell
 .\tools\validate-local.ps1
 ```
 
-Local source preview:
+If you need to run the pipeline directly, remember that `main.py` is the credentialed integration path, not the normal offline validation path.
 
-```powershell
-.\tools\preview-local.ps1
-```
+## Required Environment Variables
 
-The preview server runs in the foreground so `Ctrl+C` stops it cleanly. If you only want to build the temp preview without serving it, use `.\tools\preview-local.ps1 -NoServe`.
-
-If you have an older orphaned preview server from the previous background mode, you can clean it up with `.\tools\stop-local-preview.ps1`.
-
-Manual fallback commands from `D:\projects\Azeroths-Most-Wanted` in PowerShell:
-
-```powershell
-.\venv\Scripts\python.exe -m pip install -r requirements.txt
-.\venv\Scripts\python.exe -m compileall -q main.py wow render tests
-.\venv\Scripts\python.exe -m unittest discover
-git status --short --untracked-files=all
-```
-
-Required environment variables for the live pipeline:
+The live pipeline expects these variables:
 
 - `BLIZZARD_CLIENT_ID`
 - `BLIZZARD_CLIENT_SECRET`
 - `TURSO_DATABASE_URL`
 - `TURSO_AUTH_TOKEN`
 
-`python main.py` is credentialed integration/pipeline execution, not the normal offline pre-commit test. It requires the Blizzard and Turso environment variables above, and it may write remote data and regenerate tracked output depending on the current code path. Passing offline validation does not prove live Blizzard/Turso integration is healthy.
+Never commit real secrets to the repository.
 
-GitHub Actions runs the same offline validation before the credentialed pipeline step.
+## Repository Boundaries
 
-Text files are LF-normalized in the repo to keep Windows and Unix diffs stable.
+Source lives under:
 
-## GoatCounter custom domain
+- `render/`
+- `wow/`
+- `tests/`
+- `.github/workflows/`
+- `main.py`
 
-The analytics vanity domain is separate from the main GitHub Pages site.
+Generated output lives at:
 
-- DNS record to create outside the repo: `stats CNAME nullbit5.goatcounter.com.`
-- Custom domain to enter in GoatCounter: `stats.azeroths-most-wanted.eu.org`
-- Do not switch the tracking code to the vanity domain until DNS and GoatCounter verification are complete.
-- GoatCounter vanity domains are for display and do not bypass adblockers.
+- the repository-root `index.html`
+- the `asset/` directory
+
+Those generated files are part of the build output and should not be edited by hand. If a local preview or pipeline run updates them, restore them before committing:
+
+```powershell
+git restore index.html asset
+```
+
+## Current Boundaries and Non-Goals
+
+This project is intentionally not:
+
+- a general-purpose SaaS product
+- a real-time live service with per-user backend sessions
+- a frontend framework showcase
+- a manually maintained static site
+
+It is a refresh-driven portfolio system: data is collected, normalized, stored, rendered, and published on a repeatable cadence.
+
+## Project Notes
+
+The public README is now written as an architecture case study instead of a generic setup guide. That makes it easier to evaluate the system as a portfolio piece and keeps the GitHub mobile view readable without large logo blocks or wide image grids.
+
+---
+
+*World of Warcraft, Warcraft, and Blizzard Entertainment are trademarks or registered trademarks of Blizzard Entertainment, Inc. in the U.S. and/or other countries. This is a community project and is not affiliated with, endorsed by, or sponsored by Blizzard Entertainment.*
