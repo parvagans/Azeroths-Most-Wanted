@@ -4,6 +4,19 @@ const DOSSIER_RECENT_ACTIVITY_WINDOW_DAYS = 14;
 const DOSSIER_QUIET_ACTIVITY_WINDOW_DAYS = 30;
 const DOSSIER_RAID_READY_ILVL = 110;
 const DOSSIER_STAGING_ILVL = 100;
+const DOSSIER_PRESTIGE_ICONS = Object.freeze({
+    dragonHoard: '\u{1F409}',
+    heroJourney: '\u{1F6E1}\uFE0F',
+    bloodEnemy: '\u{1FA78}',
+    zenith: '\u26A1\uFE0F',
+    vanguard: '\u{1F396}\uFE0F',
+    crown: '\u{1F451}',
+    sword: '\u2694\uFE0F',
+    gold: '\u{1F947}',
+    silver: '\u{1F948}',
+    bronze: '\u{1F949}'
+});
+const DOSSIER_PRESTIGE_SEPARATOR = '\u00B7';
 
 function getDossierCommendationSnapshot(profile, source = null, dashboardConfig = null) {
     if (!profile) return null;
@@ -609,7 +622,7 @@ function formatDossierBadgeHistoryEntry(entry) {
         if (sourceLabel) parts.push(sourceLabel);
     }
 
-    return parts.join(' · ');
+    return parts.join(` ${DOSSIER_PRESTIGE_SEPARATOR} `);
 }
 
 function getDossierRecognitionHistoryLines({ charName, badgeTypes = [], actualCount = 0, timelineEvents = [], dashboardConfig = {} }) {
@@ -664,7 +677,7 @@ function buildDossierPrestigeShowcase({ profile, source = null, timelineEvents =
         {
             key: 'loot',
             label: "Dragon's Hoard",
-            icon: 'ðŸ‰',
+            icon: DOSSIER_PRESTIGE_ICONS.dragonHoard,
             count: campaignBadges.filter(type => String(type).toLowerCase() === 'loot').length,
             tone: 'loot',
             badgeClass: 'tt-badge-weekly-loot',
@@ -674,7 +687,7 @@ function buildDossierPrestigeShowcase({ profile, source = null, timelineEvents =
         {
             key: 'xp',
             label: "Hero's Journey",
-            icon: 'ðŸ›¡ï¸',
+            icon: DOSSIER_PRESTIGE_ICONS.heroJourney,
             count: campaignBadges.filter(type => String(type).toLowerCase() === 'xp').length,
             tone: 'xp',
             badgeClass: 'tt-badge-weekly-xp',
@@ -684,7 +697,7 @@ function buildDossierPrestigeShowcase({ profile, source = null, timelineEvents =
         {
             key: 'hks',
             label: 'Blood of the Enemy',
-            icon: 'ðŸ©¸',
+            icon: DOSSIER_PRESTIGE_ICONS.bloodEnemy,
             count: campaignBadges.filter(type => ['hks', 'hk'].includes(String(type).toLowerCase())).length,
             tone: 'hks',
             badgeClass: 'tt-badge-weekly-hks',
@@ -694,7 +707,7 @@ function buildDossierPrestigeShowcase({ profile, source = null, timelineEvents =
         {
             key: 'zenith',
             label: 'The Zenith Cohort',
-            icon: 'âš¡',
+            icon: DOSSIER_PRESTIGE_ICONS.zenith,
             count: campaignBadges.filter(type => String(type).toLowerCase() === 'zenith').length,
             tone: 'zenith',
             badgeClass: 'tt-badge-weekly-zenith',
@@ -704,7 +717,7 @@ function buildDossierPrestigeShowcase({ profile, source = null, timelineEvents =
         {
             key: 'vanguard',
             label: 'Vanguard Status',
-            icon: 'ðŸŽ–ï¸',
+            icon: DOSSIER_PRESTIGE_ICONS.vanguard,
             count: vanguardBadges.length,
             tone: 'vanguard',
             badgeClass: 'tt-badge-vanguard',
@@ -714,7 +727,7 @@ function buildDossierPrestigeShowcase({ profile, source = null, timelineEvents =
         {
             key: 'pve_gold',
             label: 'PvE Gold Medal',
-            icon: 'ðŸ¥‡',
+            icon: DOSSIER_PRESTIGE_ICONS.gold,
             count: pveGold,
             tone: 'gold',
             badgeClass: 'tt-badge-gold',
@@ -724,7 +737,7 @@ function buildDossierPrestigeShowcase({ profile, source = null, timelineEvents =
         {
             key: 'pve_silver',
             label: 'PvE Silver Medal',
-            icon: 'ðŸ¥ˆ',
+            icon: DOSSIER_PRESTIGE_ICONS.silver,
             count: pveSilver,
             tone: 'silver',
             badgeClass: 'tt-badge-silver',
@@ -734,7 +747,7 @@ function buildDossierPrestigeShowcase({ profile, source = null, timelineEvents =
         {
             key: 'pve_bronze',
             label: 'PvE Bronze Medal',
-            icon: 'ðŸ¥‰',
+            icon: DOSSIER_PRESTIGE_ICONS.bronze,
             count: pveBronze,
             tone: 'bronze',
             badgeClass: 'tt-badge-bronze',
@@ -744,7 +757,7 @@ function buildDossierPrestigeShowcase({ profile, source = null, timelineEvents =
         {
             key: 'pvp_gold',
             label: 'PvP Gold Medal',
-            icon: 'ðŸ¥‡',
+            icon: DOSSIER_PRESTIGE_ICONS.gold,
             count: pvpGold,
             tone: 'gold',
             badgeClass: 'tt-badge-gold',
@@ -754,7 +767,7 @@ function buildDossierPrestigeShowcase({ profile, source = null, timelineEvents =
         {
             key: 'pvp_silver',
             label: 'PvP Silver Medal',
-            icon: 'ðŸ¥ˆ',
+            icon: DOSSIER_PRESTIGE_ICONS.silver,
             count: pvpSilver,
             tone: 'silver',
             badgeClass: 'tt-badge-silver',
@@ -764,7 +777,7 @@ function buildDossierPrestigeShowcase({ profile, source = null, timelineEvents =
         {
             key: 'pvp_bronze',
             label: 'PvP Bronze Medal',
-            icon: 'ðŸ¥‰',
+            icon: DOSSIER_PRESTIGE_ICONS.bronze,
             count: pvpBronze,
             tone: 'bronze',
             badgeClass: 'tt-badge-bronze',
@@ -820,7 +833,7 @@ function buildDossierPrestigeShowcase({ profile, source = null, timelineEvents =
 
             const reigningIcon = document.createElement('span');
             reigningIcon.className = 'char-card-commendation-showcase-summary-icon';
-            reigningIcon.textContent = reigningInfo.category === 'pvp' ? 'âš”ï¸' : 'ðŸ‘‘';
+            reigningIcon.textContent = reigningInfo.icon || (reigningInfo.category === 'pvp' ? DOSSIER_PRESTIGE_ICONS.sword : DOSSIER_PRESTIGE_ICONS.crown);
 
             const reigningBody = document.createElement('span');
             reigningBody.className = 'char-card-commendation-showcase-summary-body';
@@ -897,13 +910,13 @@ function buildDossierPrestigeShowcase({ profile, source = null, timelineEvents =
             const summaryMeta = document.createElement('span');
             summaryMeta.className = 'char-card-commendation-showcase-summary-meta';
             if (item.key === 'vanguard') {
-                summaryMeta.textContent = summarizeBadges(vanguardBadges) || `${item.categoryLabel} · ${item.count.toLocaleString()} recorded mark${item.count === 1 ? '' : 's'}`;
+                summaryMeta.textContent = summarizeBadges(vanguardBadges) || `${item.categoryLabel} ${DOSSIER_PRESTIGE_SEPARATOR} ${item.count.toLocaleString()} recorded mark${item.count === 1 ? '' : 's'}`;
             } else if (item.key.startsWith('pve_') || item.key.startsWith('pvp_')) {
-                summaryMeta.textContent = `${item.categoryLabel} · ${item.count.toLocaleString()} medal${item.count === 1 ? '' : 's'}`;
+                summaryMeta.textContent = `${item.categoryLabel} ${DOSSIER_PRESTIGE_SEPARATOR} ${item.count.toLocaleString()} medal${item.count === 1 ? '' : 's'}`;
             } else if (item.key === 'loot' || item.key === 'xp' || item.key === 'hks' || item.key === 'zenith') {
-                summaryMeta.textContent = `${item.categoryLabel} · ${item.count.toLocaleString()} supporting week${item.count === 1 ? '' : 's'}`;
+                summaryMeta.textContent = `${item.categoryLabel} ${DOSSIER_PRESTIGE_SEPARATOR} ${item.count.toLocaleString()} supporting week${item.count === 1 ? '' : 's'}`;
             } else {
-                summaryMeta.textContent = `${item.categoryLabel} · ${item.count.toLocaleString()} recorded instance${item.count === 1 ? '' : 's'}`;
+                summaryMeta.textContent = `${item.categoryLabel} ${DOSSIER_PRESTIGE_SEPARATOR} ${item.count.toLocaleString()} recorded instance${item.count === 1 ? '' : 's'}`;
             }
 
             const summaryCount = document.createElement('span');
@@ -1001,7 +1014,7 @@ function buildDossierBadgeHistoryEntries({
                     dateLabel,
                     sourceLabel,
                     roleLabel: 'Vanguard',
-                    detail: `${dateLabel} · ${sourceLabel} / ${categoryLabel} · Vanguard`
+                    detail: `${dateLabel} ${DOSSIER_PRESTIGE_SEPARATOR} ${sourceLabel} / ${categoryLabel} ${DOSSIER_PRESTIGE_SEPARATOR} Vanguard`
                 });
             });
         });
@@ -1034,7 +1047,7 @@ function buildDossierBadgeHistoryEntries({
                     dateLabel,
                     sourceLabel,
                     roleLabel,
-                    detail: `${dateLabel} · ${sourceLabel} / ${categoryLabel} · ${roleLabel}`
+                    detail: `${dateLabel} ${DOSSIER_PRESTIGE_SEPARATOR} ${sourceLabel} / ${categoryLabel} ${DOSSIER_PRESTIGE_SEPARATOR} ${roleLabel}`
                 });
             });
         });
@@ -1065,7 +1078,7 @@ function buildDossierBadgeHistoryEntries({
                         medalLabel,
                         rank,
                         score,
-                        detail: `${dateLabel} · ${categoryLabel} · ${medalLabel} · Rank #${rank} · Score ${score.toLocaleString()}`
+                        detail: `${dateLabel} ${DOSSIER_PRESTIGE_SEPARATOR} ${categoryLabel} ${DOSSIER_PRESTIGE_SEPARATOR} ${medalLabel} ${DOSSIER_PRESTIGE_SEPARATOR} Rank #${rank} ${DOSSIER_PRESTIGE_SEPARATOR} Score ${score.toLocaleString()}`
                     });
                 });
             });
@@ -1106,7 +1119,7 @@ function buildDossierBadgeHistoryEntries({
                     kind: 'timeline',
                     dateLabel,
                     sourceLabel: displayName,
-                    detail: `${dateLabel} · ${displayName}`
+                    detail: `${dateLabel} ${DOSSIER_PRESTIGE_SEPARATOR} ${displayName}`
                 });
             });
         }
@@ -1152,9 +1165,9 @@ function buildDossierReigning({ profile, source = null, dashboardConfig = {} }) 
         pve: 'Biggest Upgrades / iLvl',
         pvp: 'Deadliest / HKs'
     };
-    const badgeTextByCategory = {
-        pve: '👑 Reign',
-        pvp: '⚔️ Reign'
+    const reigningIconByCategory = {
+        pve: DOSSIER_PRESTIGE_ICONS.crown,
+        pvp: DOSSIER_PRESTIGE_ICONS.sword
     };
     const badgeClassByCategory = {
         pve: 'tt-badge-pve c-badge-reigning c-badge-reigning-pve',
@@ -1169,17 +1182,20 @@ function buildDossierReigning({ profile, source = null, dashboardConfig = {} }) 
             const score = parseInt(reigning.score || 0, 10) || 0;
             const label = reigningLabelByCategory[category] || 'Reigning Champion';
             const sourceLabel = reigningMetaByCategory[category] || 'Current reigning champion';
+            const icon = reigningIconByCategory[category] || DOSSIER_PRESTIGE_ICONS.crown;
+            const meta = `${sourceLabel} ${DOSSIER_PRESTIGE_SEPARATOR} +${score.toLocaleString()}`;
 
             results.push({
                 category,
                 label,
-                badgeText: badgeTextByCategory[category] || '👑 Reign',
+                badgeText: label,
                 badgeClass: badgeClassByCategory[category] || 'c-badge-reigning',
+                icon,
                 weekAnchor: '',
                 weekLabel: '',
                 score,
-                title: `${label}\n-------------------\n${sourceLabel} · +${score.toLocaleString()}`,
-                meta: `${sourceLabel} · +${score.toLocaleString()}`
+                title: `${label}\n-------------------\n${meta}`,
+                meta
             });
         });
 
@@ -1196,22 +1212,23 @@ function buildDossierReigning({ profile, source = null, dashboardConfig = {} }) 
         const label = reigningLabelByCategory[category] || 'Reigning Champion';
         const badgeClass = badgeClassByCategory[category] || 'c-badge-reigning';
         const sourceLabel = reigningMetaByCategory[category] || 'Current reigning champion';
-        const title = weekLabel
-            ? `${label}\n-------------------\n${sourceLabel} · Latest archive week: ${weekLabel}\nScore: +${score.toLocaleString()}`
-            : `${label}\n-------------------\n${sourceLabel} · Score: +${score.toLocaleString()}`;
+        const icon = reigningIconByCategory[category] || DOSSIER_PRESTIGE_ICONS.crown;
+        const meta = weekLabel
+            ? `${sourceLabel} ${DOSSIER_PRESTIGE_SEPARATOR} Latest archive week: ${weekLabel} ${DOSSIER_PRESTIGE_SEPARATOR} +${score.toLocaleString()}`
+            : `${sourceLabel} ${DOSSIER_PRESTIGE_SEPARATOR} +${score.toLocaleString()}`;
+        const title = `${label}\n-------------------\n${meta}`;
 
         results.push({
             category,
             label,
-            badgeText: badgeTextByCategory[category] || '👑 Reign',
+            badgeText: label,
             badgeClass,
+            icon,
             weekAnchor,
             weekLabel,
             score,
             title,
-            meta: weekLabel
-                ? `${sourceLabel} · Latest archive week: ${weekLabel} • +${score.toLocaleString()}`
-                : `${sourceLabel} · +${score.toLocaleString()}`
+            meta
         });
     });
 

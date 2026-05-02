@@ -33,6 +33,18 @@ window.WAR_EFFORT_THRESHOLDS = window.WAR_EFFORT_THRESHOLDS || Object.freeze({
     loot: 40,
     zenith: 5
 });
+const DASHBOARD_BADGE_ICONS = Object.freeze({
+    crown: '\u{1F451}',
+    sword: '\u2694\uFE0F',
+    gold: '\u{1F947}',
+    silver: '\u{1F948}',
+    bronze: '\u{1F949}',
+    vanguard: '\u{1F396}\uFE0F',
+    shield: '\u{1F6E1}\uFE0F',
+    blood: '\u{1FA78}',
+    dragon: '\u{1F409}',
+    lightning: '\u26A1\uFE0F'
+});
 
 function killIntro() {
     sessionStorage.setItem('amwIntroPlayed', 'true');
@@ -1910,6 +1922,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
 
         const headerBadgesEl = clone.querySelector('.char-card-header-badges') || clone.querySelector('.char-badges-container');
+        const headerReigningSlotEl = clone.querySelector('.char-card-header-reigning-slot') || headerBadgesEl;
         if (headerBadgesEl) {
             headerBadgesEl.textContent = '';
 
@@ -1946,15 +1959,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                 : [];
 
             reigningBadges.forEach((reigningInfo, index) => {
-                appendFullCardBadge(headerBadgesEl, {
-                    text: reigningInfo.badgeText || reigningInfo.label || 'Reigning Champion',
-                    title: reigningInfo.title || reigningInfo.meta || '',
-                    classNames: [
-                        'char-card-header-reigning-badge',
-                        ...(String(reigningInfo.badgeClass || '').split(' ').filter(Boolean)),
-                        index === 0 ? 'char-card-header-reigning-badge-primary' : 'char-card-header-reigning-badge-secondary'
-                    ]
-                });
+                appendFullCardReigningBadge(headerReigningSlotEl, reigningInfo, index === 0);
             });
         }
 
@@ -2175,6 +2180,52 @@ window.addEventListener('DOMContentLoaded', async () => {
         }
 
         content.appendChild(document.createTextNode(text));
+        container.appendChild(clone);
+    }
+
+    function appendFullCardReigningBadge(container, reigningInfo, isPrimary = false) {
+        const template = document.getElementById('tpl-full-card-badge');
+        if (!template || !container || !reigningInfo) return;
+
+        const clone = template.content.cloneNode(true);
+        const badge = clone.querySelector('.full-card-badge');
+        const content = clone.querySelector('.full-card-badge-content');
+
+        const classNames = [
+            'char-card-header-reigning-badge',
+            'char-card-header-reigning-badge-premium',
+            ...(String(reigningInfo.badgeClass || '').split(' ').filter(Boolean)),
+            isPrimary ? 'char-card-header-reigning-badge-primary' : 'char-card-header-reigning-badge-secondary'
+        ];
+
+        classNames.forEach(cls => badge.classList.add(cls));
+        if (reigningInfo.title) badge.title = reigningInfo.title;
+
+        if (content) {
+            content.textContent = '';
+
+            const icon = document.createElement('span');
+            icon.className = 'char-card-header-reigning-badge-icon';
+            icon.textContent = reigningInfo.icon || '\u{1F451}';
+
+            const body = document.createElement('span');
+            body.className = 'char-card-header-reigning-badge-body';
+
+            const label = document.createElement('strong');
+            label.className = 'char-card-header-reigning-badge-label';
+            label.textContent = reigningInfo.label || 'Reigning Champion';
+
+            const meta = document.createElement('span');
+            meta.className = 'char-card-header-reigning-badge-meta';
+            meta.textContent = reigningInfo.meta || '';
+
+            body.appendChild(label);
+            if (meta.textContent) body.appendChild(meta);
+
+            content.appendChild(icon);
+            content.appendChild(body);
+        }
+
         container.appendChild(clone);
     }
 
@@ -2453,16 +2504,16 @@ window.addEventListener('DOMContentLoaded', async () => {
         });
 
         const AWARD_DEFS = {
-            'mvp_pve': { label: 'PvE MVP', icon: '👑', color: '#ff8000' },
-            'mvp_pvp': { label: 'PvP MVP', icon: '⚔️', color: '#ff4400' },
-            'pve_gold': { label: 'PvE Gold', icon: '🥇', color: '#ffd700' },
-            'pvp_gold': { label: 'PvP Gold', icon: '🥇', color: '#ffd700' },
-            'pve_silver': { label: 'PvE Silver', icon: '🥈', color: '#c0c0c0' },
-            'pvp_silver': { label: 'PvP Silver', icon: '🥈', color: '#c0c0c0' },
-            'pve_bronze': { label: 'PvE Bronze', icon: '🥉', color: '#cd7f32' },
-            'pvp_bronze': { label: 'PvP Bronze', icon: '🥉', color: '#cd7f32' },
-            'vanguard': { label: 'Vanguards', icon: '🎖️', color: '#c79b4b' },
-            'campaign': { label: 'Campaigns', icon: '🎖️', color: '#aaa' }
+            'mvp_pve': { label: 'PvE MVP', icon: DASHBOARD_BADGE_ICONS.crown, color: '#ff8000' },
+            'mvp_pvp': { label: 'PvP MVP', icon: DASHBOARD_BADGE_ICONS.sword, color: '#ff4400' },
+            'pve_gold': { label: 'PvE Gold', icon: DASHBOARD_BADGE_ICONS.gold, color: '#ffd700' },
+            'pvp_gold': { label: 'PvP Gold', icon: DASHBOARD_BADGE_ICONS.gold, color: '#ffd700' },
+            'pve_silver': { label: 'PvE Silver', icon: DASHBOARD_BADGE_ICONS.silver, color: '#c0c0c0' },
+            'pvp_silver': { label: 'PvP Silver', icon: DASHBOARD_BADGE_ICONS.silver, color: '#c0c0c0' },
+            'pve_bronze': { label: 'PvE Bronze', icon: DASHBOARD_BADGE_ICONS.bronze, color: '#cd7f32' },
+            'pvp_bronze': { label: 'PvP Bronze', icon: DASHBOARD_BADGE_ICONS.bronze, color: '#cd7f32' },
+            'vanguard': { label: 'Vanguards', icon: DASHBOARD_BADGE_ICONS.vanguard, color: '#c79b4b' },
+            'campaign': { label: 'Campaigns', icon: DASHBOARD_BADGE_ICONS.vanguard, color: '#aaa' }
         };
 
         container.textContent = '';
@@ -3333,7 +3384,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
                 if (pveGold > 0) {
                     conciseBadges.push({
-                        text: `🛡️🥇 ${pveGold}`,
+                        text: `${DASHBOARD_BADGE_ICONS.shield}${DASHBOARD_BADGE_ICONS.gold} ${pveGold}`,
                         title: tPveGold,
                         classNames: ['c-badge-pill', 'c-badge-gold']
                     });
@@ -3341,7 +3392,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
                 if (pveSilver > 0) {
                     conciseBadges.push({
-                        text: `🛡️🥈 ${pveSilver}`,
+                        text: `${DASHBOARD_BADGE_ICONS.shield}${DASHBOARD_BADGE_ICONS.silver} ${pveSilver}`,
                         title: tPveSilver,
                         classNames: ['c-badge-pill', 'c-badge-silver']
                     });
@@ -3349,7 +3400,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
                 if (pveBronze > 0) {
                     conciseBadges.push({
-                        text: `🛡️🥉 ${pveBronze}`,
+                        text: `${DASHBOARD_BADGE_ICONS.shield}${DASHBOARD_BADGE_ICONS.bronze} ${pveBronze}`,
                         title: tPveBronze,
                         classNames: ['c-badge-pill', 'c-badge-bronze']
                     });
@@ -3357,7 +3408,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
                 if (pvpGold > 0) {
                     conciseBadges.push({
-                        text: `⚔️🥇 ${pvpGold}`,
+                        text: `${DASHBOARD_BADGE_ICONS.sword}${DASHBOARD_BADGE_ICONS.gold} ${pvpGold}`,
                         title: tPvpGold,
                         classNames: ['c-badge-pill', 'c-badge-gold']
                     });
@@ -3365,7 +3416,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
                 if (pvpSilver > 0) {
                     conciseBadges.push({
-                        text: `⚔️🥈 ${pvpSilver}`,
+                        text: `${DASHBOARD_BADGE_ICONS.sword}${DASHBOARD_BADGE_ICONS.silver} ${pvpSilver}`,
                         title: tPvpSilver,
                         classNames: ['c-badge-pill', 'c-badge-silver']
                     });
@@ -3373,7 +3424,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
                 if (pvpBronze > 0) {
                     conciseBadges.push({
-                        text: `⚔️🥉 ${pvpBronze}`,
+                        text: `${DASHBOARD_BADGE_ICONS.sword}${DASHBOARD_BADGE_ICONS.bronze} ${pvpBronze}`,
                         title: tPvpBronze,
                         classNames: ['c-badge-pill', 'c-badge-bronze']
                     });
@@ -3381,7 +3432,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
                 if (isPveReigning) {
                     conciseBadges.push({
-                        text: '👑 Reigning MVP',
+                        text: `${DASHBOARD_BADGE_ICONS.crown} Reigning MVP`,
                         title: 'Current Reigning PvE Champion!',
                         classNames: ['c-badge-reigning', 'c-badge-reigning-pve']
                     });
@@ -3389,7 +3440,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
                 if (isPvpReigning) {
                     conciseBadges.push({
-                        text: '⚔️ Reigning MVP',
+                        text: `${DASHBOARD_BADGE_ICONS.sword} Reigning MVP`,
                         title: 'Current Reigning PvP Champion!',
                         classNames: ['c-badge-reigning', 'c-badge-reigning-pvp']
                     });
@@ -3397,7 +3448,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
                 if (pveChamp > 0) {
                     conciseBadges.push({
-                        text: `👑 ${pveChamp}`,
+                        text: `${DASHBOARD_BADGE_ICONS.crown} ${pveChamp}`,
                         title: tPveChamp,
                         classNames: ['c-badge-pill', 'c-badge-pve']
                     });
@@ -3405,7 +3456,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
                 if (pvpChamp > 0) {
                     conciseBadges.push({
-                        text: `⚔️ ${pvpChamp}`,
+                        text: `${DASHBOARD_BADGE_ICONS.sword} ${pvpChamp}`,
                         title: tPvpChamp,
                         classNames: ['c-badge-pill', 'c-badge-pvp']
                     });
@@ -3413,7 +3464,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
                 if (vCount > 0) {
                     conciseBadges.push({
-                        text: `🎖️ ${vCount}`,
+                        text: `${DASHBOARD_BADGE_ICONS.vanguard} ${vCount}`,
                         title: tVanguard,
                         classNames: ['c-badge-pill', 'c-badge-vanguard']
                     });
@@ -3421,7 +3472,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
                 if (xpCount > 0) {
                     conciseBadges.push({
-                        text: `🛡️ ${xpCount}`,
+                        text: `${DASHBOARD_BADGE_ICONS.shield} ${xpCount}`,
                         title: tXp,
                         classNames: ['c-badge-pill', 'c-badge-weekly-xp']
                     });
@@ -3429,7 +3480,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
                 if (hksCount > 0) {
                     conciseBadges.push({
-                        text: `🩸 ${hksCount}`,
+                        text: `${DASHBOARD_BADGE_ICONS.blood} ${hksCount}`,
                         title: tHks,
                         classNames: ['c-badge-pill', 'c-badge-weekly-hks']
                     });
@@ -3437,7 +3488,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
                 if (lootCount > 0) {
                     conciseBadges.push({
-                        text: `🐉 ${lootCount}`,
+                        text: `${DASHBOARD_BADGE_ICONS.dragon} ${lootCount}`,
                         title: tLoot,
                         classNames: ['c-badge-pill', 'c-badge-weekly-loot']
                     });
@@ -3445,7 +3496,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
                 if (zenithCount > 0) {
                     conciseBadges.push({
-                        text: `⚡ ${zenithCount}`,
+                        text: `${DASHBOARD_BADGE_ICONS.lightning} ${zenithCount}`,
                         title: tZenith,
                         classNames: ['c-badge-pill', 'c-badge-weekly-zenith']
                     });
@@ -3957,21 +4008,19 @@ window.addEventListener('DOMContentLoaded', async () => {
                         }
                     };
                     
-                    addBadge(pveGold, tPveGold, 'tt-badge-gold', '🥇');
-                    addBadge(pveSilver, tPveSilver, 'tt-badge-silver', '🥈');
-                    addBadge(pveBronze, tPveBronze, 'tt-badge-bronze', '🥉');
-                    addBadge(pvpGold, tPvpGold, 'tt-badge-gold', '🥇');
-                    addBadge(pvpSilver, tPvpSilver, 'tt-badge-silver', '🥈');
-                    addBadge(pvpBronze, tPvpBronze, 'tt-badge-bronze', '🥉');
-                    addBadge(isPveReigning ? 1 : 0, 'Current Reigning PvE Champion!', 'tt-badge-pve', '👑', '👑 Reign');
-                    addBadge(isPvpReigning ? 1 : 0, 'Current Reigning PvP Champion!', 'tt-badge-pvp', '⚔️', '⚔️ Reign');
-                    addBadge(pveChamp, tPveChamp, 'tt-badge-pve', '👑');
-                    addBadge(pvpChamp, tPvpChamp, 'tt-badge-pvp', '⚔️');
-                    addBadge(vCount, tVanguard, 'tt-badge-vanguard', '🎖️');
-                    addBadge(xpCount, tXp, 'tt-badge-weekly-xp', '🛡️');
-                    addBadge(hksCount, tHks, 'tt-badge-weekly-hks', '🩸');
-                    addBadge(lootCount, tLoot, 'tt-badge-weekly-loot', '🐉');
-                    addBadge(zenithCount, tZenith, 'tt-badge-weekly-zenith', '⚡');
+                    addBadge(pveGold, tPveGold, 'tt-badge-gold', DASHBOARD_BADGE_ICONS.gold);
+                    addBadge(pveSilver, tPveSilver, 'tt-badge-silver', DASHBOARD_BADGE_ICONS.silver);
+                    addBadge(pveBronze, tPveBronze, 'tt-badge-bronze', DASHBOARD_BADGE_ICONS.bronze);
+                    addBadge(pvpGold, tPvpGold, 'tt-badge-gold', DASHBOARD_BADGE_ICONS.gold);
+                    addBadge(pvpSilver, tPvpSilver, 'tt-badge-silver', DASHBOARD_BADGE_ICONS.silver);
+                    addBadge(pvpBronze, tPvpBronze, 'tt-badge-bronze', DASHBOARD_BADGE_ICONS.bronze);
+                    addBadge(pveChamp, tPveChamp, 'tt-badge-pve', DASHBOARD_BADGE_ICONS.crown);
+                    addBadge(pvpChamp, tPvpChamp, 'tt-badge-pvp', DASHBOARD_BADGE_ICONS.sword);
+                    addBadge(vCount, tVanguard, 'tt-badge-vanguard', DASHBOARD_BADGE_ICONS.vanguard);
+                    addBadge(xpCount, tXp, 'tt-badge-weekly-xp', DASHBOARD_BADGE_ICONS.shield);
+                    addBadge(hksCount, tHks, 'tt-badge-weekly-hks', DASHBOARD_BADGE_ICONS.blood);
+                    addBadge(lootCount, tLoot, 'tt-badge-weekly-loot', DASHBOARD_BADGE_ICONS.dragon);
+                    addBadge(zenithCount, tZenith, 'tt-badge-weekly-zenith', DASHBOARD_BADGE_ICONS.lightning);
                     
                     clone.querySelector('.tooltip-guild-rank').textContent = guildRank;
                     clone.querySelector('.tooltip-level-race').textContent = `${p.level || 0} / ${raceName}`;
@@ -6438,22 +6487,22 @@ window.addEventListener('DOMContentLoaded', async () => {
                 eventEl.classList.add('timeline-event-badge');
                 eventEl.style.setProperty('--timeline-border-accent', c_hex);
                 eventEl.style.setProperty('--timeline-class-accent', c_hex);
-                let badgeIcon = '🎖️', badgeColor = '#aaa', badgeText = '';
+                let badgeIcon = DASHBOARD_BADGE_ICONS.vanguard, badgeColor = '#aaa', badgeText = '';
                 
-                if (event.badge_type === 'mvp_pve') { badgeIcon = '👑'; badgeColor = '#ff8000'; badgeText = 'PvE MVP'; }
-                else if (event.badge_type === 'mvp_pvp') { badgeIcon = '⚔️'; badgeColor = '#ff4400'; badgeText = 'PvP MVP'; }
-                else if (event.badge_type === 'vanguard') { badgeIcon = '🎖️'; badgeColor = '#c79b4b'; badgeText = 'Vanguard'; }
-                else if (event.badge_type === 'campaign') { badgeIcon = '🎖️'; badgeColor = '#aaa'; badgeText = 'Campaign'; }
-                else if (event.badge_type === 'xp') { badgeIcon = '🛡️'; badgeColor = '#8fd3ff'; badgeText = "Hero's Journey"; }
-                else if (event.badge_type === 'hks' || event.badge_type === 'hk') { badgeIcon = '🩸'; badgeColor = '#ff5f5f'; badgeText = 'Blood of the Enemy'; }
-                else if (event.badge_type === 'loot') { badgeIcon = '🐉'; badgeColor = '#c98bff'; badgeText = "Dragon's Hoard"; }
-                else if (event.badge_type === 'zenith') { badgeIcon = '⚡'; badgeColor = '#ffe16a'; badgeText = 'The Zenith Cohort'; }
-                else if (event.badge_type === 'pve_gold') { badgeIcon = '🥇'; badgeColor = '#ffd700'; badgeText = 'PvE 1st'; }
-                else if (event.badge_type === 'pve_silver') { badgeIcon = '🥈'; badgeColor = '#c0c0c0'; badgeText = 'PvE 2nd'; }
-                else if (event.badge_type === 'pve_bronze') { badgeIcon = '🥉'; badgeColor = '#cd7f32'; badgeText = 'PvE 3rd'; }
-                else if (event.badge_type === 'pvp_gold') { badgeIcon = '🥇'; badgeColor = '#ffd700'; badgeText = 'PvP 1st'; }
-                else if (event.badge_type === 'pvp_silver') { badgeIcon = '🥈'; badgeColor = '#c0c0c0'; badgeText = 'PvP 2nd'; }
-                else if (event.badge_type === 'pvp_bronze') { badgeIcon = '🥉'; badgeColor = '#cd7f32'; badgeText = 'PvP 3rd'; }
+                if (event.badge_type === 'mvp_pve') { badgeIcon = DASHBOARD_BADGE_ICONS.crown; badgeColor = '#ff8000'; badgeText = 'PvE MVP'; }
+                else if (event.badge_type === 'mvp_pvp') { badgeIcon = DASHBOARD_BADGE_ICONS.sword; badgeColor = '#ff4400'; badgeText = 'PvP MVP'; }
+                else if (event.badge_type === 'vanguard') { badgeIcon = DASHBOARD_BADGE_ICONS.vanguard; badgeColor = '#c79b4b'; badgeText = 'Vanguard'; }
+                else if (event.badge_type === 'campaign') { badgeIcon = DASHBOARD_BADGE_ICONS.vanguard; badgeColor = '#aaa'; badgeText = 'Campaign'; }
+                else if (event.badge_type === 'xp') { badgeIcon = DASHBOARD_BADGE_ICONS.shield; badgeColor = '#8fd3ff'; badgeText = "Hero's Journey"; }
+                else if (event.badge_type === 'hks' || event.badge_type === 'hk') { badgeIcon = DASHBOARD_BADGE_ICONS.blood; badgeColor = '#ff5f5f'; badgeText = 'Blood of the Enemy'; }
+                else if (event.badge_type === 'loot') { badgeIcon = DASHBOARD_BADGE_ICONS.dragon; badgeColor = '#c98bff'; badgeText = "Dragon's Hoard"; }
+                else if (event.badge_type === 'zenith') { badgeIcon = DASHBOARD_BADGE_ICONS.lightning; badgeColor = '#ffe16a'; badgeText = 'The Zenith Cohort'; }
+                else if (event.badge_type === 'pve_gold') { badgeIcon = DASHBOARD_BADGE_ICONS.gold; badgeColor = '#ffd700'; badgeText = 'PvE 1st'; }
+                else if (event.badge_type === 'pve_silver') { badgeIcon = DASHBOARD_BADGE_ICONS.silver; badgeColor = '#c0c0c0'; badgeText = 'PvE 2nd'; }
+                else if (event.badge_type === 'pve_bronze') { badgeIcon = DASHBOARD_BADGE_ICONS.bronze; badgeColor = '#cd7f32'; badgeText = 'PvE 3rd'; }
+                else if (event.badge_type === 'pvp_gold') { badgeIcon = DASHBOARD_BADGE_ICONS.gold; badgeColor = '#ffd700'; badgeText = 'PvP 1st'; }
+                else if (event.badge_type === 'pvp_silver') { badgeIcon = DASHBOARD_BADGE_ICONS.silver; badgeColor = '#c0c0c0'; badgeText = 'PvP 2nd'; }
+                else if (event.badge_type === 'pvp_bronze') { badgeIcon = DASHBOARD_BADGE_ICONS.bronze; badgeColor = '#cd7f32'; badgeText = 'PvP 3rd'; }
 
                 eventEl.style.setProperty('--timeline-badge-accent', badgeColor);
                 
