@@ -4969,6 +4969,10 @@ body.nav-menu-open {
   max-width: 700px;
 }
 
+.hero-text-col .hero-search-wrapper {
+  z-index: 1;
+}
+
 .command-ribbon-container {
   display: flex;
   gap: 24px;

@@ -348,8 +348,11 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
         js_text = Path("render/src/js/features/home_analytics/home_overview.js").read_text(encoding="utf-8")
         css_text = Path("render/style.css").read_text(encoding="utf-8")
 
-        self.assertIn("Roster Overview", template_text)
-        self.assertIn("Raid Readiness", template_text)
+        self.assertNotIn("Dispatch Board", template_text)
+        self.assertNotIn("home-command-section", template_text)
+        self.assertIn("Select View...", template_text)
+        self.assertIn('id="charSearch"', template_text)
+        self.assertIn('id="heroCharSearch"', template_text)
         self.assertIn(".home-command-card .home-nav-value", css_text)
         self.assertNotIn("setHomeText('home-command-total-value'", js_text)
         self.assertNotIn("setHomeText('home-command-active-value'", js_text)

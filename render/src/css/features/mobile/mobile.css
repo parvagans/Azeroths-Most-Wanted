@@ -555,6 +555,11 @@
     z-index: 10 !important;
   }
 
+  body.nav-menu-open .navbar .search-container {
+    opacity: 0;
+    pointer-events: none;
+  }
+
   .hero-search-box {
     width: 100% !important;
     border-radius: 25px !important;
