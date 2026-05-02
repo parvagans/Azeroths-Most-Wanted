@@ -748,6 +748,7 @@ function renderAnalyticsProgressionReadiness(progression = {}) {
     if (!noteEl || !levelCardEl || !levelListEl || !ilvlCardEl || !ilvlListEl) return;
 
     const roster = Array.isArray(progression.roster) ? progression.roster.filter(Boolean) : [];
+    const ilvlRoster = Array.isArray(progression.ilvlRoster) ? progression.ilvlRoster.filter(Boolean) : roster;
     const emptyLevelCopy = 'Level distribution data is not available for this snapshot.';
     const emptyIlvlCopy = 'Item-level spread data is not available for this snapshot.';
     const partialCopy = 'Some progression readiness fields are unavailable from the current snapshot.';
@@ -791,29 +792,6 @@ function renderAnalyticsProgressionReadiness(progression = {}) {
         const existingLevelCount = levelCounts.get(levelLabel) || 0;
         levelCounts.set(levelLabel, existingLevelCount + 1);
 
-        if (level >= 70) {
-            const ilvl = getAnalyticsRosterIlvl(entry);
-            if (ilvl === null) {
-                unknownIlvlCount++;
-                return;
-            }
-
-            let ilvlLabel = '';
-            if (ilvl >= 130) {
-                ilvlLabel = '130+';
-            } else if (ilvl >= 120) {
-                ilvlLabel = '120-129';
-            } else if (ilvl >= 110) {
-                ilvlLabel = '110-119';
-            } else if (ilvl >= 100) {
-                ilvlLabel = '100-109';
-            } else {
-                ilvlLabel = '<100';
-            }
-
-            const existingIlvlCount = ilvlCounts.get(ilvlLabel) || 0;
-            ilvlCounts.set(ilvlLabel, existingIlvlCount + 1);
-        }
     });
 
     const levelTotal = roster.length;
@@ -846,27 +824,8 @@ function renderAnalyticsProgressionReadiness(progression = {}) {
     const levelRows = [...knownLevelEntries];
     if (levelUnknown) levelRows.push(levelUnknown);
 
-    const ilvlBandOrder = { '130+': 0, '120-129': 1, '110-119': 2, '100-109': 3, '<100': 4 };
-    const ilvlToneByLabel = {
-        '130+': { route: 'filter-ilvl-130+', tone: 'prime' },
-        '120-129': { route: 'filter-ilvl-120-129', tone: 'high' },
-        '110-119': { route: 'filter-ilvl-110-119', tone: 'steady' },
-        '100-109': { route: 'filter-ilvl-100-109', tone: 'rising' },
-        '<100': { route: 'filter-ilvl-<100', tone: 'under' }
-    };
-    const ilvlKnownRows = [...ilvlCounts.entries()]
-        .map(([label, count]) => ({
-            label,
-            count,
-            ...(ilvlToneByLabel[label] || { route: '', tone: '' })
-        }))
-        .sort((a, b) => (ilvlBandOrder[a.label] ?? 99) - (ilvlBandOrder[b.label] ?? 99));
-
     const levelHasPartialData = unknownLevelCount > 0;
     const levelHasKnownData = levelRows.some(row => row.label !== 'Unknown');
-    const ilvlHasPartialData = unknownIlvlCount > 0;
-    const ilvlHasKnownData = ilvlKnownRows.length > 0;
-    const hasPartialData = levelHasPartialData || ilvlHasPartialData;
 
     if (!levelHasKnownData) {
         levelListEl.innerHTML = `<div class="analytics-progression-empty-state">${escapeAnalyticsHtml(emptyLevelCopy)}</div>`;
@@ -889,7 +848,57 @@ function renderAnalyticsProgressionReadiness(progression = {}) {
         levelCardEl.setAttribute('data-progression-state', levelHasPartialData ? 'partial' : 'populated');
     }
 
-    const level70Total = totalLevel70Count;
+    const ilvlBandOrder = { '130+': 0, '120-129': 1, '110-119': 2, '100-109': 3, '<100': 4 };
+    const ilvlToneByLabel = {
+        '130+': { route: 'filter-ilvl-130+', tone: 'prime' },
+        '120-129': { route: 'filter-ilvl-120-129', tone: 'high' },
+        '110-119': { route: 'filter-ilvl-110-119', tone: 'steady' },
+        '100-109': { route: 'filter-ilvl-100-109', tone: 'rising' },
+        '<100': { route: 'filter-ilvl-<100', tone: 'under' }
+    };
+
+    const level70IlvlEntries = ilvlRoster.filter(entry => {
+        const level = getAnalyticsRosterLevel(entry);
+        return level !== null && level >= 70;
+    });
+    const level70IlvlTotal = level70IlvlEntries.length;
+
+    level70IlvlEntries.forEach(entry => {
+        const ilvl = getAnalyticsRosterIlvl(entry);
+        if (ilvl === null) {
+            unknownIlvlCount++;
+            return;
+        }
+
+        let ilvlLabel = '';
+        if (ilvl >= 130) {
+            ilvlLabel = '130+';
+        } else if (ilvl >= 120) {
+            ilvlLabel = '120-129';
+        } else if (ilvl >= 110) {
+            ilvlLabel = '110-119';
+        } else if (ilvl >= 100) {
+            ilvlLabel = '100-109';
+        } else {
+            ilvlLabel = '<100';
+        }
+
+        const existingIlvlCount = ilvlCounts.get(ilvlLabel) || 0;
+        ilvlCounts.set(ilvlLabel, existingIlvlCount + 1);
+    });
+
+    const ilvlKnownRows = [...ilvlCounts.entries()]
+        .map(([label, count]) => ({
+            label,
+            count,
+            ...(ilvlToneByLabel[label] || { route: '', tone: '' })
+        }))
+        .sort((a, b) => (ilvlBandOrder[a.label] ?? 99) - (ilvlBandOrder[b.label] ?? 99));
+
+    const ilvlHasPartialData = unknownIlvlCount > 0 || totalLevel70Count !== level70IlvlTotal;
+    const ilvlHasKnownData = ilvlKnownRows.length > 0;
+    const hasPartialData = levelHasPartialData || ilvlHasPartialData;
+
     if (!ilvlHasKnownData) {
         ilvlListEl.innerHTML = `<div class="analytics-progression-empty-state">${escapeAnalyticsHtml(emptyIlvlCopy)}</div>`;
         ilvlCardEl.setAttribute('data-progression-state', 'empty');
@@ -899,8 +908,8 @@ function renderAnalyticsProgressionReadiness(progression = {}) {
             .map(row => buildAnalyticsProgressionRow({
                 label: row.label,
                 count: row.count,
-                total: level70Total,
-                meta: formatAnalyticsProgressionShareText(row.count, level70Total, 'of level 70s'),
+                total: level70IlvlTotal,
+                meta: formatAnalyticsProgressionShareText(row.count, level70IlvlTotal, 'of level 70s'),
                 tone: row.tone,
                 route: row.route
             }));
@@ -909,7 +918,7 @@ function renderAnalyticsProgressionReadiness(progression = {}) {
             ilvlItems.push(buildAnalyticsProgressionRow({
                 label: 'Unknown',
                 count: unknownIlvlCount,
-                total: level70Total,
+                total: level70IlvlTotal,
                 meta: 'Not available from current snapshot',
                 tone: 'unknown'
             }));

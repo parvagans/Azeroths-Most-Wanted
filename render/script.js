@@ -4689,7 +4689,8 @@ window.addEventListener('DOMContentLoaded', async () => {
 
         if (typeof renderAnalyticsProgressionReadiness === 'function') {
             renderAnalyticsProgressionReadiness({
-                roster: analyticsRosterSnapshot
+                roster: analyticsRosterSnapshot,
+                ilvlRoster: Array.isArray(rosterData) && rosterData.length > 0 ? rosterData : analyticsRosterSnapshot
             });
         }
 
