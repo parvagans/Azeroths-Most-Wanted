@@ -924,16 +924,24 @@ body[data-route-family="character"] .timeline-container.timeline-character-dossi
 }
 .tt-badge-container {
   display: inline-flex;
+  flex-wrap: wrap;
   gap: 4px;
-  margin-left: 10px;
+  max-width: 100%;
+  min-width: 0;
+  margin-left: 0;
   vertical-align: middle;
+  overflow: hidden;
 }
 .tt-badge {
+  flex: 0 0 auto;
+  max-width: 100%;
+  box-sizing: border-box;
   padding: 1px 4px;
   border-radius: 4px;
   font-size: 10px;
   font-weight: bold;
   border: 1px solid;
+  white-space: nowrap;
 }
 .tt-badge-gold {
   background: rgba(255, 215, 0, 0.2);

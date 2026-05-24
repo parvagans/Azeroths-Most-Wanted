@@ -10,6 +10,65 @@ class CharacterIntelligenceRenderTests(unittest.TestCase):
         self.assertIn('class="info-box char-card-intelligence-shell"', template_text)
         self.assertIn('class="char-card-intelligence-profile"', template_text)
 
+    def test_character_tooltip_badges_wrap_without_capping_rendered_badges(self):
+        template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")
+        runtime_text = Path("render/script.js").read_text(encoding="utf-8")
+        style_css_text = Path("render/style.css").read_text(encoding="utf-8")
+        dossier_css_text = Path("render/src/css/features/character/dossier.css").read_text(encoding="utf-8")
+        mobile_css_text = Path("render/src/css/features/mobile/mobile.css").read_text(encoding="utf-8")
+
+        self.assertIn('class="tooltip-badges-container"', template_text)
+        self.assertIn("badgesContainer.className = 'tt-badge-container';", runtime_text)
+        self.assertIn("badgesContainer.appendChild(badge);", runtime_text)
+
+        tooltip_badge_start = runtime_text.index("const addBadge = (count, title, cssClass, icon, label = null) => {")
+        tooltip_badge_end = runtime_text.index("addBadge(pveGold, tPveGold", tooltip_badge_start)
+        tooltip_badge_render_text = runtime_text[tooltip_badge_start:tooltip_badge_end]
+        self.assertNotIn(".slice(", tooltip_badge_render_text)
+        self.assertNotIn("removeChild", tooltip_badge_render_text)
+        self.assertNotIn("badge.remove()", tooltip_badge_render_text)
+
+        badge_container_start = dossier_css_text.index(".tt-badge-container {")
+        badge_container_end = dossier_css_text.index("}", badge_container_start)
+        badge_container_rule = dossier_css_text[badge_container_start:badge_container_end]
+        self.assertIn("display: inline-flex;", badge_container_rule)
+        self.assertIn("flex-wrap: wrap;", badge_container_rule)
+        self.assertIn("max-width: 100%;", badge_container_rule)
+        self.assertIn("min-width: 0;", badge_container_rule)
+        self.assertIn("overflow: hidden;", badge_container_rule)
+
+        badge_chip_start = dossier_css_text.index(".tt-badge {")
+        badge_chip_end = dossier_css_text.index("}", badge_chip_start)
+        badge_chip_rule = dossier_css_text[badge_chip_start:badge_chip_end]
+        self.assertIn("flex: 0 0 auto;", badge_chip_rule)
+        self.assertIn("max-width: 100%;", badge_chip_rule)
+        self.assertIn("box-sizing: border-box;", badge_chip_rule)
+
+        tooltip_shell_start = style_css_text.rfind(
+            ".custom-tooltip {",
+            0,
+            style_css_text.index("width: min(348px, calc(100vw - 24px));"),
+        )
+        tooltip_shell_end = style_css_text.index("}", tooltip_shell_start)
+        tooltip_shell_rule = style_css_text[tooltip_shell_start:tooltip_shell_end]
+        self.assertIn("width: min(348px, calc(100vw - 24px));", tooltip_shell_rule)
+        self.assertIn("max-width: calc(100vw - 24px);", tooltip_shell_rule)
+        self.assertIn("box-sizing: border-box;", tooltip_shell_rule)
+        self.assertIn("overflow: hidden;", tooltip_shell_rule)
+
+        tooltip_name_start = style_css_text.index(".custom-tooltip .tt-name {")
+        tooltip_name_end = style_css_text.index("}", tooltip_name_start)
+        tooltip_name_rule = style_css_text[tooltip_name_start:tooltip_name_end]
+        self.assertIn("display: flex;", tooltip_name_rule)
+        self.assertIn("flex-wrap: wrap;", tooltip_name_rule)
+        self.assertIn("max-width: 100%;", tooltip_name_rule)
+        self.assertIn("min-width: 0;", tooltip_name_rule)
+        self.assertIn(".custom-tooltip .tooltip-char-name {", style_css_text)
+
+        self.assertIn(".custom-tooltip .tt-badge-container {", mobile_css_text)
+        self.assertIn("flex-wrap: wrap;", mobile_css_text)
+        self.assertIn("max-width: calc(100vw - 16px);", mobile_css_text)
+
     def test_dossier_js_includes_prestige_identity_and_reigning_header(self):
         html_dashboard_text = Path("render/html_dashboard.py").read_text(encoding="utf-8")
         core_data_text = Path("render/src/js/core/data.js").read_text(encoding="utf-8")
