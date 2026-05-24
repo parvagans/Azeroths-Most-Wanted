@@ -130,6 +130,39 @@ function getResolvedEquippedItemLevel(character = null, profile = null) {
     ) || 0;
 }
 
+function getLeaderboardThemeClass(theme = '') {
+    const cleanTheme = String(theme || '').trim().toLowerCase().replace(/\s+/g, '-');
+    return cleanTheme ? `amw-leaderboard-theme-${cleanTheme}` : 'amw-leaderboard-theme-default';
+}
+
+function decorateLeaderboardClone(clone, { rank = 0, theme = '' } = {}) {
+    if (!clone) return;
+
+    const root = clone.querySelector('.amw-leaderboard-card');
+    if (!root) return;
+
+    root.classList.add('amw-leaderboard-card', getLeaderboardThemeClass(theme));
+    if (rank === 1) root.classList.add('amw-leaderboard-card-rank-1');
+    else if (rank === 2) root.classList.add('amw-leaderboard-card-rank-2');
+    else if (rank === 3) root.classList.add('amw-leaderboard-card-rank-3');
+}
+
+function appendWarEffortVanguardBadge(card, { showVanguardBadge = false, vanguardBadgeTimeText = '' } = {}) {
+    if (!card || !showVanguardBadge) return;
+
+    const identity = card.querySelector('.amw-leaderboard-identity');
+    if (!identity) return;
+
+    const badge = document.createElement('span');
+    badge.className = 'amw-leaderboard-vanguard-badge is-locked';
+    badge.textContent = 'Vanguard';
+    if (vanguardBadgeTimeText) {
+        badge.title = `Locked ${vanguardBadgeTimeText}`;
+    }
+
+    identity.appendChild(badge);
+}
+
 function formatWarEffortTooltipSummary(type, snapshot = {}, config = {}) {
     const current = Number(snapshot.current) || 0;
     const target = Number(snapshot.target) || Number(config.target) || 0;
@@ -400,7 +433,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         container.addEventListener('click', (e) => {
             if (e.target.closest('.we-loot-link')) return;
 
-            const trigger = e.target.closest('.concise-char-bar.tt-char[data-char], .podium-block.tt-char[data-char], .hero-band-item.tt-char[data-char], .hall-stage-card.tt-char[data-char]');
+            const trigger = e.target.closest('.concise-char-bar.tt-char[data-char], .amw-leaderboard-card.tt-char[data-char], .hero-band-item.tt-char[data-char], .hall-stage-card.tt-char[data-char]');
             if (!trigger) return;
 
             const charName = trigger.getAttribute('data-char');
@@ -970,6 +1003,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         const listWrap = listWrapTemplate?.content?.firstElementChild?.cloneNode(true);
 
         if (!podiumWrap || !listWrap) return;
+        podiumWrap.classList.add('amw-leaderboard-featured');
 
         const podiumTemplate = document.getElementById('tpl-home-leaderboard-podium');
         const rowTemplate = document.getElementById('tpl-home-leaderboard-row');
@@ -987,41 +1021,36 @@ window.addEventListener('DOMContentLoaded', async () => {
 
             if (index < 3 && podiumTemplate) {
                 const rank = index + 1;
-                const stepClass = rank === 1 ? 'podium-step-1' : (rank === 2 ? 'podium-step-2' : 'podium-step-3');
                 const clone = podiumTemplate.content.cloneNode(true);
+                decorateLeaderboardClone(clone, {
+                    rank,
+                    theme: 'pve'
+                });
 
-                const block = clone.querySelector('.podium-block');
-                block.classList.add(stepClass);
+                const block = clone.querySelector('.amw-leaderboard-card');
                 block.setAttribute('data-char', cleanName);
                 block.setAttribute('data-class', cClass);
                 block.addEventListener('click', () => selectCharacter(cleanName));
 
-                const crown = clone.querySelector('.podium-crown');
-                if (rank === 1) {
-                    crown.hidden = false;
-                } else {
-                    crown.hidden = true;
-                }
-
-                const avatar = clone.querySelector('.podium-avatar');
+                const avatar = clone.querySelector('.amw-leaderboard-avatar');
                 avatar.src = portraitURL;
                 avatar.alt = p.name || 'Character portrait';
 
-                const rankEl = clone.querySelector('.podium-rank');
+                const rankEl = clone.querySelector('.amw-leaderboard-rank');
                 rankEl.textContent = `#${rank}`;
 
-                const nameEl = clone.querySelector('.podium-name');
+                const nameEl = clone.querySelector('.amw-leaderboard-name');
                 nameEl.textContent = p.name;
 
-                const statValEl = clone.querySelector('.podium-stat-val');
-                statValEl.textContent = p.equipped_item_level || 0;
+                const subtitleEl = clone.querySelector('.amw-leaderboard-subtitle');
+                if (subtitleEl) subtitleEl.remove();
+
+                const statValEl = clone.querySelector('.amw-leaderboard-metric-value');
+                statValEl.textContent = getResolvedEquippedItemLevel(char, p) || 0;
                 statValEl.classList.add('text-ilvl');
 
-                const statLabelEl = clone.querySelector('.podium-stat-lbl');
+                const statLabelEl = clone.querySelector('.amw-leaderboard-metric-label');
                 statLabelEl.textContent = 'iLvl';
-
-                const trendContainer = clone.querySelector('.podium-trend-container');
-                trendContainer.appendChild(createTrendSpan(trend, 'podium'));
 
                 podiumWrap.appendChild(clone);
             } else if (rowTemplate) {
@@ -1120,6 +1149,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         const listWrap = listWrapTemplate?.content?.firstElementChild?.cloneNode(true);
 
         if (!podiumWrap || !listWrap) return;
+        podiumWrap.classList.add('amw-leaderboard-featured');
 
         const podiumTemplate = document.getElementById('tpl-home-leaderboard-podium');
         const rowTemplate = document.getElementById('tpl-home-leaderboard-row');
@@ -1138,41 +1168,36 @@ window.addEventListener('DOMContentLoaded', async () => {
 
             if (index < 3 && podiumTemplate) {
                 const rank = index + 1;
-                const stepClass = rank === 1 ? 'podium-step-1' : (rank === 2 ? 'podium-step-2' : 'podium-step-3');
                 const clone = podiumTemplate.content.cloneNode(true);
+                decorateLeaderboardClone(clone, {
+                    rank,
+                    theme: 'pvp'
+                });
 
-                const block = clone.querySelector('.podium-block');
-                block.classList.add(stepClass);
+                const block = clone.querySelector('.amw-leaderboard-card');
                 block.setAttribute('data-char', cleanName);
                 block.setAttribute('data-class', cClass);
                 block.addEventListener('click', () => selectCharacter(cleanName));
 
-                const crown = clone.querySelector('.podium-crown');
-                if (rank === 1) {
-                    crown.hidden = false;
-                } else {
-                    crown.hidden = true;
-                }
-
-                const avatar = clone.querySelector('.podium-avatar');
+                const avatar = clone.querySelector('.amw-leaderboard-avatar');
                 avatar.src = portraitURL;
                 avatar.alt = p.name || 'Character portrait';
 
-                const rankEl = clone.querySelector('.podium-rank');
+                const rankEl = clone.querySelector('.amw-leaderboard-rank');
                 rankEl.textContent = `#${rank}`;
 
-                const nameEl = clone.querySelector('.podium-name');
+                const nameEl = clone.querySelector('.amw-leaderboard-name');
                 nameEl.textContent = p.name;
 
-                const statValEl = clone.querySelector('.podium-stat-val');
+                const subtitleEl = clone.querySelector('.amw-leaderboard-subtitle');
+                if (subtitleEl) subtitleEl.remove();
+
+                const statValEl = clone.querySelector('.amw-leaderboard-metric-value');
                 statValEl.textContent = hkCount;
                 statValEl.classList.add('text-hk');
 
-                const statLabelEl = clone.querySelector('.podium-stat-lbl');
+                const statLabelEl = clone.querySelector('.amw-leaderboard-metric-label');
                 statLabelEl.textContent = 'HKs';
-
-                const trendContainer = clone.querySelector('.podium-trend-container');
-                trendContainer.appendChild(createTrendSpan(trend, 'podium'));
 
                 podiumWrap.appendChild(clone);
             } else if (rowTemplate) {
@@ -2799,7 +2824,6 @@ window.addEventListener('DOMContentLoaded', async () => {
         statsNode,
         hashUrl,
         vanguardClass,
-        podiumClass,
         ladderMeta = null
     }) {
         const template = document.getElementById('tpl-concise-row');
@@ -2817,7 +2841,6 @@ window.addEventListener('DOMContentLoaded', async () => {
         const isHallOfHeroesView = hashUrl === 'badges';
         const isCommandView = ['total', 'active', 'raidready', 'alt-heroes', 'badges'].includes(hashUrl);
 
-        if (podiumClass) bar.classList.add(podiumClass);
         if (vanguardClass) bar.classList.add(vanguardClass);
         if (isCommandView) bar.classList.add('concise-char-bar-command', `concise-char-bar-command-${hashUrl}`);
         if (isWarEffortRow) bar.classList.add('concise-char-bar-war-effort');
@@ -2928,12 +2951,13 @@ window.addEventListener('DOMContentLoaded', async () => {
         activeSpecAttr,
         awardsAttr,
         cHex,
-        stepClass,
         rank,
         rankColor,
         portraitURL,
         baseName,
         vanguardClass,
+        showVanguardBadge = false,
+        vanguardBadgeTimeText = '',
         hashUrl,
         deepChar,
         statValue,
@@ -2945,35 +2969,31 @@ window.addEventListener('DOMContentLoaded', async () => {
         if (!template) return null;
 
         const clone = template.content.cloneNode(true);
-        const block = clone.querySelector('.podium-block');
-        const crown = clone.querySelector('.podium-crown');
-        const vanguard = clone.querySelector('.vanguard-floating-icon');
-        const avatar = clone.querySelector('.podium-avatar');
-        const rankEl = clone.querySelector('.podium-rank');
-        const nameEl = clone.querySelector('.podium-name');
-        const metaEl = clone.querySelector('.podium-meta');
-        const rivalryEl = clone.querySelector('.podium-rivalry');
-        const pill = clone.querySelector('.podium-pill');
-        const statLine = clone.querySelector('.podium-stat-line');
-        const statValEl = clone.querySelector('.podium-stat-val');
-        const statLabelEl = clone.querySelector('.podium-stat-lbl');
-        const trendContainer = clone.querySelector('.podium-trend-container');
+        decorateLeaderboardClone(clone, {
+            rank,
+            theme: (() => {
+                if (hashUrl === 'war-effort-readiness') return 'readiness';
+                if (hashUrl === 'war-effort-hk') return 'hks';
+                if (hashUrl === 'war-effort-loot') return 'loot';
+                if (hashUrl === 'war-effort-zenith') return 'zenith';
+                if (hashUrl === 'ladder-pvp') return 'pvp';
+                if (hashUrl === 'ladder-pve') return 'pve';
+                return 'default';
+            })()
+        });
+        const block = clone.querySelector('.amw-leaderboard-card');
+        const avatar = clone.querySelector('.amw-leaderboard-avatar');
+        const rankEl = clone.querySelector('.amw-leaderboard-rank');
+        const nameEl = clone.querySelector('.amw-leaderboard-name');
+        const subtitleEl = clone.querySelector('.amw-leaderboard-subtitle');
+        const metricPill = clone.querySelector('.amw-leaderboard-metric');
+        const metricValueEl = clone.querySelector('.amw-leaderboard-metric-value');
+        const metricLabelEl = clone.querySelector('.amw-leaderboard-metric-label');
 
-        block.classList.add(stepClass);
         block.setAttribute('data-char', cleanName);
         block.setAttribute('data-class', cClass);
         block.setAttribute('data-spec', activeSpecAttr);
         block.setAttribute('data-awards', awardsAttr.join(','));
-
-        if (rank === 1) {
-            crown.hidden = false;
-        } else {
-            crown.hidden = true;
-        }
-
-        if (vanguardClass !== '') {
-            vanguard.hidden = false;
-        }
 
         avatar.src = portraitURL;
         avatar.alt = baseName || 'Character portrait';
@@ -2981,57 +3001,49 @@ window.addEventListener('DOMContentLoaded', async () => {
         rankEl.textContent = `#${rank}`;
 
         nameEl.textContent = baseName;
-        if (metaEl) metaEl.textContent = `${raceName} • ${displaySpecClass}`;
-        if (rivalryEl) rivalryEl.textContent = rivalryText || '';
+        if (subtitleEl) {
+            const subtitleText = rivalryText || `${raceName} • ${displaySpecClass}`.trim();
+            if (subtitleText) subtitleEl.textContent = subtitleText;
+            else subtitleEl.remove();
+        }
+        appendWarEffortVanguardBadge(block, { showVanguardBadge, vanguardBadgeTimeText });
 
         if (hashUrl === 'war-effort-hk') {
             const trendVal = deepChar && deepChar.profile ? (deepChar.profile.trend_pvp || deepChar.profile.trend_hks || 0) : 0;
-            statValEl.textContent = `+${trendVal.toLocaleString()}`;
-            statValEl.classList.add('text-hk');
-            statLabelEl.textContent = 'HKs';
-            trendContainer.remove();
+            metricValueEl.textContent = `+${trendVal.toLocaleString()}`;
+            metricValueEl.classList.add('text-hk');
+            metricLabelEl.textContent = 'HKs';
         } else if (hashUrl === 'war-effort-xp' && window.warEffortContext && window.warEffortContext[cleanName]) {
-            statValEl.textContent = `+${window.warEffortContext[cleanName]}`;
-            statValEl.classList.add('text-xp');
-            statLabelEl.textContent = 'Levels';
-            trendContainer.remove();
+            metricValueEl.textContent = `+${window.warEffortContext[cleanName]}`;
+            metricValueEl.classList.add('text-xp');
+            metricLabelEl.textContent = 'Levels';
         } else if (hashUrl === 'war-effort-loot' && window.warEffortContext && window.warEffortContext[cleanName]) {
-            statValEl.textContent = window.warEffortContext[cleanName].length;
-            statValEl.classList.add('text-loot');
-            statLabelEl.textContent = 'Epics';
-            trendContainer.remove();
+            metricValueEl.textContent = window.warEffortContext[cleanName].length;
+            metricValueEl.classList.add('text-loot');
+            metricLabelEl.textContent = 'Epics';
         } else if (hashUrl === 'war-effort-zenith' && window.warEffortContext && window.warEffortContext[cleanName]) {
-            statLine.remove();
-            trendContainer.remove();
-
-            const zenithEl = document.createElement('div');
-            zenithEl.className = 'text-zenith';
-            zenithEl.textContent = window.warEffortContext[cleanName].split(' ')[0];
-            pill.appendChild(zenithEl);
+            metricValueEl.textContent = window.warEffortContext[cleanName].split(' ')[0];
+            metricValueEl.classList.add('text-zenith');
+            metricLabelEl.remove();
         } else if (hashUrl === 'war-effort-readiness') {
             const readinessIlvl = getResolvedEquippedItemLevel(deepChar, deepChar && deepChar.profile ? deepChar.profile : null);
             if (readinessIlvl > 0) {
-                statValEl.textContent = `iLvl ${readinessIlvl.toLocaleString()}`;
-                statValEl.classList.add('text-ilvl');
-                statLabelEl.remove();
+                metricValueEl.textContent = `iLvl ${readinessIlvl.toLocaleString()}`;
+                metricValueEl.classList.add('text-ilvl');
+                metricLabelEl.remove();
             } else {
-                pill.remove();
+                metricPill.remove();
             }
-            trendContainer.remove();
         } else if (hashUrl === 'ladder-pve') {
-            const trendVal = deepChar && deepChar.profile ? (deepChar.profile.trend_pve || deepChar.profile.trend_ilvl || 0) : 0;
-            statValEl.textContent = statValue;
-            statValEl.classList.add('text-ilvl');
-            statLabelEl.textContent = 'iLvl';
-            trendContainer.appendChild(createTrendSpan(trendVal, 'podium'));
+            metricValueEl.textContent = statValue;
+            metricValueEl.classList.add('text-ilvl');
+            metricLabelEl.textContent = 'iLvl';
         } else if (hashUrl === 'ladder-pvp') {
-            const trendVal = deepChar && deepChar.profile ? (deepChar.profile.trend_pvp || deepChar.profile.trend_hks || 0) : 0;
-            statValEl.textContent = statValue;
-            statValEl.classList.add('text-hk');
-            statLabelEl.textContent = 'HKs';
-            trendContainer.appendChild(createTrendSpan(trendVal, 'podium'));
+            metricValueEl.textContent = statValue;
+            metricValueEl.classList.add('text-hk');
+            metricLabelEl.textContent = 'HKs';
         } else {
-            trendContainer.remove();
+            metricPill.remove();
         }
 
         return clone.firstElementChild;
@@ -3042,10 +3054,10 @@ window.addEventListener('DOMContentLoaded', async () => {
         cClass,
         activeSpecAttr,
         awardsAttr,
-        stepClass,
         rank,
         portraitURL,
         baseName,
+        displaySpecClass,
         hashUrl,
         deepChar,
         statValue
@@ -3054,37 +3066,36 @@ window.addEventListener('DOMContentLoaded', async () => {
         if (!template) return null;
 
         const clone = template.content.cloneNode(true);
-        const block = clone.querySelector('.ladder-podium-block');
-        const crown = clone.querySelector('.podium-crown');
-        const rankEl = clone.querySelector('.podium-rank');
-        const avatar = clone.querySelector('.podium-avatar');
-        const nameEl = clone.querySelector('.podium-name');
-        const statValEl = clone.querySelector('.podium-stat-val');
-        const statLabelEl = clone.querySelector('.podium-stat-lbl');
-        const trendContainer = clone.querySelector('.podium-trend-container');
+        decorateLeaderboardClone(clone, {
+            rank,
+            theme: hashUrl === 'ladder-pvp' ? 'pvp' : 'pve'
+        });
+        const block = clone.querySelector('.amw-leaderboard-card');
+        const rankEl = clone.querySelector('.amw-leaderboard-rank');
+        const avatar = clone.querySelector('.amw-leaderboard-avatar');
+        const nameEl = clone.querySelector('.amw-leaderboard-name');
+        const subtitleEl = clone.querySelector('.amw-leaderboard-subtitle');
+        const metricValueEl = clone.querySelector('.amw-leaderboard-metric-value');
+        const metricLabelEl = clone.querySelector('.amw-leaderboard-metric-label');
 
-        block.classList.add(stepClass);
         block.setAttribute('data-char', cleanName);
         block.setAttribute('data-class', cClass);
         block.setAttribute('data-spec', activeSpecAttr);
         block.setAttribute('data-awards', awardsAttr.join(','));
-
-        crown.hidden = rank !== 1;
         if (rankEl) rankEl.textContent = `#${rank}`;
 
         avatar.src = portraitURL;
         avatar.alt = baseName || 'Character portrait';
 
         nameEl.textContent = baseName;
+        if (subtitleEl) {
+            if (displaySpecClass) subtitleEl.textContent = displaySpecClass;
+            else subtitleEl.remove();
+        }
 
-        const trendVal = hashUrl === 'ladder-pvp'
-            ? (deepChar && deepChar.profile ? (deepChar.profile.trend_pvp || deepChar.profile.trend_hks || 0) : 0)
-            : (deepChar && deepChar.profile ? (deepChar.profile.trend_pve || deepChar.profile.trend_ilvl || 0) : 0);
-
-        statValEl.textContent = statValue;
-        statValEl.classList.add(hashUrl === 'ladder-pvp' ? 'text-hk' : 'text-ilvl');
-        statLabelEl.textContent = hashUrl === 'ladder-pvp' ? 'HKs' : 'iLvl';
-        trendContainer.appendChild(createTrendSpan(trendVal, 'podium'));
+        metricValueEl.textContent = statValue;
+        metricValueEl.classList.add(hashUrl === 'ladder-pvp' ? 'text-hk' : 'text-ilvl');
+        metricLabelEl.textContent = hashUrl === 'ladder-pvp' ? 'HKs' : 'iLvl';
 
         return clone.firstElementChild;
     }
@@ -3122,7 +3133,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         const normalizedQuery = (query || '').toLowerCase().trim();
         if (!normalizedQuery || !conciseList) return false;
 
-        const candidates = Array.from(conciseList.querySelectorAll('.podium-block[data-char], .concise-char-bar[data-char]'));
+        const candidates = Array.from(conciseList.querySelectorAll('.amw-leaderboard-card[data-char], .concise-char-bar[data-char]'));
         const targetNode = candidates.find(node => (node.getAttribute('data-char') || '').toLowerCase() === normalizedQuery);
         if (!targetNode) return false;
 
@@ -3752,13 +3763,11 @@ window.addEventListener('DOMContentLoaded', async () => {
 
             // Inject Podium Classes & Rank Number if we are on a Ladder View
             const isLadderView = hashUrl === 'ladder-pve' || hashUrl === 'ladder-pvp';
-            let podiumClass = '';
             let rankNumber = null;
             let rankToneClass = '';
             let rankSizeClass = '';
 
             if (isLadderView) {
-                podiumClass = index === 0 ? 'podium-1' : index === 1 ? 'podium-2' : index === 2 ? 'podium-3' : '';
                 rankToneClass = index === 0 ? 'concise-rank-gold' : index === 1 ? 'concise-rank-silver' : index === 2 ? 'concise-rank-bronze' : 'concise-rank-default';
                 rankSizeClass = index < 3 ? 'rank-size-large' : 'rank-size-small';
                 rankNumber = index + 1;
@@ -3934,14 +3943,12 @@ window.addEventListener('DOMContentLoaded', async () => {
                 statsNode,
                 hashUrl,
                 vanguardClass,
-                podiumClass,
                 ladderMeta
             });
 
-                        // Intercept and Build Podium Block for Top 3
+            // Intercept and Build Podium Block for Top 3
             if (usePodium && index < 3) {
                 const rank = index + 1;
-                const stepClass = rank === 1 ? 'podium-step-1' : (rank === 2 ? 'podium-step-2' : 'podium-step-3');
                 const isLadderPodium = hashUrl === 'ladder-pve' || hashUrl === 'ladder-pvp';
 
                 const podiumNode = isLadderPodium
@@ -3950,10 +3957,10 @@ window.addEventListener('DOMContentLoaded', async () => {
                         cClass,
                         activeSpecAttr,
                         awardsAttr,
-                        stepClass,
                         rank,
                         portraitURL,
                         baseName,
+                        displaySpecClass,
                         hashUrl,
                         deepChar,
                         statValue
@@ -3964,12 +3971,13 @@ window.addEventListener('DOMContentLoaded', async () => {
                         activeSpecAttr,
                         awardsAttr,
                         cHex,
-                        stepClass,
                         rank,
                         rankColor: rank === 1 ? '#ffd100' : (rank === 2 ? '#c0c0c0' : '#cd7f32'),
                         portraitURL,
                         baseName,
                         vanguardClass,
+                        showVanguardBadge,
+                        vanguardBadgeTimeText,
                         hashUrl,
                         deepChar,
                         statValue,
@@ -4026,10 +4034,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             const listWrap = listWrapTemplate?.content?.firstElementChild?.cloneNode(true);
 
             if (podiumWrap) {
-                if (isPaginatedLadder) {
-                    podiumWrap.classList.add('ladder-podium-wrap');
-                }
-
+                podiumWrap.classList.add('amw-leaderboard-compact');
                 podiumNodes.forEach(node => {
                     if (node) podiumWrap.appendChild(node);
                 });
@@ -6951,46 +6956,49 @@ window.addEventListener('DOMContentLoaded', async () => {
             if (!containerTemplate) return document.createDocumentFragment();
 
             const containerClone = containerTemplate.content.cloneNode(true);
-            const container = containerClone.querySelector('.mvp-podium-container');
+            const container = containerClone.querySelector('.amw-leaderboard-list');
             if (!container) return document.createDocumentFragment();
+            container.classList.add('amw-leaderboard-featured');
 
             chars.forEach((char, index) => {
                 const p = char.profile;
                 const cClass = getCharClass(char);
-                const cHex = CLASS_COLORS[cClass] || '#fff';
                 const portraitURL = char.render_url || getClassIcon(cClass);
                 const trend = isPvp ? (p.trend_pvp || p.trend_hks || 0) : (p.trend_pve || p.trend_ilvl || 0);
                 const label = isPvp ? 'HKs' : 'iLvl';
                 const rank = index + 1;
-                const stepClass = rank === 1 ? 'podium-step-1' : (rank === 2 ? 'podium-step-2' : 'podium-step-3');
-                const rankColor = rank === 1 ? '#ffd100' : (rank === 2 ? '#c0c0c0' : '#cd7f32');
                 
                 const template = document.getElementById('tpl-mvp-podium-block');
                 if (!template) return;
                 const clone = template.content.cloneNode(true);
+                decorateLeaderboardClone(clone, {
+                    rank,
+                    theme: isPvp ? 'pvp' : 'pve'
+                });
                 
-                const block = clone.querySelector('.podium-block');
-                block.classList.add(stepClass);
+                const block = clone.querySelector('.amw-leaderboard-card');
                 block.setAttribute('data-char', (p.name || '').toLowerCase());
                 block.setAttribute('data-class', cClass);
                 block.onclick = () => selectCharacter((p.name || '').toLowerCase());
-
-                const crown = clone.querySelector('.podium-crown');
-                if (crown) {
-                    crown.hidden = rank !== 1;
-                }
                 
-                const avatar = clone.querySelector('.podium-avatar');
+                const avatar = clone.querySelector('.amw-leaderboard-avatar');
                 avatar.src = portraitURL;
                 
-                const rankDiv = clone.querySelector('.podium-rank');
+                const rankDiv = clone.querySelector('.amw-leaderboard-rank');
                 rankDiv.textContent = `#${rank}`;
                 
-                const nameDiv = clone.querySelector('.podium-name');
+                const nameDiv = clone.querySelector('.amw-leaderboard-name');
                 nameDiv.textContent = p.name;
-                
-                clone.querySelector('.podium-trend-val').textContent = `▲ ${trend.toLocaleString()}`;
-                clone.querySelector('.podium-trend-label').textContent = label;
+
+                const subtitleDiv = clone.querySelector('.amw-leaderboard-subtitle');
+                if (subtitleDiv) subtitleDiv.remove();
+
+                const metricValue = clone.querySelector('.amw-leaderboard-metric-value');
+                metricValue.textContent = trend.toLocaleString();
+                metricValue.classList.add(isPvp ? 'text-hk' : 'text-ilvl');
+
+                const metricLabel = clone.querySelector('.amw-leaderboard-metric-label');
+                metricLabel.textContent = label;
                 
                 container.appendChild(clone);
             });

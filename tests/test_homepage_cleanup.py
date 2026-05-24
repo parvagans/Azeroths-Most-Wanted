@@ -181,6 +181,216 @@ class HomepageCleanupTests(unittest.TestCase):
         self.assertIn('Viewing: raid-ready roster. Filter: mains meeting the configured readiness threshold.', shell_text)
         self.assertIn('Character dossier •', script_text)
 
+    def test_shared_leaderboard_system_contract_is_present(self):
+        template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")
+        script_text = Path("render/script.js").read_text(encoding="utf-8")
+        css_text = Path("render/style.css").read_text(encoding="utf-8")
+        mobile_css_text = Path("render/src/css/features/mobile/mobile.css").read_text(encoding="utf-8")
+
+        self.assertIn('id="tpl-mvp-podium-block"', template_text)
+        self.assertIn('id="tpl-home-leaderboard-podium"', template_text)
+        self.assertIn('id="tpl-concise-podium"', template_text)
+        self.assertIn('id="tpl-ladder-podium"', template_text)
+        self.assertIn('class="amw-leaderboard-card tt-char"', template_text)
+        self.assertIn('class="amw-leaderboard amw-leaderboard-list"', template_text)
+        self.assertIn('class="amw-leaderboard-identity"', template_text)
+        self.assertIn('class="amw-leaderboard-metric"', template_text)
+        self.assertIn('class="amw-leaderboard-metric-value"', template_text)
+        self.assertIn('class="amw-leaderboard-metric-label"', template_text)
+        self.assertIn('.amw-leaderboard-list {', css_text)
+        self.assertIn('.amw-leaderboard-card {', css_text)
+        self.assertIn('.amw-leaderboard-featured {', css_text)
+        self.assertIn('.amw-leaderboard-compact {', css_text)
+        self.assertIn('grid-template-columns: repeat(3, minmax(0, 1fr));', css_text)
+        self.assertIn('grid-template-columns: var(--leaderboard-card-columns);', css_text)
+        self.assertIn('grid-template-areas:', css_text)
+        self.assertIn('.amw-leaderboard-card-rank-1 {', css_text)
+        self.assertIn('.amw-leaderboard-avatar {', css_text)
+        self.assertIn('.amw-leaderboard-rank {', css_text)
+        self.assertIn('.amw-leaderboard-theme-pve,', css_text)
+        self.assertIn('.amw-leaderboard-theme-pvp,', css_text)
+        self.assertIn('.amw-leaderboard-theme-ilvl,', css_text)
+        self.assertIn('.amw-leaderboard-theme-hks {', css_text)
+        self.assertIn('.amw-leaderboard-theme-readiness {', css_text)
+        self.assertIn('.amw-leaderboard-theme-loot {', css_text)
+        self.assertIn('.amw-leaderboard-theme-zenith {', css_text)
+        self.assertNotIn('.amw-podium-grid {', css_text)
+        self.assertNotIn('.podium-step-1 {', css_text)
+        self.assertNotIn('.podium-step-2 {', css_text)
+        self.assertNotIn('.podium-step-3 {', css_text)
+        self.assertNotIn('.podium-1 {', css_text)
+        self.assertNotIn('.podium-block {', css_text)
+        self.assertNotIn('.amw-leaderboard-crown {', css_text)
+        self.assertNotIn('.amw-leaderboard-list.ladder-podium-wrap', css_text)
+        self.assertNotIn('ladder-podium-wrap stage', css_text)
+        self.assertNotIn('ladder-podium-wrap floor', css_text)
+        self.assertNotIn('.amw-leaderboard-list::before', css_text)
+        self.assertNotIn('.amw-leaderboard-list::after', css_text)
+        self.assertNotIn('stepClass = rank === 1 ? \'podium-step-1\'', script_text)
+        self.assertNotIn('block.classList.add(stepClass);', script_text)
+        self.assertNotIn('.podium-block', script_text)
+        self.assertNotIn('podium-trend-text', script_text)
+        self.assertIn('function getLeaderboardThemeClass(theme = \'\') {', script_text)
+        self.assertIn("function decorateLeaderboardClone(clone, { rank = 0, theme = '' } = {}) {", script_text)
+        self.assertIn("theme: isPvp ? 'pvp' : 'pve'", script_text)
+        self.assertIn("theme: 'pve'", script_text)
+        self.assertIn("theme: 'pvp'", script_text)
+        self.assertIn("theme: (() => {", script_text)
+        self.assertIn("theme: hashUrl === 'ladder-pvp' ? 'pvp' : 'pve'", script_text)
+        self.assertIn('.amw-leaderboard-list {', mobile_css_text)
+        self.assertIn('.amw-leaderboard-card {', mobile_css_text)
+        self.assertIn('--leaderboard-card-columns: 46px minmax(0, 1fr) auto;', mobile_css_text)
+        self.assertIn('grid-template-columns: var(--leaderboard-card-columns);', mobile_css_text)
+        self.assertIn('grid-template-areas:', mobile_css_text)
+        self.assertIn('.amw-leaderboard-avatar {', mobile_css_text)
+        self.assertIn('.amw-leaderboard-rank {', mobile_css_text)
+        self.assertNotIn('.amw-leaderboard-grid', mobile_css_text)
+        self.assertNotIn('.podium-step-1', mobile_css_text)
+        self.assertNotIn('.podium-step-2', mobile_css_text)
+        self.assertNotIn('.podium-step-3', mobile_css_text)
+        self.assertNotIn('.podium-1', mobile_css_text)
+        self.assertNotIn('.amw-leaderboard-list.ladder-podium-wrap', mobile_css_text)
+
+    def test_homepage_standouts_use_featured_leaderboard_variant(self):
+        script_text = Path("render/script.js").read_text(encoding="utf-8")
+        mvp_start = script_text.index("window.renderMVPs = function()")
+        mvp_end = script_text.index("function generateGloatingHtml", mvp_start)
+        mvp_text = script_text[mvp_start:mvp_end]
+
+        self.assertIn("const container = containerClone.querySelector('.amw-leaderboard-list');", mvp_text)
+        self.assertIn("container.classList.add('amw-leaderboard-featured');", mvp_text)
+        self.assertIn("decorateLeaderboardClone(clone, {", mvp_text)
+
+    def test_homepage_curated_ladder_intelligence_uses_featured_variant(self):
+        script_text = Path("render/script.js").read_text(encoding="utf-8")
+        pve_start = script_text.index("const pveContainer = document.getElementById('pve-leaderboard');")
+        pvp_end = script_text.index("setupTooltips();", pve_start)
+        homepage_ladder_text = script_text[pve_start:pvp_end]
+
+        self.assertEqual(homepage_ladder_text.count("podiumWrap.classList.add('amw-leaderboard-featured');"), 2)
+        self.assertIn("theme: 'pve'", homepage_ladder_text)
+        self.assertIn("theme: 'pvp'", homepage_ladder_text)
+
+    def test_deeper_leaderboard_surfaces_use_compact_variant(self):
+        script_text = Path("render/script.js").read_text(encoding="utf-8")
+        concise_start = script_text.index("if (usePodium && podiumNodes.length > 0) {")
+        concise_end = script_text.index("const conciseLoadMoreContainer", concise_start)
+        concise_text = script_text[concise_start:concise_end]
+
+        self.assertIn("podiumWrap.classList.add('amw-leaderboard-compact');", concise_text)
+        self.assertNotIn("amw-leaderboard-featured", concise_text)
+
+    def test_leaderboard_variants_share_base_component_classes(self):
+        template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")
+        css_text = Path("render/style.css").read_text(encoding="utf-8")
+
+        for class_name in (
+            "amw-leaderboard",
+            "amw-leaderboard-list",
+            "amw-leaderboard-card",
+            "amw-leaderboard-rank",
+            "amw-leaderboard-avatar",
+            "amw-leaderboard-identity",
+            "amw-leaderboard-name",
+            "amw-leaderboard-subtitle",
+            "amw-leaderboard-metric",
+        ):
+            self.assertIn(class_name, template_text + css_text)
+
+        self.assertIn(".amw-leaderboard-featured {", css_text)
+        self.assertIn(".amw-leaderboard-compact {", css_text)
+        self.assertIn(".amw-leaderboard-card {", css_text)
+        self.assertNotIn(".amw-leaderboard-compact .amw-leaderboard-card {", css_text)
+
+    def test_featured_variant_increases_card_avatar_name_and_metric_sizing(self):
+        css_text = Path("render/style.css").read_text(encoding="utf-8")
+
+        self.assertIn("--leaderboard-avatar-size: 60px;", css_text)
+        self.assertIn("--leaderboard-card-min-height: 118px;", css_text)
+        self.assertIn("--leaderboard-name-size: 14px;", css_text)
+        self.assertIn("--leaderboard-metric-size: 13px;", css_text)
+        self.assertIn("--leaderboard-avatar-size: clamp(68px, 6vw, 84px);", css_text)
+        self.assertIn("--leaderboard-card-min-height: 172px;", css_text)
+        self.assertIn("--leaderboard-name-size: 17px;", css_text)
+        self.assertIn("--leaderboard-metric-size: 15px;", css_text)
+        self.assertIn("width: var(--leaderboard-avatar-size);", css_text)
+        self.assertIn("min-height: var(--leaderboard-card-min-height);", css_text)
+        self.assertIn("font-size: var(--leaderboard-name-size);", css_text)
+        self.assertIn("font-size: var(--leaderboard-metric-size);", css_text)
+        self.assertIn(".amw-leaderboard-featured .amw-leaderboard-subtitle {", css_text)
+        self.assertIn(".amw-leaderboard-featured .amw-leaderboard-rank {", css_text)
+
+    def test_featured_cards_use_vertical_showcase_layout_not_compact_horizontal_grid(self):
+        css_text = Path("render/style.css").read_text(encoding="utf-8")
+        featured_card_start = css_text.index(".amw-leaderboard-featured .amw-leaderboard-card {")
+        featured_card_end = css_text.index("}", featured_card_start)
+        featured_card_rule = css_text[featured_card_start:featured_card_end]
+
+        self.assertIn("display: flex;", featured_card_rule)
+        self.assertIn("flex-direction: column;", featured_card_rule)
+        self.assertIn("align-items: center;", featured_card_rule)
+        self.assertIn("text-align: center;", featured_card_rule)
+        self.assertNotIn("grid-template-columns", featured_card_rule)
+        self.assertNotIn("grid-template-areas", featured_card_rule)
+
+    def test_featured_card_names_are_not_tiny_or_one_letter_clipped(self):
+        css_text = Path("render/style.css").read_text(encoding="utf-8")
+        featured_name_start = css_text.index(".amw-leaderboard-featured .amw-leaderboard-name {")
+        featured_name_end = css_text.index("}", featured_name_start)
+        featured_name_rule = css_text[featured_name_start:featured_name_end]
+
+        self.assertIn("width: 100%;", featured_name_rule)
+        self.assertIn("max-width: 100%;", featured_name_rule)
+        self.assertIn("white-space: normal;", featured_name_rule)
+        self.assertIn("overflow: visible;", featured_name_rule)
+        self.assertIn("text-overflow: unset;", featured_name_rule)
+        self.assertIn("text-align: center;", featured_name_rule)
+        self.assertNotIn("width: auto;", featured_name_rule)
+        self.assertNotIn("white-space: nowrap;", featured_name_rule)
+        self.assertNotIn("overflow: hidden;", featured_name_rule)
+
+    def test_homepage_featured_cards_do_not_emit_subtitle_identity_text(self):
+        script_text = Path("render/script.js").read_text(encoding="utf-8")
+        pve_start = script_text.index("const pveContainer = document.getElementById('pve-leaderboard');")
+        pvp_end = script_text.index("setupTooltips();", pve_start)
+        homepage_ladder_text = script_text[pve_start:pvp_end]
+        mvp_start = script_text.index("window.renderMVPs = function()")
+        mvp_end = script_text.index("function generateGloatingHtml", mvp_start)
+        mvp_text = script_text[mvp_start:mvp_end]
+
+        self.assertEqual(homepage_ladder_text.count("if (subtitleEl) subtitleEl.remove();"), 2)
+        self.assertIn("if (subtitleDiv) subtitleDiv.remove();", mvp_text)
+        self.assertNotIn("subtitleEl.textContent = displaySpecClass", homepage_ladder_text)
+        self.assertNotIn("subtitleDiv.textContent", mvp_text)
+        self.assertNotIn("subtitleText", mvp_text)
+        self.assertIn("metricValue.textContent = trend.toLocaleString();", mvp_text)
+
+    def test_compact_podiums_keep_subtitle_identity_text(self):
+        script_text = Path("render/script.js").read_text(encoding="utf-8")
+        concise_start = script_text.index("function buildConcisePodiumHtml({")
+        ladder_end = script_text.index("// Variable to track current sort method", concise_start)
+        compact_podium_text = script_text[concise_start:ladder_end]
+
+        self.assertIn("const subtitleText = rivalryText || `${raceName} • ${displaySpecClass}`.trim();", compact_podium_text)
+        self.assertIn("if (subtitleText) subtitleEl.textContent = subtitleText;", compact_podium_text)
+        self.assertIn("if (displaySpecClass) subtitleEl.textContent = displaySpecClass;", compact_podium_text)
+
+    def test_leaderboard_metrics_still_render_for_homepage_and_readiness(self):
+        script_text = Path("render/script.js").read_text(encoding="utf-8")
+
+        self.assertIn("statLabelEl.textContent = 'iLvl';", script_text)
+        self.assertIn("statLabelEl.textContent = 'HKs';", script_text)
+        self.assertIn("metricLabel.textContent = label;", script_text)
+        self.assertIn("metricValueEl.textContent = `iLvl ${readinessIlvl.toLocaleString()}`;", script_text)
+
+    def test_empty_leaderboard_metric_pill_is_not_emitted(self):
+        script_text = Path("render/script.js").read_text(encoding="utf-8")
+
+        self.assertIn("const metricPill = clone.querySelector('.amw-leaderboard-metric');", script_text)
+        self.assertGreaterEqual(script_text.count("metricPill.remove();"), 2)
+        self.assertNotIn("metricValueEl.textContent = '';", script_text)
+        self.assertNotIn("metricLabelEl.textContent = '';", script_text)
+
     def test_search_autocomplete_helpers_are_present(self):
         script_text = Path("render/script.js").read_text(encoding="utf-8")
 

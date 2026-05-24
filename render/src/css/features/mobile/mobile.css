@@ -364,10 +364,6 @@
   .home-secondary-section {
     margin-top: 48px;
   }
-
-  .lb-podium-wrap {
-    padding-inline: 8px;
-  }
 }
 
 /* Dossier and war effort tablet collapse */
@@ -529,6 +525,87 @@
   .analytics-spotlight-grid {
     gap: 18px;
   }
+
+  .amw-leaderboard-list {
+    --leaderboard-list-gap: 12px;
+    --leaderboard-avatar-size: 46px;
+    --leaderboard-card-columns: 46px minmax(0, 1fr) auto;
+    --leaderboard-card-areas:
+      "avatar identity rank"
+      "avatar identity metric";
+    --leaderboard-card-padding: 12px 11px 11px;
+    --leaderboard-card-min-height: 0;
+    --leaderboard-card-gap: 4px 9px;
+    --leaderboard-avatar-radius: 14px;
+    --leaderboard-name-size: 13px;
+    --leaderboard-metric-padding: 4px 10px;
+    grid-template-columns: 1fr;
+    gap: var(--leaderboard-list-gap);
+    margin: 12px 0 0;
+    padding: 0;
+  }
+
+  .amw-leaderboard-featured {
+    --leaderboard-list-gap: 12px;
+    --leaderboard-avatar-size: 56px;
+    --leaderboard-card-padding: 14px 12px 13px;
+    --leaderboard-card-min-height: 136px;
+    --leaderboard-card-gap: 8px;
+    --leaderboard-avatar-radius: 15px;
+    --leaderboard-name-size: 14px;
+    --leaderboard-metric-size: 13px;
+    --leaderboard-metric-padding: 5px 11px;
+  }
+
+  .amw-leaderboard-card {
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    min-height: var(--leaderboard-card-min-height);
+    padding: var(--leaderboard-card-padding);
+    grid-template-columns: var(--leaderboard-card-columns);
+    grid-template-areas: var(--leaderboard-card-areas);
+    gap: var(--leaderboard-card-gap);
+  }
+
+  .amw-leaderboard-avatar {
+    width: var(--leaderboard-avatar-size);
+    height: var(--leaderboard-avatar-size);
+    border-radius: var(--leaderboard-avatar-radius);
+  }
+
+  .amw-leaderboard-rank {
+    min-width: 34px;
+    padding: 3px 7px;
+    font-size: 10px;
+  }
+
+  .amw-leaderboard-name {
+    white-space: normal;
+    overflow: visible;
+    text-overflow: unset;
+    line-height: 1.12;
+    font-size: var(--leaderboard-name-size);
+  }
+
+  .amw-leaderboard-metric {
+    padding: var(--leaderboard-metric-padding);
+  }
+
+  .amw-leaderboard-vanguard-badge {
+    padding: 4px 8px;
+    font-size: 9px;
+    letter-spacing: 0.07em;
+  }
+
+  .amw-leaderboard-featured .amw-leaderboard-identity {
+    padding: 0;
+  }
+
+  .amw-leaderboard-featured .amw-leaderboard-rank {
+    top: 10px;
+    right: 10px;
+  }
 }
 
 /* Timeline and ladder tablet rules */
@@ -543,51 +620,6 @@
 
   .timeline-container.timeline-home-board .monuments-grid {
     grid-template-columns: 1fr;
-  }
-
-  .lb-podium-wrap.ladder-podium-wrap {
-    gap: 8px;
-    margin-top: 20px;
-    margin-bottom: 2px;
-    padding-top: 26px;
-  }
-
-  .lb-podium-wrap.ladder-podium-wrap .podium-step-1 {
-    min-height: 178px;
-  }
-
-  .lb-podium-wrap.ladder-podium-wrap .podium-step-2 {
-    min-height: 154px;
-  }
-
-  .lb-podium-wrap.ladder-podium-wrap .podium-step-3 {
-    min-height: 142px;
-  }
-
-  .lb-podium-wrap.ladder-podium-wrap .ladder-podium-block {
-    padding: 16px 8px 12px;
-  }
-
-  .lb-podium-wrap.ladder-podium-wrap .ladder-podium-block:hover {
-    transform: translateY(-4px);
-  }
-
-  .lb-podium-wrap.ladder-podium-wrap .ladder-podium-block .podium-avatar {
-    width: 46px;
-    height: 46px;
-  }
-
-  .lb-podium-wrap.ladder-podium-wrap .ladder-podium-block .podium-crown {
-    top: -48px;
-  }
-
-  .lb-podium-wrap.ladder-podium-wrap .ladder-podium-block .podium-name {
-    font-size: 13px;
-  }
-
-  .lb-podium-wrap.ladder-podium-wrap .ladder-podium-block .podium-pill {
-    min-width: 84px;
-    padding: 4px 10px;
   }
 
   .ladder-hero-stats,
@@ -1069,7 +1101,7 @@
   }
 
   .leaderboard-row:hover,
-  .podium-block:hover {
+  .amw-leaderboard-card:hover {
     transform: translateY(-2px);
   }
 
@@ -1363,9 +1395,8 @@
     padding-top: 14px;
   }
 
-  .lb-podium-wrap {
-    padding: 18px 4px 8px;
-    margin: 18px auto 10px;
+  .amw-leaderboard-list {
+    margin: 12px 0 0;
   }
 
   .loader-content {
@@ -1784,55 +1815,6 @@
   .home-metric-scope-list {
     font-size: 12px;
     line-height: 1.6;
-  }
-
-  .lb-podium-wrap {
-    gap: 4px;
-  }
-
-  .podium-block {
-    padding: 30px 2px 8px 2px;
-  }
-
-  .lb-podium-wrap.ladder-podium-wrap {
-    gap: 6px;
-    margin-top: 14px;
-    margin-bottom: 0;
-    padding-top: 20px;
-  }
-
-  .lb-podium-wrap.ladder-podium-wrap .ladder-podium-block {
-    padding: 36px 6px 72px;
-  }
-
-  .lb-podium-wrap.ladder-podium-wrap .podium-step-1 {
-    min-height: 156px;
-    transform: none;
-  }
-
-  .lb-podium-wrap.ladder-podium-wrap .podium-step-2 {
-    min-height: 138px;
-    transform: none;
-  }
-
-  .lb-podium-wrap.ladder-podium-wrap .podium-step-3 {
-    min-height: 128px;
-    transform: none;
-  }
-
-  .lb-podium-wrap.ladder-podium-wrap .ladder-podium-block .podium-name {
-    font-size: 12px;
-    min-height: 2.8em;
-  }
-
-  .lb-podium-wrap.ladder-podium-wrap .ladder-podium-block .podium-pill {
-    min-width: 94px;
-    bottom: 10px;
-  }
-
-  .lb-podium-wrap.ladder-podium-wrap .ladder-podium-block .podium-rank {
-    bottom: 8px;
-    font-size: 28px;
   }
 }
 

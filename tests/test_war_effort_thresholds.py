@@ -27,6 +27,8 @@ class WarEffortThresholdTests(unittest.TestCase):
         self.assertIn("Objective: 25 notable gear upgrades this week.", template_text)
         self.assertIn("Objective: 3 members reach level 70 this week.", template_text)
         self.assertIn("Warden's Standard", template_text)
+        self.assertIn('class="amw-leaderboard-card tt-char"', template_text)
+        self.assertIn('class="amw-leaderboard amw-leaderboard-list"', template_text)
         self.assertIn('href="#war-effort-readiness"', template_text)
         self.assertIn('id="guild-readiness-kicker"', template_text)
         self.assertIn('id="guild-readiness-tooltip-trigger"', template_text)
@@ -58,6 +60,11 @@ class WarEffortThresholdTests(unittest.TestCase):
         self.assertIn('.war-effort-archive-link {', war_effort_css_text)
         self.assertIn('@media (min-width: 1025px) {', war_effort_css_text)
         self.assertIn('.weekly-challenges-flex-container {', css_text)
+        self.assertIn('.amw-leaderboard-list {', css_text)
+        self.assertIn('.amw-leaderboard-card {', css_text)
+        self.assertIn('.amw-leaderboard-theme-readiness {', css_text)
+        self.assertNotIn('.amw-leaderboard-grid {', css_text)
+        self.assertNotIn('.podium-block {', css_text)
         self.assertIn('display: grid;', css_text)
         self.assertIn('grid-template-columns: repeat(2, minmax(0, 1fr));', css_text)
         self.assertIn('.home-war-effort-section .weekly-challenges-flex-container > .war-effort-home-card-readiness {', war_effort_css_text)
@@ -154,9 +161,11 @@ class WarEffortThresholdTests(unittest.TestCase):
         self.assertIn("window.warEffortVanguards = { xp: [], hk: [], loot: [], zenith: [], readiness: [] };", script_text)
         self.assertIn("Warden's Standard (${filteredRoster.length})", script_text)
         self.assertIn("function getResolvedEquippedItemLevel(character = null, profile = null) {", script_text)
+        self.assertIn("function getLeaderboardThemeClass(theme = '') {", script_text)
+        self.assertIn("function decorateLeaderboardClone(clone, { rank = 0, theme = '' } = {}) {", script_text)
         self.assertIn("else if (hashUrl === 'war-effort-readiness') {", script_text)
-        self.assertIn("statValEl.textContent = `iLvl ${readinessIlvl.toLocaleString()}`;", script_text)
-        self.assertIn("pill.remove();", script_text)
+        self.assertIn("metricValueEl.textContent = `iLvl ${readinessIlvl.toLocaleString()}`;", script_text)
+        self.assertIn("metricPill.remove();", script_text)
         self.assertIn("guild-xp-tooltip-trigger", template_text)
         self.assertIn("guild-hk-tooltip-trigger", template_text)
         self.assertIn("guild-loot-tooltip-trigger", template_text)
@@ -182,6 +191,45 @@ class WarEffortThresholdTests(unittest.TestCase):
         self.assertIn("ZENITH_THRESHOLD = 3", backend_text)
         self.assertNotIn("const WAR_EFFORT_THRESHOLDS", shell_text)
         self.assertNotIn("const WAR_EFFORT_THRESHOLDS", script_text)
+
+    def test_war_effort_top_three_vanguard_cards_emit_badge_from_existing_vanguard_state(self):
+        script_text = Path("render/script.js").read_text(encoding="utf-8")
+        css_text = Path("render/style.css").read_text(encoding="utf-8")
+        mobile_css_text = Path("render/src/css/features/mobile/mobile.css").read_text(encoding="utf-8")
+
+        self.assertIn("function appendWarEffortVanguardBadge(card, { showVanguardBadge = false, vanguardBadgeTimeText = '' } = {}) {", script_text)
+        self.assertIn("if (!card || !showVanguardBadge) return;", script_text)
+        self.assertIn("badge.className = 'amw-leaderboard-vanguard-badge is-locked';", script_text)
+        self.assertIn("badge.textContent = 'Vanguard';", script_text)
+        self.assertIn("identity.appendChild(badge);", script_text)
+        self.assertIn("appendWarEffortVanguardBadge(block, { showVanguardBadge, vanguardBadgeTimeText });", script_text)
+        self.assertIn("showVanguardBadge,", script_text)
+        self.assertIn("vanguardBadgeTimeText,", script_text)
+        self.assertIn("rankEl.textContent = `#${rank}`;", script_text)
+        self.assertIn("metricValueEl.textContent = `iLvl ${readinessIlvl.toLocaleString()}`;", script_text)
+
+        self.assertIn(".amw-leaderboard-vanguard-badge {", css_text)
+        self.assertIn("border: 1px solid rgba(255, 209, 0, 0.42);", css_text)
+        self.assertIn("color: #ffe39a;", css_text)
+        self.assertIn("text-transform: uppercase;", css_text)
+        self.assertIn(".amw-leaderboard-vanguard-badge.is-locked {", css_text)
+        self.assertIn(".amw-leaderboard-vanguard-badge {", mobile_css_text)
+
+    def test_war_effort_vanguard_badge_is_not_added_to_non_vanguard_participants(self):
+        script_text = Path("render/script.js").read_text(encoding="utf-8")
+
+        vanguard_start = script_text.index("// Add the vanguard treatment when this character finished a war-effort push first.")
+        vanguard_end = script_text.index("// Swap in war-effort-specific stat summaries", vanguard_start)
+        vanguard_text = script_text[vanguard_start:vanguard_end]
+        helper_start = script_text.index("function appendWarEffortVanguardBadge")
+        helper_end = script_text.index("function formatWarEffortTooltipSummary", helper_start)
+        helper_text = script_text[helper_start:helper_end]
+
+        self.assertIn("let showVanguardBadge = false;", vanguard_text)
+        self.assertIn("if (window.warEffortVanguards[type] && window.warEffortVanguards[type].includes(cleanName)) {", vanguard_text)
+        self.assertIn("showVanguardBadge = true;", vanguard_text)
+        self.assertIn("if (!card || !showVanguardBadge) return;", helper_text)
+        self.assertNotIn("badge.textContent = 'Vanguard';", vanguard_text)
 
 
 if __name__ == "__main__":
