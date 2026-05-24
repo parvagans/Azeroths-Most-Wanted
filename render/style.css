@@ -3712,6 +3712,107 @@ body.nav-menu-open {
   font-size: 13px;
 }
 
+.mvp-gloat-card,
+.mvp-placeholder-card {
+  display: grid;
+  grid-template-columns: 54px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  margin: 0 0 12px;
+  padding: 12px 13px;
+  border: 1px solid rgba(255, 209, 0, 0.16);
+  border-radius: 14px;
+  background:
+    radial-gradient(circle at top left, rgba(255, 209, 0, 0.08), transparent 42%),
+    linear-gradient(180deg, rgba(20, 18, 12, 0.92), rgba(8, 8, 12, 0.96));
+  box-shadow:
+    0 12px 22px rgba(0, 0, 0, 0.32),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.gloat-avatar,
+.mvp-placeholder-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 209, 0, 0.24);
+  object-fit: cover;
+  background: rgba(0, 0, 0, 0.72);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.42);
+}
+
+.mvp-placeholder-avatar {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: rgba(255, 209, 0, 0.82);
+  font-family: "Cinzel";
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.gloat-info,
+.mvp-placeholder-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+}
+
+.gloat-title,
+.mvp-placeholder-title,
+.mvp-placeholder-status {
+  color: rgba(245, 224, 166, 0.82);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.11em;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
+.gloat-name {
+  min-width: 0;
+  color: #fff4cf;
+  font-family: "Cinzel";
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.12;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-shadow: 1px 1px 2px #000;
+  cursor: pointer;
+}
+
+.gloat-meta,
+.mvp-placeholder-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: center;
+  gap: 2px;
+  min-width: 72px;
+  text-align: right;
+}
+
+.gloat-score {
+  color: var(--activity-accent, #ffd100);
+  font-size: 18px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 1px 1px 2px #000;
+}
+
+.gloat-label,
+.mvp-placeholder-label {
+  color: rgba(216, 208, 184, 0.72);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-transform: uppercase;
+}
+
 .text-hk {
   color: #ff4400;
 }

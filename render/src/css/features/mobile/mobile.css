@@ -1411,6 +1411,28 @@
     padding: 14px 12px;
   }
 
+  .mvp-gloat-card,
+  .mvp-placeholder-card {
+    grid-template-columns: 46px minmax(0, 1fr);
+    gap: 10px;
+    padding: 11px;
+  }
+
+  .gloat-avatar,
+  .mvp-placeholder-avatar {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+  }
+
+  .gloat-meta,
+  .mvp-placeholder-meta {
+    grid-column: 1 / -1;
+    align-items: flex-start;
+    min-width: 0;
+    text-align: left;
+  }
+
   .ac-empty-text {
     font-size: 12px;
     line-height: 1.5;

@@ -7008,12 +7008,12 @@ window.addEventListener('DOMContentLoaded', async () => {
 
         function generateGloatingHtml(mvpData, isPvp) {
             const label = isPvp ? 'HKs' : 'iLvl';
+            const title = isPvp ? 'Previous HK Leader' : 'Previous Top Climber';
             
             if (!mvpData || !mvpData.name) {
                 const template = document.getElementById('tpl-mvp-placeholder');
                 if (!template) return document.createDocumentFragment();
                 const clone = template.content.cloneNode(true);
-                clone.querySelector('.mvp-placeholder-label').textContent = `Last Week's ${label}`;
                 return clone;
             }
 
@@ -7033,14 +7033,17 @@ window.addEventListener('DOMContentLoaded', async () => {
             
             const img = clone.querySelector('.gloat-avatar');
             img.src = portraitURL;
+            img.alt = p.name || 'Previous week standout portrait';
             img.onclick = () => selectCharacter(p.name.toLowerCase());
             
+            clone.querySelector('.gloat-title').textContent = title;
+
             const nameSpan = clone.querySelector('.gloat-name');
             nameSpan.textContent = p.name;
             nameSpan.onclick = () => selectCharacter(p.name.toLowerCase());
             
             clone.querySelector('.gloat-score').textContent = `+${mvpData.score.toLocaleString()}`;
-            clone.querySelector('.gloat-label').textContent = `Last Week's ${label}`;
+            clone.querySelector('.gloat-label').textContent = `${label} last week`;
             
             return clone;
         }

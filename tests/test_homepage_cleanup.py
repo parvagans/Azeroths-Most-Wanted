@@ -261,6 +261,36 @@ class HomepageCleanupTests(unittest.TestCase):
         self.assertIn("container.classList.add('amw-leaderboard-featured');", mvp_text)
         self.assertIn("decorateLeaderboardClone(clone, {", mvp_text)
 
+    def test_homepage_previous_week_standout_banner_uses_metric_specific_copy(self):
+        template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")
+        script_text = Path("render/script.js").read_text(encoding="utf-8")
+        css_text = Path("render/style.css").read_text(encoding="utf-8")
+        mobile_css_text = Path("render/src/css/features/mobile/mobile.css").read_text(encoding="utf-8")
+
+        placeholder_start = template_text.index('id="tpl-mvp-placeholder"')
+        placeholder_end = template_text.index('id="tpl-mvp-gloat"', placeholder_start)
+        placeholder_text = template_text[placeholder_start:placeholder_end]
+        gloat_start = template_text.index('id="tpl-mvp-gloat"')
+        gloat_end = template_text.index('id="tpl-mvp-empty"', gloat_start)
+        gloat_text = template_text[gloat_start:gloat_end]
+        mvp_start = script_text.index("function generateGloatingHtml(mvpData, isPvp) {")
+        mvp_end = script_text.index("const prevMvps = config.prev_mvps || {};", mvp_start)
+        gloat_runtime_text = script_text[mvp_start:mvp_end]
+
+        self.assertNotIn("Reigning Champion", placeholder_text + gloat_text + gloat_runtime_text)
+        self.assertIn("Awaiting previous week data", placeholder_text)
+        self.assertIn("const label = isPvp ? 'HKs' : 'iLvl';", gloat_runtime_text)
+        self.assertIn("const title = isPvp ? 'Previous HK Leader' : 'Previous Top Climber';", gloat_runtime_text)
+        self.assertIn("clone.querySelector('.gloat-title').textContent = title;", gloat_runtime_text)
+        self.assertIn("clone.querySelector('.gloat-score').textContent = `+${mvpData.score.toLocaleString()}`;", gloat_runtime_text)
+        self.assertIn("clone.querySelector('.gloat-label').textContent = `${label} last week`;", gloat_runtime_text)
+        self.assertNotIn("clone.querySelector('.mvp-placeholder-status').textContent = title;", gloat_runtime_text)
+        self.assertNotIn("clone.querySelector('.mvp-placeholder-label').textContent = `${label} last week`;", gloat_runtime_text)
+        self.assertIn(".mvp-gloat-card,", css_text)
+        self.assertIn("grid-template-columns: 54px minmax(0, 1fr) auto;", css_text)
+        self.assertIn(".gloat-score {", css_text)
+        self.assertIn(".mvp-gloat-card,", mobile_css_text)
+
     def test_homepage_curated_ladder_intelligence_uses_featured_variant(self):
         script_text = Path("render/script.js").read_text(encoding="utf-8")
         pve_start = script_text.index("const pveContainer = document.getElementById('pve-leaderboard');")
