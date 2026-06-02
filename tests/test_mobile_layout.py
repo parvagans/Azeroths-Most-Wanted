@@ -232,6 +232,32 @@ class MobileLayoutTests(unittest.TestCase):
         self.assertIn(".timeline-container.timeline-home-board .monuments-grid", mobile_css)
         self.assertIn(".arch-pipeline", mobile_css)
 
+    def test_mobile_war_effort_progress_text_cannot_force_horizontal_overflow(self):
+        mobile_css = self.mobile_css
+        war_effort_css = self.war_effort_css
+
+        self.assertIn(".war-effort-home-track .challenge-text {\n  padding: 0 12px;", war_effort_css)
+        self.assertIn("white-space: nowrap;", war_effort_css)
+        self.assertIn(
+            ".home-war-effort-section .weekly-challenges-flex-container,\n"
+            "  .war-effort-home-card,\n"
+            "  .war-effort-home-track,\n"
+            "  .challenge-bar-bg {\n"
+            "    min-width: 0;\n"
+            "    max-width: 100%;",
+            mobile_css,
+        )
+        self.assertIn(
+            ".war-effort-home-track .challenge-text {\n"
+            "    min-width: 0;\n"
+            "    max-width: 100%;\n"
+            "    padding: 0 10px;",
+            mobile_css,
+        )
+        self.assertIn("white-space: normal;", mobile_css)
+        self.assertIn("overflow-wrap: anywhere;", mobile_css)
+        self.assertIn("line-height: 1.15;", mobile_css)
+
     def test_mobile_breakpoints_cover_target_phone_widths(self):
         for breakpoint in (
             "1180px",
