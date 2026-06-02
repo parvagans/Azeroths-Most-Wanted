@@ -6360,6 +6360,18 @@ body[data-app-ready="true"] #main-dashboard {
     0 18px 34px rgba(0, 0, 0, 0.28);
 }
 
+.tt-char.is-character-interactive {
+  cursor: pointer;
+}
+
+.tt-char.is-character-interactive:focus-visible {
+  outline: 2px solid rgba(255, 209, 0, 0.72);
+  outline-offset: 3px;
+  box-shadow:
+    var(--amw-surface-focus-ring),
+    0 16px 30px rgba(0, 0, 0, 0.26);
+}
+
 #loading-overlay {
   background:
     radial-gradient(circle at center, rgba(54, 38, 18, 0.76) 0%, rgba(11, 9, 7, 0.96) 58%, #000 100%);

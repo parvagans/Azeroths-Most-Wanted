@@ -69,6 +69,36 @@ class CharacterIntelligenceRenderTests(unittest.TestCase):
         self.assertIn("flex-wrap: wrap;", mobile_css_text)
         self.assertIn("max-width: calc(100vw - 16px);", mobile_css_text)
 
+    def test_tooltip_character_surfaces_are_keyboard_accessible(self):
+        runtime_text = Path("render/script.js").read_text(encoding="utf-8")
+        style_css_text = Path("render/style.css").read_text(encoding="utf-8")
+        mobile_css_text = Path("render/src/css/features/mobile/mobile.css").read_text(encoding="utf-8")
+
+        self.assertIn("function makeCharacterInteractive(trigger) {", runtime_text)
+        self.assertIn("makeCharacterInteractive(trigger);", runtime_text)
+        self.assertIn("trigger.classList.add('is-character-interactive');", runtime_text)
+        self.assertIn("trigger.setAttribute('tabindex', '0');", runtime_text)
+        self.assertIn("trigger.setAttribute('role', 'button');", runtime_text)
+        self.assertIn("trigger.setAttribute('aria-label', `Open character dossier for ${displayName}`);", runtime_text)
+        self.assertIn("event.key === 'Enter' || event.key === ' '", runtime_text)
+        self.assertIn("selectCharacter(currentCharName);", runtime_text)
+        self.assertIn("trigger.dataset.characterKeyboardBound = 'true';", runtime_text)
+
+        self.assertIn(".tt-char.is-character-interactive {", style_css_text)
+        self.assertIn(".tt-char.is-character-interactive:focus-visible {", style_css_text)
+        character_focus_start = style_css_text.index(".tt-char.is-character-interactive:focus-visible {")
+        character_focus_end = style_css_text.index("}", character_focus_start)
+        character_focus_rule = style_css_text[character_focus_start:character_focus_end]
+        self.assertIn("outline: 2px solid", character_focus_rule)
+        self.assertIn("outline-offset: 3px;", character_focus_rule)
+        self.assertIn("box-shadow:", character_focus_rule)
+        self.assertIn("var(--amw-surface-focus-ring)", character_focus_rule)
+
+        mobile_tooltip_start = mobile_css_text.index(".custom-tooltip {")
+        mobile_tooltip_end = mobile_css_text.index("}", mobile_tooltip_start)
+        mobile_tooltip_rule = mobile_css_text[mobile_tooltip_start:mobile_tooltip_end]
+        self.assertIn("display: none !important;", mobile_tooltip_rule)
+
     def test_dossier_js_includes_prestige_identity_and_reigning_header(self):
         html_dashboard_text = Path("render/html_dashboard.py").read_text(encoding="utf-8")
         core_data_text = Path("render/src/js/core/data.js").read_text(encoding="utf-8")

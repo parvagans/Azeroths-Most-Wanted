@@ -455,6 +455,54 @@ window.addEventListener('DOMContentLoaded', async () => {
 
     bindDelegatedCharacterSurfaceClicks(conciseShellHost);
 
+    function getCharacterInteractiveLabelName(trigger, charName) {
+        const normalizedName = String(charName || '').trim().toLowerCase();
+        const matchedCharacter = Array.isArray(rosterData)
+            ? rosterData.find(c => c.profile && c.profile.name && c.profile.name.toLowerCase() === normalizedName)
+            : null;
+        if (matchedCharacter && matchedCharacter.profile && matchedCharacter.profile.name) {
+            return matchedCharacter.profile.name;
+        }
+
+        const explicitName = trigger.getAttribute('data-character-name') || trigger.getAttribute('data-name');
+        return explicitName || charName || 'character';
+    }
+
+    function makeCharacterInteractive(trigger) {
+        if (!trigger || !trigger.getAttribute) return;
+        const charName = trigger.getAttribute('data-char');
+        if (!charName) return;
+
+        const nativeInteractive = trigger.matches('a[href], button, input, select, textarea, summary');
+        trigger.classList.add('is-character-interactive');
+
+        if (!nativeInteractive) {
+            if (!trigger.hasAttribute('tabindex')) trigger.setAttribute('tabindex', '0');
+            if (!trigger.hasAttribute('role')) trigger.setAttribute('role', 'button');
+        }
+
+        if (!trigger.hasAttribute('aria-label')) {
+            const displayName = getCharacterInteractiveLabelName(trigger, charName);
+            trigger.setAttribute('aria-label', `Open character dossier for ${displayName}`);
+        }
+
+        if (nativeInteractive || trigger.dataset.characterKeyboardBound === 'true') return;
+        trigger.dataset.characterKeyboardBound = 'true';
+        trigger.addEventListener('keydown', event => {
+            const isActivationKey = event.key === 'Enter' || event.key === ' ';
+            if (!isActivationKey) return;
+
+            const nestedInteractive = event.target.closest('a[href], button, input, select, textarea, summary, [contenteditable="true"]');
+            if (nestedInteractive && nestedInteractive !== trigger) return;
+
+            event.preventDefault();
+            const currentCharName = trigger.getAttribute('data-char');
+            if (currentCharName) {
+                selectCharacter(currentCharName);
+            }
+        });
+    }
+
     function getPowerName(cClass) {
         if (cClass === "Warrior") return "Rage";
         if (cClass === "Rogue") return "Energy";
@@ -4136,6 +4184,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         const tt_chars = document.querySelectorAll('.tt-char:not(.tt-bound)');
         tt_chars.forEach(trigger => {
             trigger.classList.add('tt-bound');
+            makeCharacterInteractive(trigger);
             
             trigger.addEventListener('mousemove', e => {
                 const charName = trigger.getAttribute('data-char');
