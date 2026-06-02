@@ -471,6 +471,49 @@ class HomepageCleanupTests(unittest.TestCase):
         self.assertIn("} else if (hash.startsWith('war-effort-')) {", script_text)
         self.assertIn("} else if (hash.startsWith('filter-role-')) {", script_text)
 
+    def test_homepage_command_brief_uses_existing_status_sources(self):
+        template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")
+        js_text = Path("render/src/js/features/home_analytics/home_overview.js").read_text(encoding="utf-8")
+        css_text = Path("render/style.css").read_text(encoding="utf-8")
+        mobile_css_text = Path("render/src/css/features/mobile/mobile.css").read_text(encoding="utf-8")
+
+        self.assertIn('id="home-command-brief"', template_text)
+        self.assertIn('Command Brief', template_text)
+        for label in ("Reset", "Roster", "War Effort", "Movement"):
+            self.assertIn(f'class="home-command-brief-label">{label}</span>', template_text)
+        self.assertIn('id="home-command-brief-reset"', template_text)
+        self.assertIn('id="home-command-brief-roster"', template_text)
+        self.assertIn('id="home-command-brief-war-effort"', template_text)
+        self.assertIn('id="home-command-brief-movement"', template_text)
+        self.assertIn('Awaiting scan', template_text)
+        self.assertIn('Not available', template_text)
+
+        self.assertIn("function renderHomeCommandBrief(dashboardConfig = {}, counts = {})", js_text)
+        self.assertIn("const resetEl = document.getElementById('countdown-timer-text');", js_text)
+        self.assertIn("const snapshots = window.warEffortSnapshots || null;", js_text)
+        self.assertIn("const movement = dashboardConfig.membership_movement || {};", js_text)
+        self.assertIn("getNumericConfigValue(movement, 'joined', 0)", js_text)
+        self.assertIn("getNumericConfigValue(movement, 'departed', 0)", js_text)
+        self.assertIn("getNumericConfigValue(movement, 'rejoined', 0)", js_text)
+        self.assertIn("getNumericConfigValue((dashboardConfig && dashboardConfig.global_trends) || {}, 'trend_total', 0)", js_text)
+        self.assertIn("renderHomeCommandBrief(dashboardConfig, {", js_text)
+        self.assertIn("totalAllCount,", js_text)
+        self.assertIn("raidReadyMainCount", js_text)
+        self.assertNotIn("command_brief", js_text)
+        self.assertNotIn("home_command_brief", js_text)
+
+        self.assertIn(".home-command-brief {", css_text)
+        self.assertIn("grid-template-columns: auto minmax(0, 1fr);", css_text)
+        self.assertIn(".home-command-brief-grid {", css_text)
+        self.assertIn("grid-template-columns: repeat(4, minmax(0, 1fr));", css_text)
+        self.assertIn(".home-command-brief-value {", css_text)
+        self.assertIn("overflow-wrap: anywhere;", css_text)
+
+        self.assertIn(".home-command-brief {", mobile_css_text)
+        self.assertIn("grid-template-columns: 1fr;", mobile_css_text)
+        self.assertIn(".home-command-brief-grid {", mobile_css_text)
+        self.assertIn("grid-template-columns: repeat(2, minmax(0, 1fr));", mobile_css_text)
+
 
 if __name__ == "__main__":
     unittest.main()

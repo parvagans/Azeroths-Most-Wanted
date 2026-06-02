@@ -739,9 +739,24 @@
   }
 
   .home-scan-summary-shell .command-ribbon-container,
+  .home-scan-summary-shell .home-command-brief,
   .home-scan-summary-shell .home-section-nav,
   .home-scan-summary-shell .home-pulse-section {
     max-width: 100%;
+  }
+
+  .home-command-brief {
+    grid-template-columns: 1fr;
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .home-command-brief-kicker {
+    justify-content: center;
+  }
+
+  .home-command-brief-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .home-war-effort-section .weekly-challenges-container {
@@ -1159,6 +1174,10 @@
     border: 0;
     background: transparent;
     box-shadow: none;
+  }
+
+  .home-command-brief-grid {
+    grid-template-columns: 1fr;
   }
 
   .home-report-cluster {

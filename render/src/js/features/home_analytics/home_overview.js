@@ -156,6 +156,81 @@ function renderHomeApiStatus(apiStatus = {}) {
     banner.hidden = false;
 }
 
+function getHomeCommandBriefResetText() {
+    const resetEl = document.getElementById('countdown-timer-text');
+    const resetText = resetEl ? String(resetEl.textContent || '').trim() : '';
+    return resetText && !resetText.includes('--') ? resetText : 'Awaiting scan';
+}
+
+function getHomeCommandBriefWarEffortText() {
+    const snapshots = window.warEffortSnapshots || null;
+    const types = ['xp', 'hk', 'loot', 'zenith', 'readiness'];
+    if (!snapshots || typeof snapshots !== 'object') return 'Awaiting scan';
+
+    const activeSnapshots = types
+        .map(type => ({ type, snapshot: snapshots[type] }))
+        .filter(entry => entry.snapshot && Number(entry.snapshot.target || 0) > 0);
+
+    if (activeSnapshots.length === 0) return 'Awaiting scan';
+
+    const completeCount = activeSnapshots.filter(entry => {
+        const current = Number(entry.snapshot.current || 0);
+        const target = Number(entry.snapshot.target || 0);
+        const pct = Number(entry.snapshot.pct || entry.snapshot.completionPct || 0);
+        return target > 0 && (pct >= 100 || current >= target);
+    }).length;
+
+    return `${completeCount.toLocaleString()}/${activeSnapshots.length.toLocaleString()} complete`;
+}
+
+function getHomeCommandBriefMovementText(dashboardConfig = {}) {
+    const movement = dashboardConfig.membership_movement || {};
+    const joined = getNumericConfigValue(movement, 'joined', 0);
+    const departed = getNumericConfigValue(movement, 'departed', 0);
+    const rejoined = getNumericConfigValue(movement, 'rejoined', 0);
+    const total = getNumericConfigValue(movement, 'total', 0);
+    const rawRosterTrend = getNumericConfigValue((dashboardConfig && dashboardConfig.global_trends) || {}, 'trend_total', 0);
+    const bootstrap = Boolean(movement.bootstrap);
+    const countOnlyRawDelta = !bootstrap && total === 0 && rawRosterTrend !== 0;
+
+    if (bootstrap) return 'Baseline building';
+    if (countOnlyRawDelta) {
+        const sign = rawRosterTrend > 0 ? '+' : '-';
+        return `${sign}${Math.abs(rawRosterTrend).toLocaleString()} roster count`;
+    }
+    if (total <= 0) return 'No movement';
+
+    const rejoinedText = rejoined > 0 ? ` / ${rejoined.toLocaleString()} rejoined` : '';
+    return `+${joined.toLocaleString()} / -${departed.toLocaleString()} latest${rejoinedText}`;
+}
+
+function updateHomeCommandBriefRuntimeValues() {
+    setHomeText('home-command-brief-reset', getHomeCommandBriefResetText());
+    setHomeText('home-command-brief-war-effort', getHomeCommandBriefWarEffortText());
+}
+
+function startHomeCommandBriefSync() {
+    if (window.homeCommandBriefSyncStarted) return;
+    window.homeCommandBriefSyncStarted = true;
+    window.setInterval(updateHomeCommandBriefRuntimeValues, 2000);
+}
+
+function renderHomeCommandBrief(dashboardConfig = {}, counts = {}) {
+    const briefEl = document.getElementById('home-command-brief');
+    if (!briefEl) return;
+
+    const totalAllCount = Number(counts.totalAllCount || 0);
+    const raidReadyMainCount = Number(counts.raidReadyMainCount || 0);
+    const rosterText = totalAllCount > 0
+        ? `${totalAllCount.toLocaleString()} total / ${raidReadyMainCount.toLocaleString()} ready mains`
+        : 'Not available';
+
+    setHomeText('home-command-brief-roster', rosterText);
+    setHomeText('home-command-brief-movement', getHomeCommandBriefMovementText(dashboardConfig));
+    updateHomeCommandBriefRuntimeValues();
+    startHomeCommandBriefSync();
+}
+
 function renderHomeLatestChangesCard(dashboardConfig = {}) {
     const latestChanges = dashboardConfig.latest_changes || {};
     const titleEl = document.getElementById('home-latest-changes-title');
@@ -446,6 +521,10 @@ function populateHomeOverview(dashboardConfig = {}) {
     setHomePulseSupport('home-kpi-ilvl', ['Mains only']);
     setHomeCardText('home-kpi-ilvl', '.home-pulse-meta', 'Average equipped iLvl for level 70 mains.');
 
+    renderHomeCommandBrief(dashboardConfig, {
+        totalAllCount,
+        raidReadyMainCount
+    });
     renderHomeMovementCard(dashboardConfig);
     renderHomeLatestChangesCard(dashboardConfig);
     renderHomeOfficerBriefCard(dashboardConfig);

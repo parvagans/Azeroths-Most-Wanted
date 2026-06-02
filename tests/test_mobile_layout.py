@@ -124,6 +124,8 @@ class MobileLayoutTests(unittest.TestCase):
     def test_mobile_css_covers_key_dashboard_routes(self):
         mobile_css = self.mobile_css
         self.assertIn(".home-dashboard-grid", mobile_css)
+        self.assertIn(".home-command-brief", mobile_css)
+        self.assertIn(".home-command-brief-grid", mobile_css)
         self.assertIn(".concise-char-bar", mobile_css)
         self.assertIn(".concise-wrapper", mobile_css)
         self.assertIn(".concise-sidebar", mobile_css)
