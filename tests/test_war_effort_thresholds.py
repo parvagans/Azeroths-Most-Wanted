@@ -11,6 +11,37 @@ class WarEffortThresholdTests(unittest.TestCase):
         self.assertEqual(LOOT_THRESHOLD, 25)
         self.assertEqual(ZENITH_THRESHOLD, 3)
 
+    def test_homepage_war_effort_open_board_controls_are_semantic_links(self):
+        template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")
+        war_effort_css_text = Path("render/src/css/features/war_effort/war_effort.css").read_text(encoding="utf-8")
+
+        controls = {
+            "guild-xp-tooltip-trigger": ("war-effort-xp", "Hero's Journey"),
+            "guild-hk-tooltip-trigger": ("war-effort-hk", "Blood of the Enemy"),
+            "guild-loot-tooltip-trigger": ("war-effort-loot", "Dragon's Hoard"),
+            "guild-zenith-tooltip-trigger": ("war-effort-zenith", "The Zenith Cohort"),
+            "guild-readiness-tooltip-trigger": ("war-effort-readiness", "Warden's Standard"),
+        }
+
+        self.assertNotIn('<span id="guild-xp-tooltip-trigger" class="war-effort-link challenge-link"', template_text)
+        self.assertNotIn('<span id="guild-hk-tooltip-trigger" class="war-effort-link challenge-link"', template_text)
+        self.assertNotIn('<span id="guild-loot-tooltip-trigger" class="war-effort-link challenge-link"', template_text)
+        self.assertNotIn('<span id="guild-zenith-tooltip-trigger" class="war-effort-link challenge-link"', template_text)
+        self.assertNotIn('<span id="guild-readiness-tooltip-trigger" class="war-effort-link challenge-link"', template_text)
+
+        self.assertEqual(template_text.count('class="war-effort-link challenge-link"'), 5)
+        self.assertEqual(template_text.count('Open board'), 5)
+
+        for trigger_id, (target_hash, label) in controls.items():
+            self.assertIn(
+                f'<a href="#{target_hash}" id="{trigger_id}" class="war-effort-link challenge-link" aria-label="Open {label} board">Open board',
+                template_text,
+            )
+            self.assertIn(f'href="#{target_hash}"', template_text)
+
+        self.assertIn('.challenge-link:focus-visible {', war_effort_css_text)
+        self.assertIn('text-decoration: none;', war_effort_css_text)
+
     def test_source_templates_and_shells_reflect_updated_thresholds(self):
         html_dashboard_text = Path("render/html_dashboard.py").read_text(encoding="utf-8")
         template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")

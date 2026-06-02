@@ -134,6 +134,7 @@ body[data-route="war-effort-zenith"]::before {
   font-size: 10px;
   font-weight: 700;
   line-height: 1.2;
+  text-decoration: none;
   text-transform: uppercase;
   letter-spacing: 0.08em;
   padding: 4px 9px;
