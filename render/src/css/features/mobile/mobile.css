@@ -1387,6 +1387,19 @@
     padding: 16px;
   }
 
+  .home-movement-summary-rows {
+    gap: 8px;
+  }
+
+  .home-movement-summary-row {
+    padding: 10px 11px;
+  }
+
+  .home-movement-helper {
+    font-size: 10px;
+    line-height: 1.4;
+  }
+
   .home-roster-intelligence-section {
     gap: 18px;
   }

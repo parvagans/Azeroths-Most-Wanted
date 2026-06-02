@@ -4761,6 +4761,60 @@ body.nav-menu-open {
   color: rgba(255, 174, 118, 0.98);
 }
 
+.home-movement-summary-rows {
+  display: grid;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  margin: 12px 0 10px;
+}
+
+.home-movement-summary-row {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  max-width: 100%;
+  padding: 11px 13px;
+  border: 1px solid rgba(255, 255, 255, 0.075);
+  border-left: 3px solid rgba(255, 209, 0, 0.4);
+  border-radius: 13px;
+  background:
+    linear-gradient(90deg, rgba(255, 209, 0, 0.045), transparent 52%),
+    rgba(255, 255, 255, 0.025);
+}
+
+.home-movement-summary-row[hidden] {
+  display: none;
+}
+
+.home-movement-summary-row-recent {
+  border-left-color: rgba(95, 170, 255, 0.42);
+  background:
+    linear-gradient(90deg, rgba(95, 170, 255, 0.045), transparent 52%),
+    rgba(255, 255, 255, 0.025);
+}
+
+.home-movement-card .home-movement-summary-label {
+  margin: 0;
+}
+
+.home-movement-card .home-movement-summary-value {
+  max-width: none;
+  margin: 0;
+}
+
+.home-movement-helper {
+  display: block;
+  margin: 0 0 10px;
+  color: rgba(205, 197, 173, 0.78);
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.home-movement-helper[hidden] {
+  display: none;
+}
+
 .home-movement-list {
   list-style: none;
   margin: 14px 0 0;

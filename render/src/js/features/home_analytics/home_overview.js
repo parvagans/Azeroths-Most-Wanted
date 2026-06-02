@@ -204,12 +204,14 @@ function renderHomeMovementCard(dashboardConfig = {}) {
     const cardEl = document.getElementById('home-movement-card');
     const titleEl = document.getElementById('home-movement-title');
     const summaryEl = document.getElementById('home-movement-summary');
+    const recentRowEl = document.getElementById('home-movement-recent-row');
     const recentLabelEl = document.getElementById('home-movement-recent-label');
     const recentSummaryEl = document.getElementById('home-movement-recent-summary');
+    const helperEl = document.getElementById('home-movement-helper');
     const listEl = document.getElementById('home-movement-list');
     const noteEl = document.getElementById('home-movement-note');
 
-    if (!cardEl || !titleEl || !summaryEl || !recentLabelEl || !recentSummaryEl || !listEl || !noteEl) return;
+    if (!cardEl || !titleEl || !summaryEl || !recentRowEl || !recentLabelEl || !recentSummaryEl || !helperEl || !listEl || !noteEl) return;
 
     const joined = getNumericConfigValue(movement, 'joined', 0);
     const departed = getNumericConfigValue(movement, 'departed', 0);
@@ -238,7 +240,7 @@ function renderHomeMovementCard(dashboardConfig = {}) {
         ? 'Initial roster capture'
         : countOnlyRawDelta
             ? 'Roster count change'
-            : 'Latest scan';
+            : 'Latest scan delta';
     summaryEl.textContent = bootstrap
         ? `${total.toLocaleString()} detail-eligible characters recorded as the movement baseline.`
         : countOnlyRawDelta
@@ -247,12 +249,15 @@ function renderHomeMovementCard(dashboardConfig = {}) {
                 ? `Latest scan: +${joined.toLocaleString()} joined / -${departed.toLocaleString()} departed / ${rejoined.toLocaleString()} rejoined.`
                 : 'No roster movement logged yet.';
 
-    recentLabelEl.textContent = 'Recent movement, last 7 days';
+    recentLabelEl.textContent = '7-day movement';
     recentSummaryEl.textContent = recentTotal > 0
         ? `Last 7 days: +${recentJoined.toLocaleString()} joined / -${recentDeparted.toLocaleString()} departed / ${recentRejoined.toLocaleString()} rejoined.`
         : 'No recent movement recorded in the last 7 days.';
     recentLabelEl.hidden = bootstrap || countOnlyRawDelta || recent.length === 0;
     recentSummaryEl.hidden = bootstrap || countOnlyRawDelta || recent.length === 0;
+    recentRowEl.hidden = bootstrap || countOnlyRawDelta || recent.length === 0;
+    helperEl.hidden = bootstrap || countOnlyRawDelta;
+    helperEl.textContent = 'Latest scan is the newest detected change set; 7-day movement summarizes recent tracked joins/departures.';
 
     listEl.innerHTML = '';
     if (bootstrap || countOnlyRawDelta || recent.length === 0) {

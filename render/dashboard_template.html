@@ -865,33 +865,40 @@
 
                     <div class="home-roster-intelligence-cluster">
                         <div id="home-movement-card" class="home-movement-card" role="note" aria-labelledby="home-movement-title">
-                        <span class="home-nav-eyebrow">Roster Movement</span>
-                        <span id="home-movement-title" class="home-nav-title">Latest scan</span>
-                        <span id="home-movement-summary" class="home-nav-copy">No roster movement logged yet.</span>
-                        <span id="home-movement-recent-label" class="home-movement-section-label">Recent movement, last 7 days</span>
-                        <span id="home-movement-recent-summary" class="home-movement-section-copy" hidden></span>
-                        <ul id="home-movement-list" class="home-movement-list home-movement-list-scroll" aria-label="Recent roster movement, last 7 days"></ul>
-                        <span id="home-movement-note" class="home-movement-note" hidden></span>
-                    </div>
-
-                    <div class="home-insights-row">
-                        <div id="home-latest-changes-card" class="home-latest-changes-card" role="note" aria-labelledby="home-latest-changes-title">
-                            <span class="home-nav-eyebrow">Latest Changes</span>
-                            <span id="home-latest-changes-title" class="home-nav-title">What changed recently</span>
-                            <span id="home-latest-changes-summary" class="home-nav-copy">Recent activity, trend shifts, and notable roster signals worth noting.</span>
-                            <ul id="home-latest-changes-list" class="home-latest-changes-list" aria-label="Recent changes"></ul>
-                        </div>
-
-                        <div id="home-officer-brief-card" class="home-officer-brief-card" role="note" aria-labelledby="home-officer-brief-title">
-                            <div class="home-officer-brief-head">
-                                <span class="home-nav-eyebrow">Roster Health</span>
-                                <span id="home-officer-brief-status" class="home-officer-brief-status" data-tone="neutral">Unknown</span>
+                            <span class="home-nav-eyebrow">Roster Movement</span>
+                            <div class="home-movement-summary-rows" aria-label="Roster movement summary">
+                                <div class="home-movement-summary-row home-movement-summary-row-latest">
+                                    <span id="home-movement-title" class="home-nav-title home-movement-summary-label">Latest scan delta</span>
+                                    <span id="home-movement-summary" class="home-nav-copy home-movement-summary-value">No roster movement logged yet.</span>
+                                </div>
+                                <div id="home-movement-recent-row" class="home-movement-summary-row home-movement-summary-row-recent">
+                                    <span id="home-movement-recent-label" class="home-movement-section-label home-movement-summary-label">7-day movement</span>
+                                    <span id="home-movement-recent-summary" class="home-movement-section-copy home-movement-summary-value" hidden></span>
+                                </div>
                             </div>
-                            <span id="home-officer-brief-title" class="home-nav-title">Officer Brief</span>
-                            <span id="home-officer-brief-summary" class="home-nav-copy">No roster health signals are available yet.</span>
-                            <ul id="home-officer-brief-list" class="home-officer-brief-list" aria-label="Officer brief insights"></ul>
+                            <span id="home-movement-helper" class="home-movement-helper">Latest scan is the newest detected change set; 7-day movement summarizes recent tracked joins/departures.</span>
+                            <ul id="home-movement-list" class="home-movement-list home-movement-list-scroll" aria-label="Recent roster movement, last 7 days"></ul>
+                            <span id="home-movement-note" class="home-movement-note" hidden></span>
                         </div>
-                    </div>
+
+                        <div class="home-insights-row">
+                            <div id="home-latest-changes-card" class="home-latest-changes-card" role="note" aria-labelledby="home-latest-changes-title">
+                                <span class="home-nav-eyebrow">Latest Changes</span>
+                                <span id="home-latest-changes-title" class="home-nav-title">What changed recently</span>
+                                <span id="home-latest-changes-summary" class="home-nav-copy">Recent activity, trend shifts, and notable roster signals worth noting.</span>
+                                <ul id="home-latest-changes-list" class="home-latest-changes-list" aria-label="Recent changes"></ul>
+                            </div>
+
+                            <div id="home-officer-brief-card" class="home-officer-brief-card" role="note" aria-labelledby="home-officer-brief-title">
+                                <div class="home-officer-brief-head">
+                                    <span class="home-nav-eyebrow">Roster Health</span>
+                                    <span id="home-officer-brief-status" class="home-officer-brief-status" data-tone="neutral">Unknown</span>
+                                </div>
+                                <span id="home-officer-brief-title" class="home-nav-title">Officer Brief</span>
+                                <span id="home-officer-brief-summary" class="home-nav-copy">No roster health signals are available yet.</span>
+                                <ul id="home-officer-brief-list" class="home-officer-brief-list" aria-label="Officer brief insights"></ul>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
