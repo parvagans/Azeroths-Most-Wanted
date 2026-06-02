@@ -679,6 +679,14 @@
     margin-bottom: 30px;
   }
 
+  .home-scan-summary-shell .command-ribbon-container {
+    margin-bottom: 0;
+  }
+
+  .command-ribbon-container .milestone-banner {
+    padding: 11px 12px;
+  }
+
   #main-dashboard .search-container {
     z-index: 10 !important;
     position: relative !important;

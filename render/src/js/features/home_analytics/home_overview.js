@@ -157,7 +157,7 @@ function renderHomeApiStatus(apiStatus = {}) {
 }
 
 function getHomeCommandBriefResetText() {
-    const resetEl = document.getElementById('countdown-timer-text');
+    const resetEl = document.getElementById('home-command-brief-reset');
     const resetText = resetEl ? String(resetEl.textContent || '').trim() : '';
     return resetText && !resetText.includes('--') ? resetText : 'Awaiting scan';
 }

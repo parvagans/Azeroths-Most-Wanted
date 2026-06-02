@@ -5215,6 +5215,37 @@ body.nav-menu-open {
   max-width: 100% !important;
 }
 
+.command-ribbon-container .milestone-banner {
+  min-height: 0;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 209, 0, 0.13);
+  border-left: 3px solid rgba(255, 209, 0, 0.38);
+  border-right: 0;
+  border-radius: 18px;
+  background:
+    linear-gradient(90deg, rgba(255, 209, 0, 0.06), transparent 42%),
+    rgba(255, 255, 255, 0.025);
+  box-shadow: none;
+}
+
+.command-ribbon-container .milestone-banner::after {
+  display: none;
+}
+
+.command-ribbon-container .milestone-icon {
+  font-size: 18px;
+  margin-right: 10px;
+  animation: none;
+}
+
+.command-ribbon-container .milestone-text {
+  color: #fff2bd;
+  font-family: "Open Sans", sans-serif;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
 .ribbon-right {
   flex: 0.72;
   display: flex;

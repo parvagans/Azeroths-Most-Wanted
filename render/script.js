@@ -7100,7 +7100,7 @@ window.addEventListener('DOMContentLoaded', async () => {
                 const m = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
                 const s = Math.floor((timeLeft % (1000 * 60)) / 1000);
 
-                const timerEl = document.getElementById('countdown-timer-text');
+                const timerEl = document.getElementById('home-command-brief-reset');
                 if (timerEl) {
                     timerEl.textContent = `${d}d ${h}h ${m}m ${s}s`;
                 }
