@@ -1,1 +1,1 @@
-{"week_anchor": "2026-07-28", "locks": {"readiness": {"vanguards": [], "participants": [], "active_raid_ready_baseline": 4, "active_raid_ready_count": 4, "total_raid_ready_count": 22, "target": 3, "participant_count": 0, "completion_pct": 0, "reset_anchor_ms": 1785189600000}}}
+{"week_anchor": "2026-07-28", "locks": {"readiness": {"vanguards": [], "participants": [], "active_raid_ready_baseline": 4, "active_raid_ready_count": 5, "total_raid_ready_count": 23, "target": 3, "participant_count": 0, "completion_pct": 0, "reset_anchor_ms": 1785189600000}}}
