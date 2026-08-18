@@ -1,1 +1,1 @@
-{"week_anchor": "2026-08-18", "locks": {"readiness": {"vanguards": [], "participants": [], "active_raid_ready_baseline": 5, "active_raid_ready_count": 5, "total_raid_ready_count": 24, "target": 4, "participant_count": 0, "completion_pct": 0, "reset_anchor_ms": 1787004000000}}}
+{"week_anchor": "2026-08-18", "locks": {"readiness": {"vanguards": [], "participants": ["azshyriel"], "active_raid_ready_baseline": 5, "active_raid_ready_count": 5, "total_raid_ready_count": 24, "target": 4, "participant_count": 1, "completion_pct": 25, "reset_anchor_ms": 1787004000000}}}
