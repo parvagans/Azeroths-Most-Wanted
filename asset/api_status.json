@@ -1,1 +1,1 @@
-{"ok": false, "code": 500, "source": "guild_roster", "message": "Roster fetch failed: 500, message='', url=https://eu.api.blizzard.com/data/wow/guild/thunderstrike/azeroths-most-wanted/roster?namespace=profile-classicann-eu&locale=en_US", "updated_at": "2026-08-19T20:02:44.202650Z"}
+{"ok": true, "code": 200, "source": "guild_roster", "message": "Live guild roster refresh completed successfully.", "updated_at": "2026-08-19T21:01:46.835843Z"}
