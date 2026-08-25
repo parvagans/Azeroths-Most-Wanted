@@ -3597,10 +3597,6 @@ body.nav-menu-open {
   flex: 0 1 auto;
 }
 
-.lb-name-status-row .character-activity-indicator {
-  flex: 0 0 auto;
-}
-
 .lb-spec {
   color: rgba(216, 208, 184, 0.84);
   font-size: 11px;
@@ -6336,6 +6332,8 @@ body[data-route="ladder-pvp"] #ember-canvas, body[data-route="war-effort-hk"] #e
 }
 
 .leaderboard-panel .war-council-row .lb-info {
+  --character-activity-slot-size: 18px;
+  --character-status-gap: 6px;
   grid-area: identity;
   display: grid;
   grid-template-rows: minmax(18px, auto) minmax(16px, auto);
@@ -6345,16 +6343,6 @@ body[data-route="ladder-pvp"] #ember-canvas, body[data-route="war-effort-hk"] #e
   width: 100%;
   min-width: 0;
   text-align: left;
-}
-
-.leaderboard-panel .war-council-row .lb-name-status-row {
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 6px;
-  width: 100%;
-  min-width: 0;
-  max-width: 100%;
 }
 
 .leaderboard-panel .war-council-row .lb-name {
@@ -6379,6 +6367,7 @@ body[data-route="ladder-pvp"] #ember-canvas, body[data-route="war-effort-hk"] #e
   white-space: nowrap;
   line-height: 1.3;
   text-align: left;
+  padding-inline-start: calc(var(--character-activity-slot-size) + var(--character-status-gap));
 }
 
 .leaderboard-panel .war-council-row .lb-spec .spec-icon-sm {
@@ -7070,16 +7059,34 @@ body[data-route-family="character"] {
   min-width: 0;
 }
 
-.character-name-status-row {
-  display: flex;
+.character-status-name-grid {
+  display: grid;
+  grid-template-columns:
+    var(--character-activity-slot-size, 18px)
+    minmax(0, 1fr);
   align-items: center;
-  gap: 7px;
-  width: 100%;
+  column-gap: var(--character-status-gap, 7px);
+  width: fit-content;
+  max-width: 100%;
   min-width: 0;
 }
 
-.character-name-status-row .amw-leaderboard-name {
-  flex: 1 1 auto;
+.character-activity-slot {
+  grid-column: 1;
+  display: inline-grid;
+  place-items: center;
+  width: var(--character-activity-slot-size, 18px);
+  height: var(--character-activity-slot-size, 18px);
+}
+
+.character-activity-slot .character-activity-indicator {
+  width: 100%;
+  height: 100%;
+}
+
+.character-status-name-grid .amw-leaderboard-name,
+.character-status-name-grid .lb-name {
+  grid-column: 2;
   min-width: 0;
 }
 
@@ -7248,7 +7255,7 @@ body[data-route-family="character"] {
   text-overflow: unset;
   line-height: 1.15;
   text-align: center;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
 }
 
 .amw-leaderboard-featured .amw-leaderboard-subtitle {
@@ -7290,22 +7297,22 @@ body[data-route-family="character"] {
   background: rgba(20, 15, 4, 0.78);
 }
 
-/* War Council uses one centered axis and fixed content tracks across both reports. */
-.leaderboard-panel .war-council-featured-grid {
+/* Homepage featured cards share one centered portrait, identity, and metric system. */
+.home-featured-grid {
   --leaderboard-card-gap: 8px;
   --leaderboard-card-padding: 16px 12px 14px;
-  --war-council-identity-height: 44px;
-  --war-council-metric-height: 31px;
+  --home-featured-identity-height: 44px;
+  --home-featured-metric-height: 31px;
   align-items: stretch;
 }
 
-.leaderboard-panel .war-council-featured-card {
+.home-featured-grid .home-featured-card {
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   grid-template-rows:
     var(--leaderboard-avatar-size)
-    var(--war-council-identity-height)
-    var(--war-council-metric-height);
+    var(--home-featured-identity-height)
+    var(--home-featured-metric-height);
   grid-template-areas:
     "avatar"
     "identity"
@@ -7318,38 +7325,45 @@ body[data-route-family="character"] {
   padding: var(--leaderboard-card-padding);
 }
 
-.leaderboard-panel .war-council-featured-card .amw-leaderboard-avatar {
+.home-featured-grid .home-featured-card .amw-leaderboard-avatar {
   place-self: center;
 }
 
-.leaderboard-panel .war-council-featured-card .amw-leaderboard-rank {
+.home-featured-grid .home-featured-card .amw-leaderboard-rank {
   position: absolute;
   top: 12px;
   right: 12px;
 }
 
-.leaderboard-panel .war-council-featured-card .amw-leaderboard-identity {
+.home-featured-grid .home-featured-card .amw-leaderboard-identity {
   place-self: stretch;
   display: grid;
   place-items: center;
   width: 100%;
-  height: var(--war-council-identity-height);
-  min-height: var(--war-council-identity-height);
+  height: var(--home-featured-identity-height);
+  min-height: var(--home-featured-identity-height);
 }
 
-.leaderboard-panel .war-council-featured-card .character-name-status-row {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: fit-content;
+.home-featured-grid .home-featured-card .character-status-name-grid {
+  place-self: center;
+  grid-template-columns:
+    var(--character-activity-slot-size, 18px)
+    minmax(0, 1fr)
+    var(--character-activity-slot-size, 18px);
   max-width: 100%;
   height: 100%;
   margin-inline: auto;
-  gap: 7px;
+  align-content: center;
 }
 
-.leaderboard-panel .war-council-featured-card .amw-leaderboard-name {
-  flex: 0 1 auto;
+.home-featured-grid .home-featured-card .character-status-name-grid::after {
+  content: "";
+  grid-column: 3;
+  width: var(--character-activity-slot-size, 18px);
+  height: var(--character-activity-slot-size, 18px);
+}
+
+.home-featured-grid .home-featured-card .amw-leaderboard-name {
   width: auto;
   max-width: 100%;
   display: -webkit-box;
@@ -7357,16 +7371,15 @@ body[data-route-family="character"] {
   -webkit-line-clamp: 2;
   line-clamp: 2;
   overflow: hidden;
-  overflow-wrap: anywhere;
+  overflow-wrap: break-word;
+  text-wrap: balance;
+  word-break: normal;
+  text-align: center;
 }
 
-.leaderboard-panel .war-council-featured-card .character-name-status-row.has-activity-indicator .amw-leaderboard-name {
-  max-width: calc(100% - 25px);
-}
-
-.leaderboard-panel .war-council-featured-card .amw-leaderboard-metric {
+.home-featured-grid .home-featured-card .amw-leaderboard-metric {
   place-self: center;
-  min-height: var(--war-council-metric-height);
+  min-height: var(--home-featured-metric-height);
   box-sizing: border-box;
 }
 

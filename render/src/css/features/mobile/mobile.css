@@ -1221,33 +1221,34 @@
     gap: 14px;
   }
 
-  .leaderboard-panel .war-council-featured-grid {
+  .home-featured-grid {
     --leaderboard-avatar-size: 52px;
     --leaderboard-card-padding: 12px 11px;
     --leaderboard-card-gap: 6px;
     --leaderboard-card-min-height: 0;
-    --war-council-identity-height: 36px;
-    --war-council-metric-height: 28px;
+    --home-featured-identity-height: 36px;
+    --home-featured-metric-height: 28px;
   }
 
-  .leaderboard-panel .war-council-featured-card {
+  .home-featured-grid .home-featured-card {
     grid-template-rows:
       var(--leaderboard-avatar-size)
-      var(--war-council-identity-height)
-      var(--war-council-metric-height);
+      var(--home-featured-identity-height)
+      var(--home-featured-metric-height);
   }
 
-  .leaderboard-panel .war-council-featured-card .character-name-status-row {
-    gap: 6px;
+  .home-featured-grid .home-featured-card .character-status-name-grid {
+    --character-activity-slot-size: 16px;
+    --character-status-gap: 6px;
   }
 
-  .leaderboard-panel .war-council-featured-card .character-activity-indicator {
+  .home-featured-grid .home-featured-card .character-activity-indicator {
     width: 16px;
     height: 16px;
     font-size: 11px;
   }
 
-  .leaderboard-panel .war-council-featured-card .amw-leaderboard-rank {
+  .home-featured-grid .home-featured-card .amw-leaderboard-rank {
     top: 10px;
     right: 10px;
   }
@@ -1592,8 +1593,9 @@
     --war-council-row-height: 58px;
   }
 
-  .leaderboard-panel .war-council-row .lb-name-status-row {
-    gap: 5px;
+  .leaderboard-panel .war-council-row .lb-info {
+    --character-activity-slot-size: 16px;
+    --character-status-gap: 5px;
   }
 
   .leaderboard-panel .war-council-row .lb-score-label {

@@ -78,6 +78,8 @@ process.stdout.write(JSON.stringify(result));
 
     def test_dossier_and_shared_current_character_cards_use_the_indicator(self):
         script = Path("render/script.js").read_text(encoding="utf-8")
+        dom_js = Path("render/src/js/core/dom.js").read_text(encoding="utf-8")
+        template = Path("render/dashboard_template.html").read_text(encoding="utf-8")
         css = Path("render/style.css").read_text(encoding="utf-8")
         dossier_css = Path("render/src/css/features/character/dossier.css").read_text(encoding="utf-8")
 
@@ -85,8 +87,13 @@ process.stdout.write(JSON.stringify(result));
         self.assertIn("character: deepChar", script)
         self.assertIn("appendCharacterActivityIndicator(nameEl, character);", script)
         self.assertIn("character-name-status-row", script)
+        self.assertIn("container.prepend(indicator);", dom_js)
+        self.assertNotIn("container.appendChild(indicator);", dom_js)
+        self.assertIn('class="character-activity-slot" aria-hidden="true"', template)
+        self.assertIn("appendCharacterActivityIndicator(statusSlot, character);", script)
         self.assertIn(".character-activity-indicator.is-active", css)
         self.assertIn(".character-activity-indicator.is-inactive", css)
+        self.assertIn(".character-status-name-grid {", css)
         self.assertIn(".char-card-name .character-activity-indicator", dossier_css)
 
 

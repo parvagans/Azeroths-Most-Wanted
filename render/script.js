@@ -148,15 +148,18 @@ function decorateLeaderboardClone(clone, { rank = 0, theme = '', character = nul
 
     const identity = root.querySelector('.amw-leaderboard-identity');
     const name = root.querySelector('.amw-leaderboard-name');
-    const indicator = buildCharacterActivityIndicator(character);
     if (identity && name) {
         const nameRow = document.createElement('div');
-        nameRow.className = 'character-name-status-row';
+        nameRow.className = 'character-name-status-row character-status-name-grid';
+        const statusSlot = document.createElement('span');
+        statusSlot.className = 'character-activity-slot';
+        statusSlot.setAttribute('aria-hidden', 'true');
         name.replaceWith(nameRow);
+        nameRow.appendChild(statusSlot);
         nameRow.appendChild(name);
+        const indicator = appendCharacterActivityIndicator(statusSlot, character);
         if (indicator) {
             nameRow.classList.add('has-activity-indicator');
-            nameRow.appendChild(indicator);
         }
     }
 }
@@ -1075,7 +1078,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         const listWrap = listWrapTemplate?.content?.firstElementChild?.cloneNode(true);
 
         if (!podiumWrap || !listWrap) return;
-        podiumWrap.classList.add('amw-leaderboard-featured');
+        podiumWrap.classList.add('amw-leaderboard-featured', 'home-featured-grid', 'war-council-featured-grid');
         setFeaturedLeaderboardCount(podiumWrap, topPve.length);
 
         const podiumTemplate = document.getElementById('tpl-home-leaderboard-podium');
@@ -1142,10 +1145,10 @@ window.addEventListener('DOMContentLoaded', async () => {
                 portraitEl.src = portraitURL;
                 portraitEl.alt = p.name || 'Character portrait';
 
-                const nameRowEl = clone.querySelector('.lb-name-status-row');
+                const activitySlotEl = clone.querySelector('.character-activity-slot');
                 const nameEl = clone.querySelector('.lb-name');
                 nameEl.textContent = p.name;
-                appendCharacterActivityIndicator(nameRowEl, char);
+                appendCharacterActivityIndicator(activitySlotEl, char);
 
                 const specEl = clone.querySelector('.lb-spec');
                 const specLabelEl = clone.querySelector('.lb-spec-label');
@@ -1228,7 +1231,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         const listWrap = listWrapTemplate?.content?.firstElementChild?.cloneNode(true);
 
         if (!podiumWrap || !listWrap) return;
-        podiumWrap.classList.add('amw-leaderboard-featured');
+        podiumWrap.classList.add('amw-leaderboard-featured', 'home-featured-grid', 'war-council-featured-grid');
         setFeaturedLeaderboardCount(podiumWrap, topPvp.length);
 
         const podiumTemplate = document.getElementById('tpl-home-leaderboard-podium');
@@ -1296,10 +1299,10 @@ window.addEventListener('DOMContentLoaded', async () => {
                 portraitEl.src = portraitURL;
                 portraitEl.alt = p.name || 'Character portrait';
 
-                const nameRowEl = clone.querySelector('.lb-name-status-row');
+                const activitySlotEl = clone.querySelector('.character-activity-slot');
                 const nameEl = clone.querySelector('.lb-name');
                 nameEl.textContent = p.name;
-                appendCharacterActivityIndicator(nameRowEl, char);
+                appendCharacterActivityIndicator(activitySlotEl, char);
 
                 const specEl = clone.querySelector('.lb-spec');
                 const specLabelEl = clone.querySelector('.lb-spec-label');

@@ -270,30 +270,37 @@ class MobileLayoutTests(unittest.TestCase):
         self.assertIn("overflow-wrap: anywhere;", mobile_css)
         self.assertIn("line-height: 1.15;", mobile_css)
 
-    def test_mobile_war_council_cards_keep_name_status_and_metric_aligned(self):
+    def test_mobile_home_featured_cards_share_a_centered_fixed_track_stack(self):
         mobile_css = self.mobile_css
 
-        self.assertIn(".leaderboard-panel .war-council-featured-grid {", mobile_css)
-        self.assertIn(".leaderboard-panel .war-council-featured-card {", mobile_css)
+        self.assertIn(".home-featured-grid {", mobile_css)
+        self.assertIn(".home-featured-grid .home-featured-card {", mobile_css)
         self.assertIn("var(--leaderboard-avatar-size)", mobile_css)
-        self.assertIn("var(--war-council-identity-height)", mobile_css)
-        self.assertIn("var(--war-council-metric-height)", mobile_css)
+        self.assertIn("var(--home-featured-identity-height)", mobile_css)
+        self.assertIn("var(--home-featured-metric-height)", mobile_css)
         self.assertIn(
-            ".leaderboard-panel .war-council-featured-card .character-name-status-row {\n"
-            "    gap: 6px;",
+            ".home-featured-grid .home-featured-card .character-status-name-grid {\n"
+            "    --character-activity-slot-size: 16px;\n"
+            "    --character-status-gap: 6px;",
             mobile_css,
         )
         self.assertIn(
-            ".leaderboard-panel .war-council-featured-card .amw-leaderboard-rank {\n"
+            ".home-featured-grid .home-featured-card .amw-leaderboard-rank {\n"
             "    top: 10px;\n"
             "    right: 10px;",
             mobile_css,
         )
         self.assertNotIn(
-            ".leaderboard-panel .war-council-featured-card .character-name-status-row {\n"
+            ".home-featured-grid .home-featured-card .character-status-name-grid {\n"
             "    position: absolute;",
             mobile_css,
         )
+        self.assertNotIn("war-council-identity-height", mobile_css)
+        self.assertNotIn("war-council-metric-height", mobile_css)
+
+    def test_mobile_war_council_compact_rows_keep_the_existing_responsive_tracks(self):
+        mobile_css = self.mobile_css
+
         self.assertIn("var(--war-council-row-rank-width)", mobile_css)
         self.assertIn("var(--war-council-row-avatar-size)", mobile_css)
         self.assertIn("var(--war-council-row-metric-width)", mobile_css)

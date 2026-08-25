@@ -101,7 +101,10 @@ function appendCharacterActivityIndicator(container, character) {
     if (!container) return null;
 
     const indicator = buildCharacterActivityIndicator(character);
-    if (indicator) container.appendChild(indicator);
+    if (indicator) {
+        container.removeAttribute('aria-hidden');
+        container.prepend(indicator);
+    }
     return indicator;
 }
 
