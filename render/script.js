@@ -147,6 +147,13 @@ function decorateLeaderboardClone(clone, { rank = 0, theme = '' } = {}) {
     else if (rank === 3) root.classList.add('amw-leaderboard-card-rank-3');
 }
 
+function setFeaturedLeaderboardCount(container, count) {
+    if (!container) return;
+
+    const visibleCount = Math.max(1, Math.min(3, Number(count) || 1));
+    container.classList.add(`amw-leaderboard-count-${visibleCount}`);
+}
+
 function appendWarEffortVanguardBadge(card, { showVanguardBadge = false, vanguardBadgeTimeText = '' } = {}) {
     if (!card || !showVanguardBadge) return;
 
@@ -1052,6 +1059,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
         if (!podiumWrap || !listWrap) return;
         podiumWrap.classList.add('amw-leaderboard-featured');
+        setFeaturedLeaderboardCount(podiumWrap, topPve.length);
 
         const podiumTemplate = document.getElementById('tpl-home-leaderboard-podium');
         const rowTemplate = document.getElementById('tpl-home-leaderboard-row');
@@ -1198,6 +1206,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
         if (!podiumWrap || !listWrap) return;
         podiumWrap.classList.add('amw-leaderboard-featured');
+        setFeaturedLeaderboardCount(podiumWrap, topPvp.length);
 
         const podiumTemplate = document.getElementById('tpl-home-leaderboard-podium');
         const rowTemplate = document.getElementById('tpl-home-leaderboard-row');
@@ -7008,6 +7017,7 @@ window.addEventListener('DOMContentLoaded', async () => {
             const container = containerClone.querySelector('.amw-leaderboard-list');
             if (!container) return document.createDocumentFragment();
             container.classList.add('amw-leaderboard-featured');
+            setFeaturedLeaderboardCount(container, chars.length);
 
             chars.forEach((char, index) => {
                 const p = char.profile;

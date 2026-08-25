@@ -204,9 +204,8 @@
 
   .leaderboards-wrapper,
   .mvp-cards-container {
-    flex-direction: column;
+    grid-template-columns: minmax(0, 1fr);
     align-items: stretch;
-    justify-content: flex-start;
   }
 
   .controls-wrapper {
@@ -1206,6 +1205,12 @@
     gap: 14px;
   }
 
+  .amw-leaderboard-featured.amw-leaderboard-count-1,
+  .amw-leaderboard-featured.amw-leaderboard-count-2 {
+    grid-template-columns: minmax(0, 1fr);
+    justify-content: stretch;
+  }
+
   .home-dashboard-grid {
     gap: 44px;
     margin-top: 44px;
@@ -1496,9 +1501,13 @@
 
   .mvp-gloat-card,
   .mvp-placeholder-card {
-    grid-template-columns: 46px minmax(0, 1fr);
+    grid-template-columns: 46px minmax(0, 1fr) minmax(64px, auto);
     gap: 10px;
     padding: 11px;
+  }
+
+  .mvp-placeholder-card {
+    grid-template-columns: 46px minmax(0, 1fr);
   }
 
   .gloat-avatar,
@@ -1510,10 +1519,22 @@
 
   .gloat-meta,
   .mvp-placeholder-meta {
-    grid-column: 1 / -1;
-    align-items: flex-start;
+    grid-column: auto;
+    align-items: flex-end;
     min-width: 0;
-    text-align: left;
+    text-align: right;
+  }
+
+  .leaderboard-panel .leaderboard-row {
+    grid-template-columns: 30px 34px minmax(0, 1fr);
+    grid-template-areas:
+      "rank avatar info"
+      ". . score";
+    row-gap: 7px;
+  }
+
+  .leaderboard-panel .lb-score {
+    justify-self: start;
   }
 
   .ac-empty-text {

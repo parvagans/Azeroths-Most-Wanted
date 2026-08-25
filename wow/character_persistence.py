@@ -43,6 +43,7 @@ def _should_write_character_row(orig, data, badge_payload):
         orig.get("equipped_item_level") != data.get("equipped_item_level")
         or orig.get("level") != data.get("level")
         or orig.get("last_login_ms") != data.get("last_login_ms")
+        or orig.get("portrait_url") != data.get("portrait_url")
         or orig.get("honorable_kills") != data.get("honorable_kills")
         or orig.get("active_spec") != data.get("active_spec")
         or orig_v_badges != badge_payload["v_badges_json"]

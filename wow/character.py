@@ -5,6 +5,18 @@ from wow.images import get_standardized_image_url
 from config import REALM
 from datetime import datetime, timezone
 
+
+def select_character_portrait_url(media):
+    """Select the Blizzard portrait asset used by standard character UI."""
+    assets = media.get("assets", []) if isinstance(media, dict) else []
+    assets_by_key = {
+        asset.get("key"): asset.get("value")
+        for asset in assets
+        if isinstance(asset, dict) and asset.get("value")
+    }
+    return assets_by_key.get("avatar") or assets_by_key.get("main-raw")
+
+
 async def fetch_character_data(session, token, char, history_data):
     """Fetch and normalize the profile, stats, equipment, media, PvP, and spec data for one character."""
     # Kick off the independent character endpoints together to keep the refresh window short.
@@ -43,17 +55,9 @@ async def fetch_character_data(session, token, char, history_data):
     if isinstance(profile, dict):
         profile["active_spec"] = active_spec
 
-    # Extract the highest quality character render available
-    render_url = None
-    if media and 'assets' in media:
-        for asset in media['assets']:
-            if asset.get('key') == 'main-raw':
-                render_url = asset.get('value')
-        # Fallback to standard avatar if 'main-raw' is missing
-        if not render_url:
-            for asset in media['assets']:
-                if asset.get('key') == 'avatar':
-                    render_url = asset.get('value')
+    # Standard character surfaces use Blizzard's portrait crop. Keep main-raw only
+    # as a last-resort fallback for characters whose media response lacks an avatar.
+    render_url = select_character_portrait_url(media)
 
     portrait_url = get_standardized_image_url(render_url) if render_url else None
 

@@ -93,7 +93,7 @@ class MobileLayoutTests(unittest.TestCase):
             self.mobile_css,
         )
         self.assertIn(
-            ".leaderboards-wrapper,\n  .mvp-cards-container {\n    flex-direction: column;\n    align-items: stretch;\n    justify-content: flex-start;\n  }",
+            ".leaderboards-wrapper,\n  .mvp-cards-container {\n    grid-template-columns: minmax(0, 1fr);\n    align-items: stretch;\n  }",
             self.mobile_css,
         )
         self.assertIn("overflow-x: hidden;", self.mobile_css)
@@ -143,7 +143,11 @@ class MobileLayoutTests(unittest.TestCase):
         self.assertIn("grid-template-columns: var(--leaderboard-card-columns);", mobile_css)
         self.assertIn("grid-template-areas:", mobile_css)
         self.assertIn(".amw-leaderboard-featured", mobile_css)
+        self.assertIn(".amw-leaderboard-featured.amw-leaderboard-count-1,", mobile_css)
+        self.assertIn(".amw-leaderboard-featured.amw-leaderboard-count-2 {", mobile_css)
         self.assertIn("--leaderboard-card-min-height: 136px;", mobile_css)
+        self.assertIn(".leaderboard-panel .leaderboard-row {", mobile_css)
+        self.assertIn('"rank avatar info"\n      ". . score";', mobile_css)
         self.assertNotIn(".amw-podium-grid", mobile_css)
         self.assertNotIn(".podium-step-1", mobile_css)
         self.assertNotIn(".podium-1", mobile_css)

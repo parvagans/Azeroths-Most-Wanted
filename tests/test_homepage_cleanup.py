@@ -268,6 +268,7 @@ class HomepageCleanupTests(unittest.TestCase):
 
         self.assertIn("const container = containerClone.querySelector('.amw-leaderboard-list');", mvp_text)
         self.assertIn("container.classList.add('amw-leaderboard-featured');", mvp_text)
+        self.assertIn("setFeaturedLeaderboardCount(container, chars.length);", mvp_text)
         self.assertIn("decorateLeaderboardClone(clone, {", mvp_text)
 
     def test_homepage_previous_week_standout_banner_uses_metric_specific_copy(self):
@@ -307,8 +308,35 @@ class HomepageCleanupTests(unittest.TestCase):
         homepage_ladder_text = script_text[pve_start:pvp_end]
 
         self.assertEqual(homepage_ladder_text.count("podiumWrap.classList.add('amw-leaderboard-featured');"), 2)
+        self.assertIn("setFeaturedLeaderboardCount(podiumWrap, topPve.length);", homepage_ladder_text)
+        self.assertIn("setFeaturedLeaderboardCount(podiumWrap, topPvp.length);", homepage_ladder_text)
         self.assertIn("theme: 'pve'", homepage_ladder_text)
         self.assertIn("theme: 'pvp'", homepage_ladder_text)
+
+    def test_homepage_report_layouts_have_deliberate_density_and_alignment(self):
+        css_text = Path("render/style.css").read_text(encoding="utf-8")
+
+        self.assertIn(".mvp-cards-container {\n  display: grid;", css_text)
+        self.assertIn("grid-template-columns: repeat(2, minmax(0, 1fr));", css_text)
+        self.assertIn(".mvp-card {\n  position: relative;\n  display: flex;\n  flex-direction: column;", css_text)
+        self.assertIn(".mvp-empty-state {\n  display: flex;\n  flex: 1;", css_text)
+        self.assertIn("min-height: 188px;", css_text)
+        self.assertIn(".amw-leaderboard-featured.amw-leaderboard-count-1 {", css_text)
+        self.assertIn(".amw-leaderboard-featured.amw-leaderboard-count-2 {", css_text)
+        self.assertIn(".amw-leaderboard-featured .amw-leaderboard-card-rank-1 {", css_text)
+
+    def test_homepage_council_rows_and_controls_use_shared_report_structure(self):
+        css_text = Path("render/style.css").read_text(encoding="utf-8")
+
+        self.assertIn(".leaderboards-wrapper {\n  display: grid;", css_text)
+        self.assertIn(".leaderboard-panel .leaderboard-row {", css_text)
+        self.assertIn("grid-template-columns: 34px 34px minmax(0, 1fr) minmax(118px, auto);", css_text)
+        self.assertIn('grid-template-areas: "rank avatar info score";', css_text)
+        self.assertIn(".leaderboard-panel .lb-score {", css_text)
+        self.assertIn(".leaderboard-panel .expand-lb-btn {", css_text)
+        self.assertIn(".leaderboard-panel > .view-all-btn {", css_text)
+        self.assertIn("#pve-leaderboard-container {", css_text)
+        self.assertIn("#pvp-leaderboard-container {", css_text)
 
     def test_deeper_leaderboard_surfaces_use_compact_variant(self):
         script_text = Path("render/script.js").read_text(encoding="utf-8")

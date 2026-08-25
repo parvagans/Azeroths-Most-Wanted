@@ -24,6 +24,7 @@ class CharacterPersistenceTests(unittest.TestCase):
                 "level": 60,
                 "equipped_item_level": 100,
                 "last_login_ms": 123,
+                "portrait_url": "https://example.invalid/portrait.jpg",
                 "honorable_kills": 5,
                 "active_spec": "Frost",
             }
@@ -33,6 +34,7 @@ class CharacterPersistenceTests(unittest.TestCase):
                 "level": 60,
                 "equipped_item_level": 100,
                 "last_login_ms": 123,
+                "portrait_url": "https://example.invalid/portrait.jpg",
                 "honorable_kills": 5,
                 "active_spec": "Frost",
                 "vanguard_badges": "[]",
@@ -52,6 +54,44 @@ class CharacterPersistenceTests(unittest.TestCase):
         )
 
         self.assertEqual(batch, [])
+
+    def test_build_character_write_batch_persists_portrait_only_changes(self):
+        history_data = {
+            "alpha": {
+                "level": 60,
+                "equipped_item_level": 100,
+                "last_login_ms": 123,
+                "portrait_url": "https://example.invalid/alpha-avatar.jpg",
+                "honorable_kills": 5,
+                "active_spec": "Frost",
+            }
+        }
+        orig_chars = {
+            "alpha": {
+                "level": 60,
+                "equipped_item_level": 100,
+                "last_login_ms": 123,
+                "portrait_url": "https://example.invalid/alpha-main-raw.png",
+                "honorable_kills": 5,
+                "active_spec": "Frost",
+                "vanguard_badges": "[]",
+                "campaign_badges": "[]",
+                "pve_champ_count": 0,
+                "pvp_champ_count": 0,
+            }
+        }
+
+        batch = build_character_write_batch(
+            history_data,
+            orig_chars,
+            vanguard_tallies={},
+            campaign_tallies={},
+            pve_champs={},
+            pvp_champs={},
+        )
+
+        self.assertEqual(len(batch), 1)
+        self.assertIn("https://example.invalid/alpha-avatar.jpg", batch[0]["params"])
 
     def test_build_character_write_batch_includes_updated_character_payload(self):
         history_data = {
