@@ -1226,6 +1226,7 @@
     --leaderboard-card-padding: 12px 11px;
     --leaderboard-card-gap: 6px;
     --leaderboard-card-min-height: 0;
+    --leaderboard-name-size: 14px;
     --home-featured-identity-height: 36px;
     --home-featured-metric-height: 28px;
   }

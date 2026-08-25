@@ -471,10 +471,8 @@ class HomepageCleanupTests(unittest.TestCase):
         self.assertIn("var(--character-activity-slot-size, 18px)", css_text)
         self.assertIn("minmax(0, 1fr);", css_text)
         self.assertIn("width: fit-content;", css_text)
-        self.assertIn(
-            ".home-featured-grid .home-featured-card .character-status-name-grid::after {",
-            css_text,
-        )
+        self.assertNotIn(".home-featured-grid .home-featured-card .character-status-name-grid::after {", css_text)
+        self.assertIn(".home-featured-grid .home-featured-card .character-activity-slot:empty {", css_text)
         self.assertIn("-webkit-line-clamp: 2;", css_text)
         self.assertIn("overflow-wrap: break-word;", css_text)
         self.assertIn("text-wrap: balance;", css_text)
@@ -490,6 +488,7 @@ class HomepageCleanupTests(unittest.TestCase):
     def test_homepage_featured_names_reserve_two_lines_without_moving_metrics(self):
         css_text = Path("render/style.css").read_text(encoding="utf-8")
 
+        self.assertIn("--leaderboard-name-size: 15px;", css_text)
         self.assertIn("--home-featured-identity-height: 44px;", css_text)
         self.assertIn("--home-featured-metric-height: 31px;", css_text)
         self.assertIn("height: var(--home-featured-identity-height);", css_text)
@@ -497,7 +496,27 @@ class HomepageCleanupTests(unittest.TestCase):
         self.assertIn("min-height: var(--home-featured-metric-height);", css_text)
         self.assertIn("-webkit-line-clamp: 2;", css_text)
         self.assertIn("overflow-wrap: break-word;", css_text)
+        self.assertIn("word-break: normal;", css_text)
+        self.assertIn("letter-spacing: 0;", css_text)
         self.assertNotIn("word-break: break-all;", css_text)
+
+    def test_homepage_featured_identity_centers_visible_status_and_name_content(self):
+        css_text = Path("render/style.css").read_text(encoding="utf-8")
+        selector = ".home-featured-grid .home-featured-card .character-status-name-grid {"
+        start = css_text.index(selector)
+        end = css_text.index("}", start)
+        identity_rule = css_text[start:end]
+
+        self.assertIn("display: inline-flex;", identity_rule)
+        self.assertIn("align-items: center;", identity_rule)
+        self.assertIn("justify-content: center;", identity_rule)
+        self.assertIn("width: auto;", identity_rule)
+        self.assertNotIn("grid-template-columns", identity_rule)
+        self.assertIn(
+            ".home-featured-grid .home-featured-card .character-activity-slot:empty {\n"
+            "  display: none;",
+            css_text,
+        )
 
     def test_featured_card_names_are_not_tiny_or_one_letter_clipped(self):
         css_text = Path("render/style.css").read_text(encoding="utf-8")

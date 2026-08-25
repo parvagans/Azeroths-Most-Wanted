@@ -278,6 +278,7 @@ class MobileLayoutTests(unittest.TestCase):
         self.assertIn("var(--leaderboard-avatar-size)", mobile_css)
         self.assertIn("var(--home-featured-identity-height)", mobile_css)
         self.assertIn("var(--home-featured-metric-height)", mobile_css)
+        self.assertIn("--leaderboard-name-size: 14px;", mobile_css)
         self.assertIn(
             ".home-featured-grid .home-featured-card .character-status-name-grid {\n"
             "    --character-activity-slot-size: 16px;\n"

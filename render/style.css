@@ -7301,6 +7301,7 @@ body[data-route-family="character"] {
 .home-featured-grid {
   --leaderboard-card-gap: 8px;
   --leaderboard-card-padding: 16px 12px 14px;
+  --leaderboard-name-size: 15px;
   --home-featured-identity-height: 44px;
   --home-featured-metric-height: 31px;
   align-items: stretch;
@@ -7346,24 +7347,23 @@ body[data-route-family="character"] {
 
 .home-featured-grid .home-featured-card .character-status-name-grid {
   place-self: center;
-  grid-template-columns:
-    var(--character-activity-slot-size, 18px)
-    minmax(0, 1fr)
-    var(--character-activity-slot-size, 18px);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--character-status-gap, 7px);
+  width: auto;
   max-width: 100%;
   height: 100%;
   margin-inline: auto;
-  align-content: center;
 }
 
-.home-featured-grid .home-featured-card .character-status-name-grid::after {
-  content: "";
-  grid-column: 3;
-  width: var(--character-activity-slot-size, 18px);
-  height: var(--character-activity-slot-size, 18px);
+.home-featured-grid .home-featured-card .character-activity-slot:empty {
+  display: none;
 }
 
 .home-featured-grid .home-featured-card .amw-leaderboard-name {
+  flex: 0 1 auto;
+  min-width: 0;
   width: auto;
   max-width: 100%;
   display: -webkit-box;
@@ -7374,7 +7374,12 @@ body[data-route-family="character"] {
   overflow-wrap: break-word;
   text-wrap: balance;
   word-break: normal;
+  letter-spacing: 0;
   text-align: center;
+}
+
+.home-featured-grid .home-featured-card .has-activity-indicator .amw-leaderboard-name {
+  max-width: calc(100% - var(--character-activity-slot-size, 18px) - var(--character-status-gap, 7px));
 }
 
 .home-featured-grid .home-featured-card .amw-leaderboard-metric {
