@@ -1238,6 +1238,14 @@
       var(--home-featured-metric-height);
   }
 
+  .home-featured-grid .home-featured-card .home-featured-name {
+    justify-self: stretch;
+    width: 100%;
+    max-width: 100%;
+    margin-inline: auto;
+    text-align: center;
+  }
+
   .home-featured-grid .home-featured-card .amw-leaderboard-rank {
     top: 10px;
     right: 10px;

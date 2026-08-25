@@ -282,10 +282,21 @@ class MobileLayoutTests(unittest.TestCase):
         self.assertNotIn(".home-featured-grid .home-featured-card .character-status-name-grid", mobile_css)
         self.assertNotIn(".home-featured-grid .home-featured-card .character-activity-indicator", mobile_css)
         self.assertIn(
-            ".home-featured-grid .home-featured-card .amw-leaderboard-name {\n"
-            "  justify-self: stretch;",
-            self.style,
+            ".home-featured-grid .home-featured-card .home-featured-name {\n"
+            "    justify-self: stretch;\n"
+            "    width: 100%;\n"
+            "    max-width: 100%;\n"
+            "    margin-inline: auto;\n"
+            "    text-align: center;",
+            mobile_css,
         )
+        featured_name_start = mobile_css.index(
+            ".home-featured-grid .home-featured-card .home-featured-name {"
+        )
+        featured_name_end = mobile_css.index("}", featured_name_start)
+        featured_name_rule = mobile_css[featured_name_start:featured_name_end]
+        self.assertNotIn("justify-self: start;", featured_name_rule)
+        self.assertNotIn("text-align: left;", featured_name_rule)
         self.assertIn(
             ".home-featured-grid .home-featured-card .amw-leaderboard-rank {\n"
             "    top: 10px;\n"

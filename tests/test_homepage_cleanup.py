@@ -471,7 +471,6 @@ class HomepageCleanupTests(unittest.TestCase):
         self.assertIn("var(--character-activity-slot-size, 18px)", css_text)
         self.assertIn("minmax(0, 1fr);", css_text)
         self.assertIn("width: fit-content;", css_text)
-        self.assertIn("-webkit-line-clamp: 2;", css_text)
         self.assertIn("overflow-wrap: break-word;", css_text)
         self.assertIn("text-wrap: balance;", css_text)
         self.assertIn(".leaderboard-panel .war-council-row .lb-info {", css_text)
@@ -492,7 +491,7 @@ class HomepageCleanupTests(unittest.TestCase):
         self.assertIn("height: var(--home-featured-identity-height);", css_text)
         self.assertIn("min-height: var(--home-featured-identity-height);", css_text)
         self.assertIn("min-height: var(--home-featured-metric-height);", css_text)
-        self.assertIn("-webkit-line-clamp: 2;", css_text)
+        self.assertIn("max-height: 2.3em;", css_text)
         self.assertIn("overflow-wrap: break-word;", css_text)
         self.assertIn("word-break: normal;", css_text)
         self.assertIn("letter-spacing: 0;", css_text)
@@ -510,22 +509,41 @@ class HomepageCleanupTests(unittest.TestCase):
 
         self.assertNotIn("character-activity", featured_templates)
         self.assertNotIn("character-status-name-grid", featured_templates)
+        self.assertEqual(featured_templates.count("home-featured-identity"), 2)
+        self.assertEqual(featured_templates.count("home-featured-name"), 2)
         self.assertEqual(script_text.count("showActivityIndicator: false"), 3)
         self.assertIn("showActivityIndicator = true", script_text)
         self.assertNotIn(".home-featured-grid .home-featured-card .character-status-name-grid", css_text)
         self.assertNotIn(".home-featured-grid .home-featured-card .character-activity", css_text)
         self.assertNotIn(".home-featured-grid .home-featured-card .has-activity-indicator", css_text)
 
-        selector = ".home-featured-grid .home-featured-card .amw-leaderboard-name {"
+        identity_selector = ".home-featured-grid .home-featured-card .home-featured-identity {"
+        identity_start = css_text.index(identity_selector)
+        identity_end = css_text.index("}", identity_start)
+        identity_rule = css_text[identity_start:identity_end]
+
+        self.assertIn("display: grid;", identity_rule)
+        self.assertIn("grid-template-columns: minmax(0, 1fr);", identity_rule)
+        self.assertIn("place-items: center;", identity_rule)
+        self.assertIn("width: 100%;", identity_rule)
+
+        selector = ".home-featured-grid .home-featured-card .home-featured-name {"
         start = css_text.index(selector)
         end = css_text.index("}", start)
         name_rule = css_text[start:end]
 
+        self.assertIn("display: block;", name_rule)
         self.assertIn("justify-self: stretch;", name_rule)
         self.assertIn("align-self: center;", name_rule)
         self.assertIn("width: 100%;", name_rule)
         self.assertIn("max-width: 100%;", name_rule)
+        self.assertIn("margin-inline: auto;", name_rule)
         self.assertIn("text-align: center;", name_rule)
+        self.assertNotIn("display: -webkit-box;", name_rule)
+        self.assertNotIn("justify-self: start;", name_rule)
+        self.assertNotIn("text-align: left;", name_rule)
+        self.assertNotIn("width: fit-content;", name_rule)
+        self.assertNotIn("width: max-content;", name_rule)
         self.assertIn(".home-featured-grid .home-featured-card .amw-leaderboard-avatar {\n  place-self: center;", css_text)
         self.assertIn(".home-featured-grid .home-featured-card .amw-leaderboard-metric {\n  place-self: center;", css_text)
 

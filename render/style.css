@@ -7336,25 +7336,25 @@ body[data-route-family="character"] {
   right: 12px;
 }
 
-.home-featured-grid .home-featured-card .amw-leaderboard-identity {
+.home-featured-grid .home-featured-card .home-featured-identity {
   place-self: stretch;
   display: grid;
+  grid-template-columns: minmax(0, 1fr);
   place-items: center;
   width: 100%;
   height: var(--home-featured-identity-height);
   min-height: var(--home-featured-identity-height);
 }
 
-.home-featured-grid .home-featured-card .amw-leaderboard-name {
+.home-featured-grid .home-featured-card .home-featured-name {
+  display: block;
   justify-self: stretch;
   align-self: center;
   min-width: 0;
   width: 100%;
   max-width: 100%;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  line-clamp: 2;
+  max-height: 2.3em;
+  margin-inline: auto;
   overflow: hidden;
   overflow-wrap: break-word;
   text-wrap: balance;
