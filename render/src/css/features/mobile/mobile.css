@@ -1238,17 +1238,6 @@
       var(--home-featured-metric-height);
   }
 
-  .home-featured-grid .home-featured-card .character-status-name-grid {
-    --character-activity-slot-size: 16px;
-    --character-status-gap: 6px;
-  }
-
-  .home-featured-grid .home-featured-card .character-activity-indicator {
-    width: 16px;
-    height: 16px;
-    font-size: 11px;
-  }
-
   .home-featured-grid .home-featured-card .amw-leaderboard-rank {
     top: 10px;
     right: 10px;

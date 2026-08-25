@@ -240,7 +240,7 @@ class HomepageCleanupTests(unittest.TestCase):
         self.assertNotIn('.podium-block', script_text)
         self.assertNotIn('podium-trend-text', script_text)
         self.assertIn('function getLeaderboardThemeClass(theme = \'\') {', script_text)
-        self.assertIn("function decorateLeaderboardClone(clone, { rank = 0, theme = '', character = null } = {}) {", script_text)
+        self.assertIn("showActivityIndicator = true", script_text)
         self.assertIn("theme: isPvp ? 'pvp' : 'pve'", script_text)
         self.assertIn("theme: 'pve'", script_text)
         self.assertIn("theme: 'pvp'", script_text)
@@ -454,7 +454,7 @@ class HomepageCleanupTests(unittest.TestCase):
         )
         self.assertIn(compact_identity, template_text)
         self.assertIn('<span class="lb-spec"><span class="lb-spec-label"></span></span>', template_text)
-        self.assertIn("if (identity && name) {", script_text)
+        self.assertIn("if (identity && name && showActivityIndicator) {", script_text)
         self.assertIn(
             "nameRow.className = 'character-name-status-row character-status-name-grid';",
             script_text,
@@ -471,8 +471,6 @@ class HomepageCleanupTests(unittest.TestCase):
         self.assertIn("var(--character-activity-slot-size, 18px)", css_text)
         self.assertIn("minmax(0, 1fr);", css_text)
         self.assertIn("width: fit-content;", css_text)
-        self.assertNotIn(".home-featured-grid .home-featured-card .character-status-name-grid::after {", css_text)
-        self.assertIn(".home-featured-grid .home-featured-card .character-activity-slot:empty {", css_text)
         self.assertIn("-webkit-line-clamp: 2;", css_text)
         self.assertIn("overflow-wrap: break-word;", css_text)
         self.assertIn("text-wrap: balance;", css_text)
@@ -500,23 +498,46 @@ class HomepageCleanupTests(unittest.TestCase):
         self.assertIn("letter-spacing: 0;", css_text)
         self.assertNotIn("word-break: break-all;", css_text)
 
-    def test_homepage_featured_identity_centers_visible_status_and_name_content(self):
+    def test_homepage_featured_identity_has_no_activity_layout_and_centers_name(self):
+        template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")
+        script_text = Path("render/script.js").read_text(encoding="utf-8")
         css_text = Path("render/style.css").read_text(encoding="utf-8")
-        selector = ".home-featured-grid .home-featured-card .character-status-name-grid {"
+        mvp_start = template_text.index('id="tpl-mvp-podium-block"')
+        mvp_end = template_text.index('id="tpl-mvp-podium-wrap"', mvp_start)
+        council_start = template_text.index('id="tpl-home-leaderboard-podium"')
+        council_end = template_text.index('id="tpl-home-leaderboard-row"', council_start)
+        featured_templates = template_text[mvp_start:mvp_end] + template_text[council_start:council_end]
+
+        self.assertNotIn("character-activity", featured_templates)
+        self.assertNotIn("character-status-name-grid", featured_templates)
+        self.assertEqual(script_text.count("showActivityIndicator: false"), 3)
+        self.assertIn("showActivityIndicator = true", script_text)
+        self.assertNotIn(".home-featured-grid .home-featured-card .character-status-name-grid", css_text)
+        self.assertNotIn(".home-featured-grid .home-featured-card .character-activity", css_text)
+        self.assertNotIn(".home-featured-grid .home-featured-card .has-activity-indicator", css_text)
+
+        selector = ".home-featured-grid .home-featured-card .amw-leaderboard-name {"
         start = css_text.index(selector)
         end = css_text.index("}", start)
-        identity_rule = css_text[start:end]
+        name_rule = css_text[start:end]
 
-        self.assertIn("display: inline-flex;", identity_rule)
-        self.assertIn("align-items: center;", identity_rule)
-        self.assertIn("justify-content: center;", identity_rule)
-        self.assertIn("width: auto;", identity_rule)
-        self.assertNotIn("grid-template-columns", identity_rule)
-        self.assertIn(
-            ".home-featured-grid .home-featured-card .character-activity-slot:empty {\n"
-            "  display: none;",
-            css_text,
-        )
+        self.assertIn("justify-self: stretch;", name_rule)
+        self.assertIn("align-self: center;", name_rule)
+        self.assertIn("width: 100%;", name_rule)
+        self.assertIn("max-width: 100%;", name_rule)
+        self.assertIn("text-align: center;", name_rule)
+        self.assertIn(".home-featured-grid .home-featured-card .amw-leaderboard-avatar {\n  place-self: center;", css_text)
+        self.assertIn(".home-featured-grid .home-featured-card .amw-leaderboard-metric {\n  place-self: center;", css_text)
+
+    def test_compact_rows_keep_activity_indicator_after_featured_cards_omit_it(self):
+        template_text = Path("render/dashboard_template.html").read_text(encoding="utf-8")
+        script_text = Path("render/script.js").read_text(encoding="utf-8")
+
+        compact_start = template_text.index('id="tpl-home-leaderboard-row"')
+        compact_end = template_text.index('id="tpl-home-leaderboard-podium-wrap"', compact_start)
+        compact_template = template_text[compact_start:compact_end]
+        self.assertIn('class="character-activity-slot" aria-hidden="true"', compact_template)
+        self.assertEqual(script_text.count("appendCharacterActivityIndicator(activitySlotEl, char);"), 2)
 
     def test_featured_card_names_are_not_tiny_or_one_letter_clipped(self):
         css_text = Path("render/style.css").read_text(encoding="utf-8")

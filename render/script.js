@@ -135,7 +135,10 @@ function getLeaderboardThemeClass(theme = '') {
     return cleanTheme ? `amw-leaderboard-theme-${cleanTheme}` : 'amw-leaderboard-theme-default';
 }
 
-function decorateLeaderboardClone(clone, { rank = 0, theme = '', character = null } = {}) {
+function decorateLeaderboardClone(
+    clone,
+    { rank = 0, theme = '', character = null, showActivityIndicator = true } = {}
+) {
     if (!clone) return;
 
     const root = clone.querySelector('.amw-leaderboard-card');
@@ -148,7 +151,7 @@ function decorateLeaderboardClone(clone, { rank = 0, theme = '', character = nul
 
     const identity = root.querySelector('.amw-leaderboard-identity');
     const name = root.querySelector('.amw-leaderboard-name');
-    if (identity && name) {
+    if (identity && name && showActivityIndicator) {
         const nameRow = document.createElement('div');
         nameRow.className = 'character-name-status-row character-status-name-grid';
         const statusSlot = document.createElement('span');
@@ -1101,7 +1104,8 @@ window.addEventListener('DOMContentLoaded', async () => {
                 decorateLeaderboardClone(clone, {
                     rank,
                     theme: 'pve',
-                    character: char
+                    character: char,
+                    showActivityIndicator: false
                 });
 
                 const block = clone.querySelector('.amw-leaderboard-card');
@@ -1255,7 +1259,8 @@ window.addEventListener('DOMContentLoaded', async () => {
                 decorateLeaderboardClone(clone, {
                     rank,
                     theme: 'pvp',
-                    character: char
+                    character: char,
+                    showActivityIndicator: false
                 });
 
                 const block = clone.querySelector('.amw-leaderboard-card');
@@ -7087,7 +7092,8 @@ window.addEventListener('DOMContentLoaded', async () => {
                 decorateLeaderboardClone(clone, {
                     rank,
                     theme: isPvp ? 'pvp' : 'pve',
-                    character: char
+                    character: char,
+                    showActivityIndicator: false
                 });
                 
                 const block = clone.querySelector('.amw-leaderboard-card');

@@ -279,21 +279,17 @@ class MobileLayoutTests(unittest.TestCase):
         self.assertIn("var(--home-featured-identity-height)", mobile_css)
         self.assertIn("var(--home-featured-metric-height)", mobile_css)
         self.assertIn("--leaderboard-name-size: 14px;", mobile_css)
+        self.assertNotIn(".home-featured-grid .home-featured-card .character-status-name-grid", mobile_css)
+        self.assertNotIn(".home-featured-grid .home-featured-card .character-activity-indicator", mobile_css)
         self.assertIn(
-            ".home-featured-grid .home-featured-card .character-status-name-grid {\n"
-            "    --character-activity-slot-size: 16px;\n"
-            "    --character-status-gap: 6px;",
-            mobile_css,
+            ".home-featured-grid .home-featured-card .amw-leaderboard-name {\n"
+            "  justify-self: stretch;",
+            self.style,
         )
         self.assertIn(
             ".home-featured-grid .home-featured-card .amw-leaderboard-rank {\n"
             "    top: 10px;\n"
             "    right: 10px;",
-            mobile_css,
-        )
-        self.assertNotIn(
-            ".home-featured-grid .home-featured-card .character-status-name-grid {\n"
-            "    position: absolute;",
             mobile_css,
         )
         self.assertNotIn("war-council-identity-height", mobile_css)
