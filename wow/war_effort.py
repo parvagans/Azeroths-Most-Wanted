@@ -6,8 +6,8 @@ from datetime import datetime, timedelta, timezone
 
 
 XP_THRESHOLD = 250
-HK_THRESHOLD = 500
-LOOT_THRESHOLD = 25
+HK_THRESHOLD = 750
+LOOT_THRESHOLD = 35
 ZENITH_THRESHOLD = 3
 READINESS_CATEGORY = "readiness"
 READINESS_LABEL = "Warden's Standard"

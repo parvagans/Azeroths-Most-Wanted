@@ -7,8 +7,8 @@ from wow.war_effort import HK_THRESHOLD, LOOT_THRESHOLD, XP_THRESHOLD, ZENITH_TH
 class WarEffortThresholdTests(unittest.TestCase):
     def test_python_threshold_constants_match_requested_values(self):
         self.assertEqual(XP_THRESHOLD, 250)
-        self.assertEqual(HK_THRESHOLD, 500)
-        self.assertEqual(LOOT_THRESHOLD, 25)
+        self.assertEqual(HK_THRESHOLD, 750)
+        self.assertEqual(LOOT_THRESHOLD, 35)
         self.assertEqual(ZENITH_THRESHOLD, 3)
 
     def test_homepage_war_effort_open_board_controls_are_semantic_links(self):
@@ -54,8 +54,8 @@ class WarEffortThresholdTests(unittest.TestCase):
 
         self.assertIn('os.path.join(base_dir, "src", "css", "features", "war_effort", "war_effort.css")', html_dashboard_text)
         self.assertIn("Objective: 250 levels gained this week.", template_text)
-        self.assertIn("Objective: 500 honorable kills this week.", template_text)
-        self.assertIn("Objective: 25 notable gear upgrades this week.", template_text)
+        self.assertIn("Objective: 750 honorable kills this week.", template_text)
+        self.assertIn("Objective: 35 notable gear upgrades this week.", template_text)
         self.assertIn("Objective: 3 members reach level 70 this week.", template_text)
         self.assertIn("Warden's Standard", template_text)
         self.assertIn('class="amw-leaderboard-card tt-char"', template_text)
@@ -76,8 +76,8 @@ class WarEffortThresholdTests(unittest.TestCase):
         self.assertIn('View Campaign Archive', template_text)
         self.assertIn('Campaign Archive', template_text)
         self.assertIn("Progress: 0 / 250 levels", template_text)
-        self.assertIn("Progress: 0 / 500 honorable kills", template_text)
-        self.assertIn("Progress: 0 / 25 upgrades", template_text)
+        self.assertIn("Progress: 0 / 750 honorable kills", template_text)
+        self.assertIn("Progress: 0 / 35 upgrades", template_text)
         self.assertIn("Progress: 0 / 3 members", template_text)
         self.assertIn("Progress: 0 / 0 participants", template_text)
         self.assertIn('war-effort-readiness', template_text)
@@ -150,8 +150,8 @@ class WarEffortThresholdTests(unittest.TestCase):
         self.assertIn("if (title) title.textContent = config.title;", shell_text)
         self.assertNotIn("if (title) title.textContent = readinessHasLock ? config.title : config.emptyTitle;", shell_text)
         self.assertIn("Objective: 250 levels gained this week.", shell_text)
-        self.assertIn("Objective: 500 honorable kills this week.", shell_text)
-        self.assertIn("Objective: 25 notable gear upgrades this week.", shell_text)
+        self.assertIn("Objective: 750 honorable kills this week.", shell_text)
+        self.assertIn("Objective: 35 notable gear upgrades this week.", shell_text)
         self.assertIn("Objective: 3 members reach level 70 this week.", shell_text)
         self.assertIn("Progress:", shell_text)
         self.assertIn("Complete", shell_text)
@@ -217,8 +217,8 @@ class WarEffortThresholdTests(unittest.TestCase):
         self.assertNotIn("patchedGetHallOfHeroes", script_text)
 
         self.assertIn("XP_THRESHOLD = 250", backend_text)
-        self.assertIn("HK_THRESHOLD = 500", backend_text)
-        self.assertIn("LOOT_THRESHOLD = 25", backend_text)
+        self.assertIn("HK_THRESHOLD = 750", backend_text)
+        self.assertIn("LOOT_THRESHOLD = 35", backend_text)
         self.assertIn("ZENITH_THRESHOLD = 3", backend_text)
         self.assertNotIn("const WAR_EFFORT_THRESHOLDS", shell_text)
         self.assertNotIn("const WAR_EFFORT_THRESHOLDS", script_text)

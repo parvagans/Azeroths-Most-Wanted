@@ -153,6 +153,8 @@ class MobileLayoutTests(unittest.TestCase):
         self.assertIn(".home-movement-summary-rows", mobile_css)
         self.assertIn(".home-movement-summary-row", mobile_css)
         self.assertIn(".home-movement-helper", mobile_css)
+        self.assertIn('grid-template-areas:\n      "name name"\n      "event time";', mobile_css)
+        self.assertIn(".home-movement-time", mobile_css)
         self.assertIn(".war-effort-home-card-footer", mobile_css)
         self.assertIn(".campaign-archive-grid,\n  .campaign-archive-grid-war-effort,\n  .campaign-archive-grid-dual", mobile_css)
         self.assertIn(".analytics-snapshot-grid", mobile_css)

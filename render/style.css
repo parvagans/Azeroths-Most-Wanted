@@ -4835,6 +4835,7 @@ body.nav-menu-open {
 .home-movement-summary-row {
   display: grid;
   gap: 5px;
+  justify-items: start;
   min-width: 0;
   max-width: 100%;
   padding: 11px 13px;
@@ -4844,6 +4845,11 @@ body.nav-menu-open {
   background:
     linear-gradient(90deg, rgba(255, 209, 0, 0.045), transparent 52%),
     rgba(255, 255, 255, 0.025);
+}
+
+.home-movement-summary-row-latest {
+  justify-items: center;
+  text-align: center;
 }
 
 .home-movement-summary-row[hidden] {
@@ -4864,6 +4870,10 @@ body.nav-menu-open {
 .home-movement-card .home-movement-summary-value {
   max-width: none;
   margin: 0;
+}
+
+.home-movement-summary-row-latest .home-movement-summary-value {
+  max-width: 62ch;
 }
 
 .home-movement-helper {
@@ -4923,10 +4933,11 @@ body.nav-menu-open {
 }
 
 .home-movement-item {
-  display: flex;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(86px, auto) minmax(112px, auto);
+  grid-template-areas: "name event time";
   align-items: center;
-  justify-content: space-between;
-  gap: 14px;
+  column-gap: 14px;
   padding: 10px 12px;
   border-radius: 12px;
   border: 1px solid rgba(255, 255, 255, 0.06);
@@ -4969,10 +4980,14 @@ body.nav-menu-open {
 }
 
 .home-movement-name {
+  grid-area: name;
   color: #fff3c0;
   font-weight: 700;
   line-height: 1.35;
   min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .home-latest-changes-label {
@@ -4983,19 +4998,18 @@ body.nav-menu-open {
 }
 
 .home-movement-meta-wrap {
-  display: inline-flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 10px;
-  flex: 0 0 auto;
+  display: contents;
 }
 
 .home-movement-event {
+  grid-area: event;
+  justify-self: start;
   color: rgba(255, 209, 0, 0.88);
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .home-latest-changes-type {
@@ -5028,8 +5042,11 @@ body.nav-menu-open {
 }
 
 .home-movement-time {
+  grid-area: time;
+  justify-self: end;
   color: rgba(198, 190, 167, 0.86);
   font-size: 12px;
+  text-align: right;
   white-space: nowrap;
 }
 

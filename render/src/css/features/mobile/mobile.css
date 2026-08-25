@@ -1452,11 +1452,26 @@
 
   .home-movement-item {
     align-items: flex-start;
-    flex-direction: column;
+    grid-template-columns: minmax(0, 1fr) minmax(96px, auto);
+    grid-template-areas:
+      "name name"
+      "event time";
+    row-gap: 6px;
+    column-gap: 12px;
   }
 
-  .home-movement-meta-wrap {
-    justify-content: flex-start;
+  .home-movement-name {
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .home-movement-event {
+    justify-self: start;
+  }
+
+  .home-movement-time {
+    justify-self: end;
+    text-align: right;
   }
 
   .home-nav-card .home-nav-cta {

@@ -29,8 +29,8 @@ const TBC_XP = {
 };
 window.WAR_EFFORT_THRESHOLDS = window.WAR_EFFORT_THRESHOLDS || Object.freeze({
     xp: 250,
-    hk: 500,
-    loot: 25,
+    hk: 750,
+    loot: 35,
     zenith: 3
 });
 const DASHBOARD_BADGE_ICONS = Object.freeze({
