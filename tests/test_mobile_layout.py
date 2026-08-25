@@ -146,8 +146,9 @@ class MobileLayoutTests(unittest.TestCase):
         self.assertIn(".amw-leaderboard-featured.amw-leaderboard-count-1,", mobile_css)
         self.assertIn(".amw-leaderboard-featured.amw-leaderboard-count-2 {", mobile_css)
         self.assertIn("--leaderboard-card-min-height: 136px;", mobile_css)
-        self.assertIn(".leaderboard-panel .leaderboard-row {", mobile_css)
-        self.assertIn('"rank avatar info"\n      ". . score";', mobile_css)
+        self.assertIn(".leaderboard-panel .war-council-row {", mobile_css)
+        self.assertIn('grid-template-areas: "rank avatar identity metric trend";', mobile_css)
+        self.assertIn('"rank avatar identity trend"\n      ". . metric metric";', mobile_css)
         self.assertNotIn(".amw-podium-grid", mobile_css)
         self.assertNotIn(".podium-step-1", mobile_css)
         self.assertNotIn(".podium-1", mobile_css)
@@ -268,6 +269,42 @@ class MobileLayoutTests(unittest.TestCase):
         self.assertIn("white-space: normal;", mobile_css)
         self.assertIn("overflow-wrap: anywhere;", mobile_css)
         self.assertIn("line-height: 1.15;", mobile_css)
+
+    def test_mobile_war_council_cards_keep_name_status_and_metric_aligned(self):
+        mobile_css = self.mobile_css
+
+        self.assertIn(".leaderboard-panel .war-council-featured-grid {", mobile_css)
+        self.assertIn(".leaderboard-panel .war-council-featured-card {", mobile_css)
+        self.assertIn("var(--leaderboard-avatar-size)", mobile_css)
+        self.assertIn("var(--war-council-identity-height)", mobile_css)
+        self.assertIn("var(--war-council-metric-height)", mobile_css)
+        self.assertIn(
+            ".leaderboard-panel .war-council-featured-card .character-name-status-row {\n"
+            "    gap: 6px;",
+            mobile_css,
+        )
+        self.assertIn(
+            ".leaderboard-panel .war-council-featured-card .amw-leaderboard-rank {\n"
+            "    top: 10px;\n"
+            "    right: 10px;",
+            mobile_css,
+        )
+        self.assertNotIn(
+            ".leaderboard-panel .war-council-featured-card .character-name-status-row {\n"
+            "    position: absolute;",
+            mobile_css,
+        )
+        self.assertIn("var(--war-council-row-rank-width)", mobile_css)
+        self.assertIn("var(--war-council-row-avatar-size)", mobile_css)
+        self.assertIn("var(--war-council-row-metric-width)", mobile_css)
+        self.assertIn("var(--war-council-row-trend-width)", mobile_css)
+        self.assertIn('grid-template-areas: "rank avatar identity metric trend";', mobile_css)
+        self.assertIn(
+            'grid-template-areas:\n'
+            '      "rank avatar identity trend"\n'
+            '      ". . metric metric";',
+            mobile_css,
+        )
 
     def test_mobile_breakpoints_cover_target_phone_widths(self):
         for breakpoint in (

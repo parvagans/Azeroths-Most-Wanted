@@ -1221,6 +1221,37 @@
     gap: 14px;
   }
 
+  .leaderboard-panel .war-council-featured-grid {
+    --leaderboard-avatar-size: 52px;
+    --leaderboard-card-padding: 12px 11px;
+    --leaderboard-card-gap: 6px;
+    --leaderboard-card-min-height: 0;
+    --war-council-identity-height: 36px;
+    --war-council-metric-height: 28px;
+  }
+
+  .leaderboard-panel .war-council-featured-card {
+    grid-template-rows:
+      var(--leaderboard-avatar-size)
+      var(--war-council-identity-height)
+      var(--war-council-metric-height);
+  }
+
+  .leaderboard-panel .war-council-featured-card .character-name-status-row {
+    gap: 6px;
+  }
+
+  .leaderboard-panel .war-council-featured-card .character-activity-indicator {
+    width: 16px;
+    height: 16px;
+    font-size: 11px;
+  }
+
+  .leaderboard-panel .war-council-featured-card .amw-leaderboard-rank {
+    top: 10px;
+    right: 10px;
+  }
+
   .amw-leaderboard-featured.amw-leaderboard-count-1,
   .amw-leaderboard-featured.amw-leaderboard-count-2 {
     grid-template-columns: minmax(0, 1fr);
@@ -1541,16 +1572,32 @@
     text-align: right;
   }
 
-  .leaderboard-panel .leaderboard-row {
-    grid-template-columns: 30px 34px minmax(0, 1fr);
-    grid-template-areas:
-      "rank avatar info"
-      ". . score";
-    row-gap: 7px;
+  .leaderboard-panel .war-council-row {
+    --war-council-row-rank-width: 32px;
+    --war-council-row-avatar-size: 34px;
+    --war-council-row-metric-width: 82px;
+    --war-council-row-trend-width: 16px;
+    grid-template-columns:
+      var(--war-council-row-rank-width)
+      var(--war-council-row-avatar-size)
+      minmax(0, 1fr)
+      var(--war-council-row-metric-width)
+      var(--war-council-row-trend-width);
+    grid-template-areas: "rank avatar identity metric trend";
+    column-gap: 7px;
+    padding: 9px 10px;
   }
 
-  .leaderboard-panel .lb-score {
-    justify-self: start;
+  .leaderboard-panel .war-council-list {
+    --war-council-row-height: 58px;
+  }
+
+  .leaderboard-panel .war-council-row .lb-name-status-row {
+    gap: 5px;
+  }
+
+  .leaderboard-panel .war-council-row .lb-score-label {
+    margin-left: 3px;
   }
 
   .ac-empty-text {
@@ -2354,6 +2401,31 @@
   .dashboard-layout.dashboard-layout-solo {
     padding-left: 8px;
     padding-right: 8px;
+  }
+
+  .leaderboard-panel .war-council-row {
+    --war-council-row-rank-width: 28px;
+    --war-council-row-avatar-size: 32px;
+    --war-council-row-trend-width: 16px;
+    grid-template-columns:
+      var(--war-council-row-rank-width)
+      var(--war-council-row-avatar-size)
+      minmax(0, 1fr)
+      var(--war-council-row-trend-width);
+    grid-template-areas:
+      "rank avatar identity trend"
+      ". . metric metric";
+    column-gap: 7px;
+    row-gap: 5px;
+  }
+
+  .leaderboard-panel .war-council-list {
+    --war-council-row-height: 78px;
+  }
+
+  .leaderboard-panel .war-council-row .lb-score {
+    justify-self: end;
+    width: auto;
   }
 
   .main-content,

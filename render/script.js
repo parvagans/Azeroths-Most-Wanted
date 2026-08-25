@@ -149,12 +149,15 @@ function decorateLeaderboardClone(clone, { rank = 0, theme = '', character = nul
     const identity = root.querySelector('.amw-leaderboard-identity');
     const name = root.querySelector('.amw-leaderboard-name');
     const indicator = buildCharacterActivityIndicator(character);
-    if (identity && name && indicator) {
+    if (identity && name) {
         const nameRow = document.createElement('div');
         nameRow.className = 'character-name-status-row';
         name.replaceWith(nameRow);
         nameRow.appendChild(name);
-        nameRow.appendChild(indicator);
+        if (indicator) {
+            nameRow.classList.add('has-activity-indicator');
+            nameRow.appendChild(indicator);
+        }
     }
 }
 
@@ -1139,12 +1142,14 @@ window.addEventListener('DOMContentLoaded', async () => {
                 portraitEl.src = portraitURL;
                 portraitEl.alt = p.name || 'Character portrait';
 
+                const nameRowEl = clone.querySelector('.lb-name-status-row');
                 const nameEl = clone.querySelector('.lb-name');
                 nameEl.textContent = p.name;
-                appendCharacterActivityIndicator(nameEl, char);
+                appendCharacterActivityIndicator(nameRowEl, char);
 
                 const specEl = clone.querySelector('.lb-spec');
-                specEl.textContent = displaySpecClass;
+                const specLabelEl = clone.querySelector('.lb-spec-label');
+                specLabelEl.textContent = displaySpecClass;
                 if (specIconUrl) {
                     const specIconEl = buildSmallSpecIconNode({
                         src: specIconUrl,
@@ -1164,7 +1169,8 @@ window.addEventListener('DOMContentLoaded', async () => {
                 const scoreLabelEl = clone.querySelector('.lb-score-label');
                 scoreLabelEl.textContent = 'iLvl';
 
-                scoreEl.appendChild(createTrendSpan(trend));
+                const trendEl = clone.querySelector('.lb-trend');
+                trendEl.appendChild(createTrendSpan(trend));
 
                 listWrap.appendChild(clone);
             }
@@ -1290,12 +1296,14 @@ window.addEventListener('DOMContentLoaded', async () => {
                 portraitEl.src = portraitURL;
                 portraitEl.alt = p.name || 'Character portrait';
 
+                const nameRowEl = clone.querySelector('.lb-name-status-row');
                 const nameEl = clone.querySelector('.lb-name');
                 nameEl.textContent = p.name;
-                appendCharacterActivityIndicator(nameEl, char);
+                appendCharacterActivityIndicator(nameRowEl, char);
 
                 const specEl = clone.querySelector('.lb-spec');
-                specEl.textContent = displaySpecClass;
+                const specLabelEl = clone.querySelector('.lb-spec-label');
+                specLabelEl.textContent = displaySpecClass;
                 if (specIconUrl) {
                     const specIconEl = buildSmallSpecIconNode({
                         src: specIconUrl,
@@ -1315,7 +1323,8 @@ window.addEventListener('DOMContentLoaded', async () => {
                 const scoreLabelEl = clone.querySelector('.lb-score-label');
                 scoreLabelEl.textContent = 'HKs';
 
-                scoreEl.appendChild(createTrendSpan(trend));
+                const trendEl = clone.querySelector('.lb-trend');
+                trendEl.appendChild(createTrendSpan(trend));
 
                 listWrap.appendChild(clone);
             }
