@@ -2,6 +2,7 @@ import unittest
 
 from wow.membership_movement import build_latest_membership_movement_query
 from wow.membership_movement import build_recent_membership_movement_query
+from wow.membership_movement import normalize_membership_detected_at
 from wow.membership_movement import summarize_membership_events
 from wow.trends import process_global_trends
 
@@ -12,14 +13,16 @@ class MembershipMovementSummaryTests(unittest.TestCase):
 
         self.assertIn("guild_membership_events", query)
         self.assertIn("SELECT id, scan_id, character_name, event_type, detected_at, previous_status, current_status", query)
-        self.assertIn("WHERE detected_at >= strftime('%Y-%m-%dT%H:%M:%SZ', 'now', '-7 days')", query)
-        self.assertIn("ORDER BY detected_at DESC, id DESC", query)
+        self.assertIn("detected_at GLOB '??/??/???? ??:??:??'", query)
+        self.assertIn("WHERE datetime(", query)
+        self.assertIn(">= datetime('now', '-7 days')", query)
+        self.assertIn("ORDER BY datetime(", query)
         self.assertIn("LIMIT 7", query)
 
     def test_build_recent_membership_movement_query_defaults_to_7_day_window_and_500_limit(self):
         query = build_recent_membership_movement_query()
 
-        self.assertIn("WHERE detected_at >= strftime('%Y-%m-%dT%H:%M:%SZ', 'now', '-7 days')", query)
+        self.assertIn(">= datetime('now', '-7 days')", query)
         self.assertIn("LIMIT 500", query)
 
     def test_build_latest_membership_movement_query_targets_latest_scan_without_limit(self):
@@ -28,8 +31,102 @@ class MembershipMovementSummaryTests(unittest.TestCase):
         self.assertIn("WITH latest_scan AS", query)
         self.assertIn("SELECT scan_id", query)
         self.assertIn("WHERE scan_id = (SELECT scan_id FROM latest_scan)", query)
-        self.assertIn("ORDER BY detected_at DESC, id DESC", query)
+        self.assertIn("ORDER BY datetime(", query)
         self.assertNotIn("LIMIT 200", query)
+
+    def test_timestamp_normalization_treats_legacy_values_as_utc_once(self):
+        self.assertEqual(
+            normalize_membership_detected_at("23/08/2026 13:30:00"),
+            "2026-08-23T13:30:00Z",
+        )
+        self.assertEqual(
+            normalize_membership_detected_at("2026-08-23T15:30:00+02:00"),
+            "2026-08-23T13:30:00Z",
+        )
+
+    def test_recent_events_sort_by_real_datetime_newest_first(self):
+        summary = summarize_membership_events(
+            [
+                {
+                    "id": 302,
+                    "scan_id": "scan-aug-22-morning",
+                    "character_name": "Morning Rejoined",
+                    "event_type": "rejoined",
+                    "detected_at": "22/08/2026 08:55:00",
+                    "previous_status": "departed",
+                    "current_status": "active",
+                },
+                {
+                    "id": 305,
+                    "scan_id": "scan-jul-tie",
+                    "character_name": "Tie Departed",
+                    "event_type": "departed",
+                    "detected_at": "2026-07-31T22:00:00Z",
+                    "previous_status": "active",
+                    "current_status": "departed",
+                },
+                {
+                    "id": 301,
+                    "scan_id": "scan-aug-23",
+                    "character_name": "Shannontwo",
+                    "event_type": "departed",
+                    "detected_at": "23/08/2026 13:30:00",
+                    "previous_status": "active",
+                    "current_status": "departed",
+                },
+                {
+                    "id": 304,
+                    "scan_id": "scan-jul-tie",
+                    "character_name": "Tie Joined",
+                    "event_type": "joined",
+                    "detected_at": "2026-07-31T22:00:00Z",
+                    "previous_status": None,
+                    "current_status": "active",
+                },
+                {
+                    "id": 303,
+                    "scan_id": "scan-aug-22-late",
+                    "character_name": "Late Joined",
+                    "event_type": "joined",
+                    "detected_at": "22/08/2026 21:00:00",
+                    "previous_status": None,
+                    "current_status": "active",
+                },
+                {
+                    "id": 300,
+                    "scan_id": "scan-aug-01",
+                    "character_name": "New Month Joined",
+                    "event_type": "joined",
+                    "detected_at": "01/08/2026 00:05:00",
+                    "previous_status": None,
+                    "current_status": "active",
+                },
+                {
+                    "id": 299,
+                    "scan_id": "scan-jul-31",
+                    "character_name": "Previous Month Departed",
+                    "event_type": "departed",
+                    "detected_at": "31/07/2026 23:55:00",
+                    "previous_status": "active",
+                    "current_status": "departed",
+                },
+            ],
+            limit=20,
+        )
+
+        self.assertEqual(
+            [event["character_name"] for event in summary["recent"]],
+            [
+                "Shannontwo",
+                "Late Joined",
+                "Morning Rejoined",
+                "New Month Joined",
+                "Previous Month Departed",
+                "Tie Departed",
+                "Tie Joined",
+            ],
+        )
+        self.assertEqual(summary["recent"][0]["detected_at"], "2026-08-23T13:30:00Z")
 
     def test_summarize_membership_events_handles_empty_input(self):
         self.assertEqual(

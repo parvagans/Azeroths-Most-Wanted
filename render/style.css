@@ -4890,9 +4890,10 @@ body.nav-menu-open {
 .home-movement-summary-row {
   display: grid;
   gap: 5px;
-  justify-items: start;
+  justify-items: center;
   min-width: 0;
   max-width: 100%;
+  text-align: center;
   padding: 11px 13px;
   border: 1px solid rgba(255, 255, 255, 0.075);
   border-left: 3px solid rgba(255, 209, 0, 0.4);
@@ -4900,11 +4901,6 @@ body.nav-menu-open {
   background:
     linear-gradient(90deg, rgba(255, 209, 0, 0.045), transparent 52%),
     rgba(255, 255, 255, 0.025);
-}
-
-.home-movement-summary-row-latest {
-  justify-items: center;
-  text-align: center;
 }
 
 .home-movement-summary-row[hidden] {
@@ -4927,7 +4923,7 @@ body.nav-menu-open {
   margin: 0;
 }
 
-.home-movement-summary-row-latest .home-movement-summary-value {
+.home-movement-summary-row .home-movement-summary-value {
   max-width: 62ch;
 }
 

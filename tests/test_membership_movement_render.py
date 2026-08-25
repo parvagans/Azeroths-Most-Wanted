@@ -70,7 +70,8 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
         self.assertTrue(
             any(
                 "guild_membership_events" in call.args[1]
-                and "WHERE detected_at >= strftime('%Y-%m-%dT%H:%M:%SZ', 'now', '-7 days')" in call.args[1]
+                and "WHERE datetime(" in call.args[1]
+                and ">= datetime('now', '-7 days')" in call.args[1]
                 and "LIMIT 500" in call.args[1]
                 for call in mock_fetch.await_args_list
             )
@@ -394,6 +395,11 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("recentLabelEl.textContent = '7-day movement';", js_text)
         self.assertIn("Last 7 days: +${recentJoined.toLocaleString()} joined / -${recentDeparted.toLocaleString()} departed /", js_text)
         self.assertIn("recentRowEl.hidden = bootstrap || countOnlyRawDelta || recent.length === 0;", js_text)
+        self.assertIn("[...movement.recent].sort(compareHomeMovementEventsNewestFirst)", js_text)
+        self.assertIn("function parseHomeMovementTimestamp(value) {", js_text)
+        self.assertIn("function compareHomeMovementEventsNewestFirst(left, right) {", js_text)
+        self.assertIn("return Date.UTC(", js_text)
+        self.assertIn("timeZone: 'Europe/Berlin'", js_text)
         self.assertIn("recent.forEach(event => {", js_text)
         self.assertNotIn("recent.slice(0, 5)", js_text)
         self.assertIn("Raw roster total from the guild roster endpoint. Tracked movement is summarized below.", js_text)
@@ -408,9 +414,9 @@ class MembershipMovementRenderTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn('.home-movement-card[data-movement-state="count-only"] .home-nav-copy,', css_text)
         self.assertIn('.home-movement-summary-rows {', css_text)
         self.assertIn('.home-movement-summary-row {', css_text)
-        self.assertIn('.home-movement-summary-row-latest {', css_text)
         self.assertIn('justify-items: center;', css_text)
         self.assertIn('text-align: center;', css_text)
+        self.assertNotIn('.home-movement-summary-row-latest {', css_text)
         self.assertIn('.home-movement-summary-row-recent {', css_text)
         self.assertIn('.home-movement-helper {', css_text)
         self.assertIn('.home-movement-list-scroll {', css_text)

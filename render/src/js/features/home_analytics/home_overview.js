@@ -60,7 +60,10 @@ function formatHomeMovementTime(isoString) {
     if (!isoString) return '';
 
     try {
-        return new Date(isoString).toLocaleString('de-DE', {
+        const timestamp = parseHomeMovementTimestamp(isoString);
+        if (!Number.isFinite(timestamp)) return '';
+
+        return new Date(timestamp).toLocaleString('de-DE', {
             timeZone: 'Europe/Berlin',
             day: '2-digit',
             month: '2-digit',
@@ -71,6 +74,42 @@ function formatHomeMovementTime(isoString) {
     } catch (error) {
         return '';
     }
+}
+
+function parseHomeMovementTimestamp(value) {
+    const clean = String(value || '').trim();
+    if (!clean) return Number.NaN;
+
+    const legacyUtc = clean.match(/^(\d{2})\/(\d{2})\/(\d{4}) (\d{2}):(\d{2}):(\d{2})$/);
+    if (legacyUtc) {
+        const [, day, month, year, hour, minute, second] = legacyUtc;
+        return Date.UTC(
+            Number(year),
+            Number(month) - 1,
+            Number(day),
+            Number(hour),
+            Number(minute),
+            Number(second)
+        );
+    }
+
+    return Date.parse(clean);
+}
+
+function compareHomeMovementEventsNewestFirst(left, right) {
+    const timeDifference = parseHomeMovementTimestamp(right && right.detected_at)
+        - parseHomeMovementTimestamp(left && left.detected_at);
+    if (Number.isFinite(timeDifference) && timeDifference !== 0) return timeDifference;
+
+    const idDifference = (Number(right && right.id) || 0) - (Number(left && left.id) || 0);
+    if (idDifference !== 0) return idDifference;
+
+    for (const key of ['scan_id', 'character_name', 'event_type']) {
+        const difference = String((right && right[key]) || '').localeCompare(String((left && left[key]) || ''));
+        if (difference !== 0) return difference;
+    }
+
+    return 0;
 }
 
 function formatHomeMovementEventType(eventType) {
@@ -296,7 +335,9 @@ function renderHomeMovementCard(dashboardConfig = {}) {
     const recentDeparted = getNumericConfigValue(movement, 'recent_departed', 0);
     const recentRejoined = getNumericConfigValue(movement, 'recent_rejoined', 0);
     const recentTotal = getNumericConfigValue(movement, 'recent_total', 0);
-    const recent = Array.isArray(movement.recent) ? movement.recent : [];
+    const recent = Array.isArray(movement.recent)
+        ? [...movement.recent].sort(compareHomeMovementEventsNewestFirst)
+        : [];
     const bootstrap = Boolean(movement.bootstrap);
     const rawRosterTrend = getNumericConfigValue((dashboardConfig && dashboardConfig.global_trends) || {}, 'trend_total', 0);
     const rawRosterTotal = getNumericConfigValue(dashboardConfig, 'total_members', 0);

@@ -62,7 +62,9 @@ class MembershipMovementPersistenceTests(unittest.IsolatedAsyncioTestCase):
         self.assertIn("guild_membership_events", query)
         self.assertIn("ROW_NUMBER() OVER", query)
         self.assertIn("PARTITION BY lower(character_name)", query)
-        self.assertIn("ORDER BY detected_at DESC, id DESC", query)
+        self.assertIn("detected_at GLOB '??/??/???? ??:??:??'", query)
+        self.assertIn("ORDER BY datetime(", query)
+        self.assertIn("DESC, id DESC", query)
 
     @mock.patch.dict(
         os.environ,

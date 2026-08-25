@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from typing import Any, Iterable
 
 from wow.turso import fetch_turso, push_turso_batch
@@ -20,6 +21,46 @@ MEMBERSHIP_EVENT_INSERT_QUERY = """
     (scan_id, character_name, event_type, detected_at, previous_status, current_status)
     VALUES (?, ?, ?, ?, ?, ?)
 """
+
+
+def _membership_detected_at_sql(column="detected_at"):
+    """Return a SQLite expression that understands ISO and legacy UTC timestamps."""
+    return f"""
+        CASE
+            WHEN {column} GLOB '??/??/???? ??:??:??' THEN
+                substr({column}, 7, 4) || '-' || substr({column}, 4, 2) || '-' || substr({column}, 1, 2)
+                || 'T' || substr({column}, 12, 8) || 'Z'
+            ELSE {column}
+        END
+    """.strip()
+
+
+def parse_membership_detected_at(value):
+    """Parse a scan detection timestamp as an aware UTC datetime.
+
+    Membership scans are recorded in UTC. Older rows lost the timezone marker and
+    used ``DD/MM/YYYY HH:MM:SS``; treat that legacy representation as UTC rather
+    than allowing locale-dependent parsing downstream.
+    """
+    clean = str(value or "").strip()
+    if not clean:
+        return None
+
+    try:
+        if len(clean) == 19 and clean[2] == "/" and clean[5] == "/" and clean[10] == " ":
+            parsed = datetime.strptime(clean, "%d/%m/%Y %H:%M:%S").replace(tzinfo=timezone.utc)
+        else:
+            parsed = datetime.fromisoformat(clean.replace("Z", "+00:00"))
+            if parsed.tzinfo is None:
+                parsed = parsed.replace(tzinfo=timezone.utc)
+        return parsed.astimezone(timezone.utc)
+    except ValueError:
+        return None
+
+
+def normalize_membership_detected_at(value):
+    parsed = parse_membership_detected_at(value)
+    return parsed.isoformat().replace("+00:00", "Z") if parsed else None
 
 
 def _normalize_name(value: Any) -> str | None:
@@ -156,7 +197,7 @@ def build_membership_event_insert_statements(events):
         scan_id = str(event.get("scan_id") or "").strip()
         character_name = str(event.get("character_name") or "").strip()
         event_type = str(event.get("event_type") or "").strip().lower()
-        detected_at = str(event.get("detected_at") or "").strip()
+        detected_at = normalize_membership_detected_at(event.get("detected_at"))
         previous_status = event.get("previous_status")
         current_status = event.get("current_status")
 
@@ -198,7 +239,8 @@ def build_membership_event_insert_statements(events):
 
 
 def build_latest_membership_status_query():
-    return """
+    detected_at_sql = _membership_detected_at_sql()
+    return f"""
         SELECT character_name, event_type, detected_at, previous_status, current_status
         FROM (
             SELECT
@@ -209,7 +251,7 @@ def build_latest_membership_status_query():
                 current_status,
                 ROW_NUMBER() OVER(
                     PARTITION BY lower(character_name)
-                    ORDER BY detected_at DESC, id DESC
+                    ORDER BY datetime({detected_at_sql}) DESC, id DESC
                 ) AS rn
             FROM guild_membership_events
         )
@@ -231,27 +273,29 @@ def build_recent_membership_movement_query(limit=500, days=7):
     safe_limit = max(1, safe_limit)
     safe_days = max(1, safe_days)
 
+    detected_at_sql = _membership_detected_at_sql()
     return f"""
         SELECT id, scan_id, character_name, event_type, detected_at, previous_status, current_status
         FROM guild_membership_events
-        WHERE detected_at >= strftime('%Y-%m-%dT%H:%M:%SZ', 'now', '-{safe_days} days')
-        ORDER BY detected_at DESC, id DESC
+        WHERE datetime({detected_at_sql}) >= datetime('now', '-{safe_days} days')
+        ORDER BY datetime({detected_at_sql}) DESC, id DESC
         LIMIT {safe_limit}
     """
 
 
 def build_latest_membership_movement_query():
-    return """
+    detected_at_sql = _membership_detected_at_sql()
+    return f"""
         WITH latest_scan AS (
             SELECT scan_id
             FROM guild_membership_events
-            ORDER BY detected_at DESC, id DESC
+            ORDER BY datetime({detected_at_sql}) DESC, id DESC
             LIMIT 1
         )
         SELECT scan_id, character_name, event_type, detected_at, previous_status, current_status
         FROM guild_membership_events
         WHERE scan_id = (SELECT scan_id FROM latest_scan)
-        ORDER BY detected_at DESC, id DESC
+        ORDER BY datetime({detected_at_sql}) DESC, id DESC
     """
 
 
@@ -266,7 +310,7 @@ def _coerce_summary_event_row(row: Any) -> dict[str, Any] | None:
 
     character_name = str(row.get("character_name") or "").strip()
     event_type = str(row.get("event_type") or "").strip().lower()
-    detected_at = str(row.get("detected_at") or "").strip()
+    detected_at = normalize_membership_detected_at(row.get("detected_at"))
     scan_id = str(row.get("scan_id") or "").strip()
 
     if not character_name or not event_type or event_type not in EVENT_TYPE_PRIORITY or not detected_at:
@@ -315,12 +359,14 @@ def summarize_membership_events(events, limit=5):
         safe_limit = 0
     safe_limit = max(0, safe_limit)
 
-    def _event_sort_key(event: dict[str, Any]) -> tuple[str, int, str, str]:
+    def _event_sort_key(event: dict[str, Any]) -> tuple[float, int, str, str, str]:
+        detected_at = parse_membership_detected_at(event["detected_at"])
         return (
-            event["detected_at"],
+            detected_at.timestamp() if detected_at else float("-inf"),
             int(event.get("id") or 0),
             event["scan_id"] or event["detected_at"],
             event["character_name"].lower(),
+            event["event_type"],
         )
 
     scan_groups: dict[str, list[dict[str, Any]]] = {}
