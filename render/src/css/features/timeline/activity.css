@@ -340,6 +340,19 @@
 .tl-load-more-btn[hidden] {
   display: none;
 }
+.tl-show-all-btn {
+  color: #d8cfb5;
+  border-color: rgba(216, 207, 181, 0.55);
+  background: rgba(18, 18, 20, 0.72);
+}
+.tl-load-more-btn:hover {
+  border-color: #ffe46d;
+  color: #fff2ad;
+}
+.tl-load-more-btn:focus-visible {
+  outline: 2px solid #fff2ad;
+  outline-offset: 3px;
+}
 .tl-btn-rare {
   color: #0070dd;
   border-color: rgba(0, 112, 221, 0.5);

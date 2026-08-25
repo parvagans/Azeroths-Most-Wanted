@@ -1752,9 +1752,19 @@ body[data-route-family="character"] .timeline-container.timeline-character-dossi
   gap: 8px;
 }
 .char-card-name {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
   font-size: 46px;
   line-height: 1.05;
   margin: 0;
+}
+
+.char-card-name .character-activity-indicator {
+  width: 24px;
+  height: 24px;
+  font-size: 16px;
 }
 .char-card-subtitle {
   margin: 0;

@@ -240,7 +240,7 @@ class HomepageCleanupTests(unittest.TestCase):
         self.assertNotIn('.podium-block', script_text)
         self.assertNotIn('podium-trend-text', script_text)
         self.assertIn('function getLeaderboardThemeClass(theme = \'\') {', script_text)
-        self.assertIn("function decorateLeaderboardClone(clone, { rank = 0, theme = '' } = {}) {", script_text)
+        self.assertIn("function decorateLeaderboardClone(clone, { rank = 0, theme = '', character = null } = {}) {", script_text)
         self.assertIn("theme: isPvp ? 'pvp' : 'pve'", script_text)
         self.assertIn("theme: 'pve'", script_text)
         self.assertIn("theme: 'pvp'", script_text)

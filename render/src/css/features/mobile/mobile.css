@@ -1176,6 +1176,22 @@
 
 /* Phone layouts: home, roster cards, archive, analytics, dossier */
 @media (max-width: 640px) {
+  #concise-load-more-container {
+    width: 100%;
+    align-items: stretch;
+  }
+
+  #concise-load-more-container .tl-load-more-btn {
+    flex: 1 1 180px;
+    min-width: 0;
+  }
+
+  .char-card-name .character-activity-indicator {
+    width: 20px;
+    height: 20px;
+    font-size: 13px;
+  }
+
   .home-scan-summary-shell {
     padding: 0;
     border: 0;

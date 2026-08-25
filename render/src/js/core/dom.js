@@ -82,6 +82,29 @@ function buildConciseTrendHtml(trend) {
     return rootEl || null;
 }
 
+function buildCharacterActivityIndicator(character) {
+    const activity = getCharacterActivityState(character);
+    if (activity.status !== 'active' && activity.status !== 'inactive') return null;
+
+    const label = activity.status === 'active' ? 'Active character' : 'Inactive character';
+    const indicator = document.createElement('span');
+    indicator.className = `character-activity-indicator is-${activity.status}`;
+    indicator.setAttribute('data-activity-status', activity.status);
+    indicator.setAttribute('role', 'img');
+    indicator.setAttribute('aria-label', label);
+    indicator.title = label;
+    indicator.textContent = '!';
+    return indicator;
+}
+
+function appendCharacterActivityIndicator(container, character) {
+    if (!container) return null;
+
+    const indicator = buildCharacterActivityIndicator(character);
+    if (indicator) container.appendChild(indicator);
+    return indicator;
+}
+
 function buildHeroBandItemNode({ kicker, value, meta = '', char = null, filterKey = '', filterValue = '' }) {
     const template = document.getElementById('tpl-hero-band-item');
     if (!template) return null;
@@ -123,20 +146,24 @@ function buildHeroBandItemNode({ kicker, value, meta = '', char = null, filterKe
 function configureIncrementalRevealButton({
     container,
     button,
+    showAllButton = null,
     visibleCount,
     totalCount,
     batchSize = 25,
     itemLabel = 'Players',
-    onReveal
+    onReveal,
+    onShowAll
 }) {
     if (!container || !button) return;
 
     const hasMoreItems = visibleCount < totalCount;
     container.hidden = !hasMoreItems;
     button.hidden = !hasMoreItems;
+    if (showAllButton) showAllButton.hidden = !hasMoreItems;
 
     if (!hasMoreItems) {
         button.onclick = null;
+        if (showAllButton) showAllButton.onclick = null;
         return;
     }
 
@@ -147,4 +174,11 @@ function configureIncrementalRevealButton({
     button.onclick = () => {
         if (typeof onReveal === 'function') onReveal();
     };
+
+    if (showAllButton) {
+        showAllButton.textContent = 'Show All';
+        showAllButton.onclick = () => {
+            if (typeof onShowAll === 'function') onShowAll();
+        };
+    }
 }

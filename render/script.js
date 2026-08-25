@@ -135,7 +135,7 @@ function getLeaderboardThemeClass(theme = '') {
     return cleanTheme ? `amw-leaderboard-theme-${cleanTheme}` : 'amw-leaderboard-theme-default';
 }
 
-function decorateLeaderboardClone(clone, { rank = 0, theme = '' } = {}) {
+function decorateLeaderboardClone(clone, { rank = 0, theme = '', character = null } = {}) {
     if (!clone) return;
 
     const root = clone.querySelector('.amw-leaderboard-card');
@@ -145,6 +145,17 @@ function decorateLeaderboardClone(clone, { rank = 0, theme = '' } = {}) {
     if (rank === 1) root.classList.add('amw-leaderboard-card-rank-1');
     else if (rank === 2) root.classList.add('amw-leaderboard-card-rank-2');
     else if (rank === 3) root.classList.add('amw-leaderboard-card-rank-3');
+
+    const identity = root.querySelector('.amw-leaderboard-identity');
+    const name = root.querySelector('.amw-leaderboard-name');
+    const indicator = buildCharacterActivityIndicator(character);
+    if (identity && name && indicator) {
+        const nameRow = document.createElement('div');
+        nameRow.className = 'character-name-status-row';
+        name.replaceWith(nameRow);
+        nameRow.appendChild(name);
+        nameRow.appendChild(indicator);
+    }
 }
 
 function setFeaturedLeaderboardCount(container, count) {
@@ -1083,7 +1094,8 @@ window.addEventListener('DOMContentLoaded', async () => {
                 const clone = podiumTemplate.content.cloneNode(true);
                 decorateLeaderboardClone(clone, {
                     rank,
-                    theme: 'pve'
+                    theme: 'pve',
+                    character: char
                 });
 
                 const block = clone.querySelector('.amw-leaderboard-card');
@@ -1129,6 +1141,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
                 const nameEl = clone.querySelector('.lb-name');
                 nameEl.textContent = p.name;
+                appendCharacterActivityIndicator(nameEl, char);
 
                 const specEl = clone.querySelector('.lb-spec');
                 specEl.textContent = displaySpecClass;
@@ -1232,7 +1245,8 @@ window.addEventListener('DOMContentLoaded', async () => {
                 const clone = podiumTemplate.content.cloneNode(true);
                 decorateLeaderboardClone(clone, {
                     rank,
-                    theme: 'pvp'
+                    theme: 'pvp',
+                    character: char
                 });
 
                 const block = clone.querySelector('.amw-leaderboard-card');
@@ -1278,6 +1292,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
                 const nameEl = clone.querySelector('.lb-name');
                 nameEl.textContent = p.name;
+                appendCharacterActivityIndicator(nameEl, char);
 
                 const specEl = clone.querySelector('.lb-spec');
                 specEl.textContent = displaySpecClass;
@@ -2097,6 +2112,7 @@ window.addEventListener('DOMContentLoaded', async () => {
 
         const nameEl = clone.querySelector('.char-card-name');
         nameEl.textContent = p.name || 'Unknown';
+        appendCharacterActivityIndicator(nameEl, char);
 
         const kickerEl = clone.querySelector('.char-card-kicker');
         if (kickerEl) kickerEl.textContent = factionLabel;
@@ -2885,7 +2901,8 @@ window.addEventListener('DOMContentLoaded', async () => {
         statsNode,
         hashUrl,
         vanguardClass,
-        ladderMeta = null
+        ladderMeta = null,
+        character = null
     }) {
         const template = document.getElementById('tpl-concise-row');
         if (!template) return null;
@@ -2940,6 +2957,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         portrait.src = portraitURL;
 
         nameEl.textContent = displayName;
+        appendCharacterActivityIndicator(nameEl, character);
         if (!(hashUrl === 'ladder-pve' || hashUrl === 'ladder-pvp' || (isCommandView && !isHallOfHeroesView))) {
             appendConciseBadges(nameEl, conciseBadges);
         }
@@ -3032,6 +3050,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         const clone = template.content.cloneNode(true);
         decorateLeaderboardClone(clone, {
             rank,
+            character: deepChar,
             theme: (() => {
                 if (hashUrl === 'war-effort-readiness') return 'readiness';
                 if (hashUrl === 'war-effort-hk') return 'hks';
@@ -3129,6 +3148,7 @@ window.addEventListener('DOMContentLoaded', async () => {
         const clone = template.content.cloneNode(true);
         decorateLeaderboardClone(clone, {
             rank,
+            character: deepChar,
             theme: hashUrl === 'ladder-pvp' ? 'pvp' : 'pve'
         });
         const block = clone.querySelector('.amw-leaderboard-card');
@@ -4009,7 +4029,8 @@ window.addEventListener('DOMContentLoaded', async () => {
                 statsNode,
                 hashUrl,
                 vanguardClass,
-                ladderMeta
+                ladderMeta,
+                character: deepChar || char
             });
 
             // Intercept and Build Podium Block for Top 3
@@ -4121,15 +4142,21 @@ window.addEventListener('DOMContentLoaded', async () => {
 
         const conciseLoadMoreContainer = document.getElementById('concise-load-more-container');
         const conciseLoadMoreBtn = document.getElementById('concise-load-more-btn');
+        const conciseShowAllBtn = document.getElementById('concise-show-all-btn');
         configureIncrementalRevealButton({
             container: conciseLoadMoreContainer,
             button: conciseLoadMoreBtn,
+            showAllButton: conciseShowAllBtn,
             visibleCount: currentlyVisibleCount,
             totalCount: totalRenderableRows,
             batchSize: conciseBatchSize,
             itemLabel: 'Players',
             onReveal: () => {
                 conciseRenderedCount += conciseBatchSize;
+                renderConciseList(title, characters, isRawMode);
+            },
+            onShowAll: () => {
+                conciseRenderedCount = totalRenderableRows;
                 renderConciseList(title, characters, isRawMode);
             }
         });
@@ -7047,7 +7074,8 @@ window.addEventListener('DOMContentLoaded', async () => {
                 const clone = template.content.cloneNode(true);
                 decorateLeaderboardClone(clone, {
                     rank,
-                    theme: isPvp ? 'pvp' : 'pve'
+                    theme: isPvp ? 'pvp' : 'pve',
+                    character: char
                 });
                 
                 const block = clone.querySelector('.amw-leaderboard-card');

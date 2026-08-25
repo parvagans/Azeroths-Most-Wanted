@@ -193,7 +193,7 @@ class WarEffortThresholdTests(unittest.TestCase):
         self.assertIn("Warden's Standard (${filteredRoster.length})", script_text)
         self.assertIn("function getResolvedEquippedItemLevel(character = null, profile = null) {", script_text)
         self.assertIn("function getLeaderboardThemeClass(theme = '') {", script_text)
-        self.assertIn("function decorateLeaderboardClone(clone, { rank = 0, theme = '' } = {}) {", script_text)
+        self.assertIn("function decorateLeaderboardClone(clone, { rank = 0, theme = '', character = null } = {}) {", script_text)
         self.assertIn("else if (hashUrl === 'war-effort-readiness') {", script_text)
         self.assertIn("metricValueEl.textContent = `iLvl ${readinessIlvl.toLocaleString()}`;", script_text)
         self.assertIn("metricPill.remove();", script_text)
