@@ -308,7 +308,7 @@ class AnalyticsRenderTests(unittest.TestCase):
         self.assertIn("Honor snapshot data is not available for this snapshot.", analytics_cards)
         self.assertIn("Some HK fields are unavailable from the current snapshot.", analytics_cards)
         self.assertIn("ctaEl.setAttribute('href', '#ladder-pvp');", analytics_cards)
-        self.assertIn("const hkEntries = roster", analytics_cards)
+        self.assertIn("const hkEntries = rankCurrentLeaderboardCharacters(", analytics_cards)
         self.assertIn("buildAnalyticsHonorSnapshotRow({", analytics_cards)
         self.assertIn("HK-active characters", analytics_cards)
         self.assertIn("Avg HKs / active character", analytics_cards)

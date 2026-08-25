@@ -5,6 +5,7 @@ from zoneinfo import ZoneInfo
 from jinja2 import Environment, FileSystemLoader
 
 from wow.alts import is_alt_record
+from wow.character_intelligence import CHARACTER_INACTIVITY_DAYS, RECENT_ACTIVITY_WINDOW_DAYS
 
 def generate_html_dashboard(roster_data, realm_data=None, timeline_data=None, raw_guild_roster=None, roster_history=None, prev_mvps=None, campaign_archive=None, membership_movement=None, latest_changes=None, officer_brief=None):
     """
@@ -226,6 +227,8 @@ def generate_html_dashboard(roster_data, realm_data=None, timeline_data=None, ra
         "raid_ready_count_mains": raid_ready_count_mains,
         "avg_ilvl_70": avg_ilvl_70,
         "avg_ilvl_70_mains": avg_ilvl_70_mains,
+        "character_inactivity_days": CHARACTER_INACTIVITY_DAYS,
+        "character_recent_activity_days": RECENT_ACTIVITY_WINDOW_DAYS,
         "global_trends": global_trends,
         "prev_mvps": prev_mvps,
         "campaign_archive": campaign_archive,

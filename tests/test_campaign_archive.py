@@ -103,6 +103,22 @@ class CampaignArchiveTests(unittest.TestCase):
         self.assertEqual(payload["weeks"][0]["reigning_titles"][0]["champion"], "Current Champion")
         self.assertEqual(payload["weeks"][0]["reigning_titles"][0]["score"], 25)
 
+    def test_historical_winner_is_preserved_when_current_activity_is_inactive(self):
+        payload = build_campaign_archive_payload(
+            reigning_rows=[
+                {
+                    "week_anchor": "2026-04-21",
+                    "category": "pve",
+                    "champion": "Past Champion",
+                    "score": 42,
+                    "last_login_timestamp": "2025-01-01T00:00:00Z",
+                }
+            ]
+        )
+
+        self.assertEqual(payload["weeks"][0]["reigning_titles"][0]["champion"], "Past Champion")
+        self.assertEqual(payload["weeks"][0]["reigning_titles"][0]["score"], 42)
+
     def test_campaign_archive_frontend_recognizes_readiness_category(self):
         archive_view_text = Path("render/src/js/features/campaign_archive/archive_view.js").read_text(encoding="utf-8")
 

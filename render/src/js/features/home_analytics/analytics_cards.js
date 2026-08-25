@@ -783,15 +783,14 @@ function renderAnalyticsHonorSnapshot(honor = {}) {
     const providedTotalHks = Number(honor.totalHks);
     const fallbackTotalHks = roster.reduce((sum, entry) => sum + getAnalyticsRosterHonorKills(entry), 0);
     const totalHks = Number.isFinite(providedTotalHks) && providedTotalHks >= 0 ? providedTotalHks : fallbackTotalHks;
-    const hkEntries = roster
-        .map(entry => {
+    const hkEntries = rankCurrentLeaderboardCharacters(
+        roster.filter(entry => getAnalyticsRosterHonorKills(entry) > 0),
+        getAnalyticsRosterHonorKills
+    ).map(entry => {
             const hks = getAnalyticsRosterHonorKills(entry);
-            if (hks <= 0) return null;
             const name = entry && (entry.name || (entry.profile && entry.profile.name) || 'Unknown');
             return { name, hks };
-        })
-        .filter(Boolean)
-        .sort((a, b) => b.hks - a.hks);
+        });
     const activeCount = hkEntries.length;
     const avgActiveHks = activeCount > 0 ? Math.round(totalHks / activeCount) : null;
     const topEntries = hkEntries.slice(0, 3);

@@ -1,7 +1,5 @@
 ﻿// Character dossier feature helpers prepended during final JS assembly.
 
-const DOSSIER_RECENT_ACTIVITY_WINDOW_DAYS = 14;
-const DOSSIER_QUIET_ACTIVITY_WINDOW_DAYS = 30;
 const DOSSIER_RAID_READY_ILVL = 110;
 const DOSSIER_STAGING_ILVL = 100;
 const DOSSIER_PRESTIGE_ICONS = Object.freeze({
@@ -334,22 +332,18 @@ function normalizeDossierCharacterName(value) {
 }
 
 function getDossierActivitySnapshot(profile, source = null) {
-    const lastSeenRaw = profile?.last_login_timestamp || source?.last_login_ms || source?.equipped?.last_login_ms || 0;
-    const lastSeen = Number(lastSeenRaw);
-
-    if (!Number.isFinite(lastSeen) || lastSeen <= 0) {
+    const activity = getCharacterActivityState({ ...(source || {}), profile });
+    if (activity.status === 'unknown') {
         return { label: 'Activity unknown', meta: '' };
     }
 
-    const dayMs = 24 * 60 * 60 * 1000;
-    const ageDays = Math.floor(Math.max(0, Date.now() - lastSeen) / dayMs);
-    const ageText = formatLastLoginAge(lastSeen, 'Unknown');
+    const ageText = formatLastLoginAge(activity.lastSeenMs, 'Unknown');
     const meta = ageText === 'Today' ? 'Last seen today' : `Last seen ${ageText}`;
 
-    if (ageDays <= DOSSIER_RECENT_ACTIVITY_WINDOW_DAYS) {
+    if (activity.status === 'active') {
         return { label: 'Recently active', meta };
     }
-    if (ageDays <= DOSSIER_QUIET_ACTIVITY_WINDOW_DAYS) {
+    if (activity.status === 'quiet') {
         return { label: 'Quiet lately', meta };
     }
     return { label: 'Inactive lately', meta };

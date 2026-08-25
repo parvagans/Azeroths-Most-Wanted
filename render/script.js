@@ -293,6 +293,8 @@ if (sessionStorage.getItem('amwIntroPlayed') === 'true') {
 window.addEventListener('DOMContentLoaded', async () => {
 
     const config = JSON.parse(document.getElementById('dashboard-config').textContent);
+    window.CHARACTER_INACTIVITY_THRESHOLD_DAYS = Number(config.character_inactivity_days);
+    window.CHARACTER_RECENT_ACTIVITY_WINDOW_DAYS = Number(config.character_recent_activity_days);
     const heatmapData = JSON.parse(document.getElementById('heatmap-data').textContent);
     
     const introContainerEl = document.getElementById('intro-container');
@@ -1042,9 +1044,10 @@ window.addEventListener('DOMContentLoaded', async () => {
     const pveContainer = document.getElementById('pve-leaderboard');
     const pveWrapper = document.getElementById('pve-leaderboard-container');
 
-    const topPve = rosterData
-        .filter(c => c.profile && (c.profile.equipped_item_level || 0) > 0)
-        .sort((a, b) => (b.profile.equipped_item_level || 0) - (a.profile.equipped_item_level || 0))
+    const topPve = rankCurrentLeaderboardCharacters(
+        rosterData.filter(c => c.profile && (c.profile.equipped_item_level || 0) > 0),
+        character => character.profile.equipped_item_level || 0
+    )
         .slice(0, 10);
 
     if (topPve.length > 0 && pveContainer) {
@@ -1189,9 +1192,10 @@ window.addEventListener('DOMContentLoaded', async () => {
     const pvpContainer = document.getElementById('pvp-leaderboard');
     const pvpWrapper = document.getElementById('pvp-leaderboard-container');
 
-    const topPvp = rosterData
-        .filter(c => c.profile && (c.profile.honorable_kills || 0) > 0)
-        .sort((a, b) => (b.profile.honorable_kills || 0) - (a.profile.honorable_kills || 0))
+    const topPvp = rankCurrentLeaderboardCharacters(
+        rosterData.filter(c => c.profile && (c.profile.honorable_kills || 0) > 0),
+        character => character.profile.honorable_kills || 0
+    )
         .slice(0, 10);
 
     if (topPvp.length > 0 && pvpContainer) {
@@ -3465,7 +3469,12 @@ window.addEventListener('DOMContentLoaded', async () => {
         let sortedCharacters = [...characters];
         const hashUrl = window.location.hash.substring(1);
 
-        sortedCharacters.sort((a, b) => {
+        if (hashUrl === 'ladder-pve' || hashUrl === 'ladder-pvp') {
+            sortedCharacters = rankCurrentLeaderboardCharacters(
+                sortedCharacters,
+                character => getLadderMetricValue(character, hashUrl)
+            );
+        } else sortedCharacters.sort((a, b) => {
             let valA, valB;
             
             // Handle Raw vs Full data structures
@@ -5863,15 +5872,19 @@ window.addEventListener('DOMContentLoaded', async () => {
             updateDropdownLabel('all');
 
         } else if (hash === 'ladder-pve') {
-            const sortedPve = [...rosterData].filter(c => c.profile && (c.profile.equipped_item_level || 0) > 0)
-                .sort((a, b) => (b.profile.equipped_item_level || 0) - (a.profile.equipped_item_level || 0));
+            const sortedPve = rankCurrentLeaderboardCharacters(
+                rosterData.filter(c => c.profile && (c.profile.equipped_item_level || 0) > 0),
+                character => character.profile.equipped_item_level || 0
+            );
             // Passed 'true' for Badges, and 'ilvl' for the default sort!
             showConciseView('', sortedPve, false, true, 'ilvl');
             updateDropdownLabel('all');
             
         } else if (hash === 'ladder-pvp') {
-            const sortedPvp = [...rosterData].filter(c => c.profile && (c.profile.honorable_kills || 0) > 0)
-                .sort((a, b) => (b.profile.honorable_kills || 0) - (a.profile.honorable_kills || 0));
+            const sortedPvp = rankCurrentLeaderboardCharacters(
+                rosterData.filter(c => c.profile && (c.profile.honorable_kills || 0) > 0),
+                character => character.profile.honorable_kills || 0
+            );
             // Passed 'true' for Badges, and 'hks' for the default sort!
             showConciseView('', sortedPvp, false, true, 'hks');
             updateDropdownLabel('all');
@@ -6986,14 +6999,16 @@ window.addEventListener('DOMContentLoaded', async () => {
         
         if (!mvpContainer || !mvpPveList || !mvpPvpList) return;
 
-        const topTrendPve = [...rosterData]
-            .filter(c => c.profile && (c.profile.trend_pve || c.profile.trend_ilvl || 0) > 0)
-            .sort((a, b) => (b.profile.trend_pve || b.profile.trend_ilvl || 0) - (a.profile.trend_pve || a.profile.trend_ilvl || 0))
+        const topTrendPve = rankCurrentLeaderboardCharacters(
+            rosterData.filter(c => c.profile && (c.profile.trend_pve || c.profile.trend_ilvl || 0) > 0),
+            character => character.profile.trend_pve || character.profile.trend_ilvl || 0
+        )
             .slice(0, 3);
 
-        const topTrendPvp = [...rosterData]
-            .filter(c => c.profile && (c.profile.trend_pvp || c.profile.trend_hks || 0) > 0)
-            .sort((a, b) => (b.profile.trend_pvp || b.profile.trend_hks || 0) - (a.profile.trend_pvp || a.profile.trend_hks || 0))
+        const topTrendPvp = rankCurrentLeaderboardCharacters(
+            rosterData.filter(c => c.profile && (c.profile.trend_pvp || c.profile.trend_hks || 0) > 0),
+            character => character.profile.trend_pvp || character.profile.trend_hks || 0
+        )
             .slice(0, 3);
 
         mvpContainer.hidden = false;

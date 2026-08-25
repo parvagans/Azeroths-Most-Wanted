@@ -1,7 +1,12 @@
 import unittest
+from datetime import datetime, timezone
 from unittest import mock
 
 from wow.character_intelligence import build_character_intelligence
+
+
+NOW_MS = int(datetime(2026, 8, 25, 12, 0, tzinfo=timezone.utc).timestamp() * 1000)
+DAY_MS = 24 * 60 * 60 * 1000
 
 
 class CharacterIntelligenceTests(unittest.TestCase):
@@ -21,14 +26,14 @@ class CharacterIntelligenceTests(unittest.TestCase):
         self.assertEqual(summary["readiness_meta"], "116 equipped iLvl")
 
     def test_labels_staging_and_recently_active_character(self):
-        with mock.patch("wow.character_intelligence._utc_now_ms", return_value=20 * 24 * 60 * 60 * 1000):
+        with mock.patch("wow.character_intelligence._utc_now_ms", return_value=NOW_MS):
             summary = build_character_intelligence(
                 {
                     "profile": {
                         "name": "Bravo",
                         "level": 70,
                         "equipped_item_level": 103,
-                        "last_login_timestamp": 10 * 24 * 60 * 60 * 1000,
+                        "last_login_timestamp": NOW_MS - 10 * DAY_MS,
                     }
                 }
             )
@@ -38,14 +43,14 @@ class CharacterIntelligenceTests(unittest.TestCase):
         self.assertEqual(summary["activity_meta"], "Last seen 10d ago")
 
     def test_labels_quiet_and_inactive_conservatively(self):
-        with mock.patch("wow.character_intelligence._utc_now_ms", return_value=50 * 24 * 60 * 60 * 1000):
+        with mock.patch("wow.character_intelligence._utc_now_ms", return_value=NOW_MS):
             quiet = build_character_intelligence(
                 {
                     "profile": {
                         "name": "Quiet",
                         "level": 69,
                         "equipped_item_level": 95,
-                        "last_login_timestamp": 25 * 24 * 60 * 60 * 1000,
+                        "last_login_timestamp": NOW_MS - 30 * DAY_MS,
                     }
                 }
             )
@@ -55,7 +60,7 @@ class CharacterIntelligenceTests(unittest.TestCase):
                         "name": "Inactive",
                         "level": 60,
                         "equipped_item_level": 70,
-                        "last_login_timestamp": 10 * 24 * 60 * 60 * 1000,
+                        "last_login_timestamp": NOW_MS - 60 * DAY_MS,
                     }
                 }
             )

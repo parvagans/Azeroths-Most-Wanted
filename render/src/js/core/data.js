@@ -62,6 +62,86 @@ function getHeatmapMetricValue(day, key, fallbackKey = '') {
     return 0;
 }
 
+function getCharacterLastSeenTimestamp(character) {
+    const profile = character && character.profile ? character.profile : (character || {});
+    const equipped = character && character.equipped ? character.equipped : {};
+    const candidates = [
+        profile.last_login_timestamp,
+        character && character.last_login_ms,
+        equipped.last_login_ms
+    ];
+
+    for (const candidate of candidates) {
+        if (candidate === null || candidate === undefined || candidate === '') continue;
+
+        let timestamp = Number(candidate);
+        if (!Number.isFinite(timestamp)) {
+            const cleanTimestamp = String(candidate).trim();
+            if (!/(?:Z|[+-]\d{2}:?\d{2})$/i.test(cleanTimestamp)) continue;
+            timestamp = Date.parse(cleanTimestamp);
+        }
+        if (!Number.isFinite(timestamp) || timestamp <= 0) continue;
+        if (timestamp < 100000000000) timestamp *= 1000;
+        return timestamp;
+    }
+
+    return null;
+}
+
+function getCharacterActivityState(character, referenceTimeMs = Date.now()) {
+    const lastSeenMs = getCharacterLastSeenTimestamp(character);
+    if (lastSeenMs === null) {
+        return { status: 'unknown', lastSeenMs: null, ageMs: null, ageDays: null };
+    }
+
+    const thresholdDays = Number(window.CHARACTER_INACTIVITY_THRESHOLD_DAYS);
+    const recentWindowDays = Number(window.CHARACTER_RECENT_ACTIVITY_WINDOW_DAYS);
+    const thresholdMs = thresholdDays * 24 * 60 * 60 * 1000;
+    const quietThresholdMs = (recentWindowDays + 1) * 24 * 60 * 60 * 1000;
+    const ageMs = Math.max(0, Number(referenceTimeMs) - lastSeenMs);
+    if (
+        !Number.isFinite(thresholdMs)
+        || thresholdMs <= 0
+        || !Number.isFinite(quietThresholdMs)
+        || quietThresholdMs <= 0
+        || quietThresholdMs >= thresholdMs
+    ) {
+        return { status: 'unknown', lastSeenMs, ageMs, ageDays: null };
+    }
+    const status = ageMs >= thresholdMs
+        ? 'inactive'
+        : (ageMs >= quietThresholdMs ? 'quiet' : 'active');
+
+    return {
+        status,
+        lastSeenMs,
+        ageMs,
+        ageDays: Math.floor(ageMs / (24 * 60 * 60 * 1000))
+    };
+}
+
+function rankCurrentLeaderboardCharacters(characters, metricSelector, referenceTimeMs = Date.now()) {
+    if (!Array.isArray(characters)) return [];
+
+    const activityPriority = { active: 0, quiet: 1, inactive: 2, unknown: 3 };
+
+    return characters
+        .map((character, originalIndex) => ({
+            character,
+            originalIndex,
+            activity: getCharacterActivityState(character, referenceTimeMs),
+            metric: Number(metricSelector(character)) || 0
+        }))
+        .sort((left, right) => {
+            const leftActivityRank = activityPriority[left.activity.status] ?? activityPriority.unknown;
+            const rightActivityRank = activityPriority[right.activity.status] ?? activityPriority.unknown;
+            return leftActivityRank - rightActivityRank
+                || right.metric - left.metric
+                || left.originalIndex - right.originalIndex;
+        })
+        .map(entry => entry.character);
+}
+
 function getLadderMetricValue(char, hashUrl) {
     const profile = char && char.profile ? char.profile : {};
     return hashUrl === 'ladder-pvp'

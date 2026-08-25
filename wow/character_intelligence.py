@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 from collections import Counter
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 
 RECENT_ACTIVITY_WINDOW_DAYS = 14
-QUIET_ACTIVITY_WINDOW_DAYS = 30
+CHARACTER_INACTIVITY_DAYS = 60
 RAID_READY_ILVL = 110
 STAGING_ILVL = 100
 TIMELINE_ITEM_ORDER = ("item", "level_up", "badge", "movement", "growth")
@@ -29,30 +29,75 @@ def _utc_now_ms() -> int:
     return int(datetime.now(timezone.utc).timestamp() * 1000)
 
 
-def _parse_timestamp_ms(value: Any) -> int | None:
+def _parse_activity_datetime(value: Any) -> datetime | None:
+    if isinstance(value, datetime):
+        if value.tzinfo is None or value.utcoffset() is None:
+            return None
+        return value.astimezone(timezone.utc)
+
     try:
-        raw = int(value)
+        raw = float(value)
     except (TypeError, ValueError):
+        try:
+            parsed = datetime.fromisoformat(str(value or "").strip().replace("Z", "+00:00"))
+        except ValueError:
+            return None
+        if parsed.tzinfo is None or parsed.utcoffset() is None:
+            return None
+        return parsed.astimezone(timezone.utc)
+
+    if raw <= 0:
         return None
-    return raw if raw > 0 else None
+    if raw >= 100_000_000_000:
+        raw /= 1000
+    try:
+        return datetime.fromtimestamp(raw, tz=timezone.utc)
+    except (OverflowError, OSError, ValueError):
+        return None
+
+
+def get_character_activity_state(character: dict[str, Any], *, reference_time: datetime | None = None) -> tuple[str, timedelta | None]:
+    """Return active, quiet, inactive, or unknown from the real last-seen instant."""
+    profile = character.get("profile") if isinstance(character.get("profile"), dict) else {}
+    equipped = character.get("equipped") if isinstance(character.get("equipped"), dict) else {}
+    last_seen = next((
+        parsed
+        for candidate in (
+            profile.get("last_login_timestamp"),
+            character.get("last_login_ms"),
+            equipped.get("last_login_ms"),
+        )
+        if (parsed := _parse_activity_datetime(candidate)) is not None
+    ), None)
+    if last_seen is None:
+        return "unknown", None
+
+    now = reference_time or datetime.now(timezone.utc)
+    if now.tzinfo is None or now.utcoffset() is None:
+        raise ValueError("reference_time must be timezone-aware")
+
+    age = max(timedelta(0), now.astimezone(timezone.utc) - last_seen)
+    if age >= timedelta(days=CHARACTER_INACTIVITY_DAYS):
+        status = "inactive"
+    elif age >= timedelta(days=RECENT_ACTIVITY_WINDOW_DAYS + 1):
+        status = "quiet"
+    else:
+        status = "active"
+    return status, age
 
 
 def _build_activity_state(character: dict[str, Any]) -> tuple[str, str | None]:
-    profile = character.get("profile") if isinstance(character.get("profile"), dict) else {}
-    equipped = character.get("equipped") if isinstance(character.get("equipped"), dict) else {}
-
-    last_seen_ms = (
-        _parse_timestamp_ms(profile.get("last_login_timestamp"))
-        or _parse_timestamp_ms(character.get("last_login_ms"))
-        or _parse_timestamp_ms(equipped.get("last_login_ms"))
+    activity_status, age = get_character_activity_state(
+        character,
+        reference_time=datetime.fromtimestamp(_utc_now_ms() / 1000, tz=timezone.utc),
     )
-    if not last_seen_ms:
+    if activity_status == "unknown" or age is None:
         return "Activity unknown", None
 
-    age_days = max(0, (_utc_now_ms() - last_seen_ms) // (24 * 60 * 60 * 1000))
-    if age_days <= RECENT_ACTIVITY_WINDOW_DAYS:
+    age_days = max(0, age.days)
+    if activity_status == "active":
         return "Recently active", f"Last seen {age_days}d ago"
-    if age_days <= QUIET_ACTIVITY_WINDOW_DAYS:
+    if activity_status == "quiet":
         return "Quiet lately", f"Last seen {age_days}d ago"
     return "Inactive lately", f"Last seen {age_days}d ago"
 

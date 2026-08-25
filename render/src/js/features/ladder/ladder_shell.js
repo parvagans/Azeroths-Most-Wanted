@@ -138,8 +138,10 @@ function buildLadderShell(characters, hashUrl) {
     }, {});
 
     const dominantClassEntry = Object.entries(classCounts).sort((a, b) => b[1] - a[1])[0] || ['Unknown', 0];
-    const biggestMover = [...characters]
-        .sort((a, b) => getLadderTrendValue(b, hashUrl) - getLadderTrendValue(a, hashUrl))[0] || leader;
+    const biggestMover = rankCurrentLeaderboardCharacters(
+        characters,
+        character => getLadderTrendValue(character, hashUrl)
+    )[0] || leader;
     const biggestMoverTrend = getLadderTrendValue(biggestMover, hashUrl);
     const rivalryGap = second ? Math.max(0, leaderMetric - getLadderMetricValue(second, hashUrl)) : 0;
     const leaderRole = getCharacterRole(
